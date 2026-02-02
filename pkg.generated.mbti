@@ -152,6 +152,21 @@ pub enum BufferSize {
 pub impl Eq for BufferSize
 pub impl Show for BufferSize
 
+pub struct Data {
+  sample_format : SampleFormat
+  bytes : Bytes
+}
+pub fn Data::bytes(Self) -> Bytes
+pub fn Data::len(Self) -> Int
+pub fn Data::new(SampleFormat, Bytes) -> Self
+pub fn Data::sample_format(Self) -> SampleFormat
+pub fn Data::try_as_f32(Self) -> Array[Float]?
+pub fn Data::try_as_i16(Self) -> Array[Int16]?
+pub fn Data::try_as_u16(Self) -> Array[UInt16]?
+pub fn Data::try_as_u8(Self) -> Array[Byte]?
+pub impl Eq for Data
+pub impl Show for Data
+
 pub struct DeviceId {
   host_id : HostId
   device_id : String
