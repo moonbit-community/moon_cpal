@@ -21,6 +21,9 @@ From `cpal-reference/src/lib.rs`:
   - MoonBit: `cpal_types.mbt`
 - `SupportedStreamConfigRange`
   - constructor + accessors
+  - `with_sample_rate(sample_rate)` (panics if out of range)
+  - `try_with_sample_rate(sample_rate)` (returns `Option`)
+  - `with_max_sample_rate()`
   - default selection heuristic `cmp_default_heuristics`
   - MoonBit: `cpal_types.mbt`, `cpal_heuristics.mbt`
 - `COMMON_SAMPLE_RATES`
@@ -28,6 +31,10 @@ From `cpal-reference/src/lib.rs`:
 - `StreamInstant` + minimal non-negative `Duration`
   - `duration_since`, `add`, `sub`
   - MoonBit: `cpal_time.mbt`
+- Timestamp callback info
+  - `InputStreamTimestamp`, `OutputStreamTimestamp`
+  - `InputCallbackInfo`, `OutputCallbackInfo`
+  - MoonBit: `cpal_callback_info.mbt`
 
 From `cpal-reference/src/samples_formats.rs`:
 
@@ -39,13 +46,7 @@ From `cpal-reference/src/samples_formats.rs`:
 
 From `cpal-reference/src/lib.rs`:
 
-- `SupportedStreamConfigRange`
-  - `with_sample_rate(sample_rate)` (panics if out of range)
-  - `try_with_sample_rate(sample_rate)` (returns `Option`)
-  - `with_max_sample_rate()`
-- Timestamp callback info
-  - `InputStreamTimestamp`, `OutputStreamTimestamp`
-  - `InputCallbackInfo`, `OutputCallbackInfo`
+- (none for the current deterministic core slice)
 
 ## Out of scope (for the initial slice)
 
@@ -58,4 +59,3 @@ From `cpal-reference/src/lib.rs`:
 
 - Integer widths differ: upstream uses `u16`/`u32` for channel/rate/frame counts; MoonBit uses `Int`.
   For this initial slice we only target behavior-level parity for deterministic logic.
-
