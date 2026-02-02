@@ -40,6 +40,8 @@ pub fn play_stream_error_backend_specific(String) -> PlayStreamError
 
 pub fn play_stream_error_device_not_available() -> PlayStreamError
 
+pub fn[A : Sample, B : Sample] sample_cast(A) -> B
+
 pub fn stream_error_backend_specific(String) -> StreamError
 
 pub fn stream_error_buffer_underrun() -> StreamError
@@ -190,6 +192,17 @@ pub fn HostId::to_string(Self) -> String
 pub impl Eq for HostId
 pub impl Show for HostId
 
+pub struct I24 {
+  raw : Int
+}
+pub fn I24::new(Int) -> Self
+pub fn I24::to_int(Self) -> Int
+pub impl Eq for I24
+pub impl Show for I24
+pub impl FromSample for I24
+pub impl Sample for I24
+pub impl SizedSample for I24
+
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
 }
@@ -314,6 +327,17 @@ pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int) -> SupportedStrea
 pub impl Eq for SupportedStreamConfigRange
 pub impl Show for SupportedStreamConfigRange
 
+pub struct U24 {
+  raw : Int
+}
+pub fn U24::new(Int) -> Self
+pub fn U24::to_int(Self) -> Int
+pub impl Eq for U24
+pub impl Show for U24
+pub impl FromSample for U24
+pub impl Sample for U24
+pub impl SizedSample for U24
+
 // Type aliases
 pub type ChannelCount = Int
 
@@ -322,4 +346,32 @@ pub type FrameCount = Int
 pub type SampleRate = Int
 
 // Traits
+pub trait FromSample : Sample {
+  from_sample(Float) -> Self
+}
+pub impl FromSample for Byte
+pub impl FromSample for Int16
+pub impl FromSample for UInt16
+pub impl FromSample for Float
+pub impl FromSample for Double
+
+pub trait Sample {
+  equilibrium() -> Self
+  to_f32(Self) -> Float
+  from_f32(Float) -> Self
+}
+pub impl Sample for Byte
+pub impl Sample for Int16
+pub impl Sample for UInt16
+pub impl Sample for Float
+pub impl Sample for Double
+
+pub trait SizedSample : Sample {
+  format(Self) -> SampleFormat
+}
+pub impl SizedSample for Byte
+pub impl SizedSample for Int16
+pub impl SizedSample for UInt16
+pub impl SizedSample for Float
+pub impl SizedSample for Double
 
