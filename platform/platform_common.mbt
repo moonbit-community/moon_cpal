@@ -19,6 +19,12 @@ pub enum Device {
 } derive(Show, Eq)
 
 ///|
+pub enum Stream {
+  Null(@null.Stream)
+  CoreAudio(@macos.Stream)
+} derive(Show, Eq)
+
+///|
 pub fn Host::id(self : Host) -> @moon_cpal.HostId {
   match self {
     Null(_) => @moon_cpal.HostId::Null
@@ -32,7 +38,40 @@ pub fn available_hosts() -> Array[@moon_cpal.HostId] {
 }
 
 ///|
-pub fn Host::default_output_device(self : Host) -> Device? {
+pub fn host_from_id(
+  id : @moon_cpal.HostId,
+) -> Host raise @moon_cpal.HostUnavailable {
+  let hs = available_hosts()
+  let mut ok = false
+  for i in 0..<hs.length() {
+    if hs[i] == id {
+      ok = true
+      break
+    }
+  }
+  if !ok {
+    raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
+  }
+  match id {
+    CoreAudio => Host::CoreAudio(@macos.default_host())
+    Null => Host::Null(@null.default_host())
+    _ => raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
+  }
+}
+
+///|
+pub fn try_host_from_id(id : @moon_cpal.HostId) -> Host? {
+  try host_from_id(id) catch {
+    _ => None
+  } noraise {
+    h => Some(h)
+  }
+}
+
+///|
+pub fn Host::default_output_device(
+  self : Host,
+) -> Device? raise @moon_cpal.DevicesError {
   match self {
     Null(h) =>
       match h.default_output_device() {
@@ -40,15 +79,26 @@ pub fn Host::default_output_device(self : Host) -> Device? {
         Some(d) => Some(Device::Null(d))
       }
     CoreAudio(h) =>
-      match (try? h.default_output_device()) {
-        Ok(Some(d)) => Some(Device::CoreAudio(d))
-        _ => None
+      try h.default_output_device() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        None => None
+        Some(d) => Some(Device::CoreAudio(d))
       }
   }
 }
 
 ///|
-pub fn Host::default_input_device(self : Host) -> Device? {
+pub fn Host::default_input_device(
+  self : Host,
+) -> Device? raise @moon_cpal.DevicesError {
   match self {
     Null(h) =>
       match h.default_input_device() {
@@ -56,33 +106,60 @@ pub fn Host::default_input_device(self : Host) -> Device? {
         Some(d) => Some(Device::Null(d))
       }
     CoreAudio(h) =>
-      match (try? h.default_input_device()) {
-        Ok(Some(d)) => Some(Device::CoreAudio(d))
-        _ => None
+      try h.default_input_device() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        None => None
+        Some(d) => Some(Device::CoreAudio(d))
       }
   }
 }
 
 ///|
-pub fn Host::devices(self : Host) -> Array[Device] {
+pub fn Host::devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
   match self {
     Null(h) => h.devices().map(fn(d) { Device::Null(d) })
     CoreAudio(h) =>
-      match (try? h.devices()) {
-        Ok(ds) => ds.map(fn(d) { Device::CoreAudio(d) })
-        Err(_) => []
+      try h.devices() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.devices_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        ds => ds.map(fn(d) { Device::CoreAudio(d) })
       }
   }
 }
 
 ///|
-pub fn Device::name(self : Device) -> String {
+pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
   match self {
     Null(d) => d.name()
     CoreAudio(d) =>
-      match (try? d.name()) {
-        Ok(s) => s
-        Err(_) => ""
+      try d.name() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+          raise @moon_cpal.device_name_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.device_name_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        s => s
       }
   }
 }
@@ -90,13 +167,19 @@ pub fn Device::name(self : Device) -> String {
 ///|
 pub fn Device::supported_output_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
   match self {
     Null(d) => d.supported_output_configs()
     CoreAudio(d) =>
-      match (try? d.supported_output_configs()) {
-        Ok(xs) => xs
-        Err(_) => []
+      try d.supported_output_configs() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
+          raise @moon_cpal.supported_stream_configs_error_device_not_available()
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.supported_stream_configs_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        xs => xs
       }
   }
 }
@@ -104,13 +187,19 @@ pub fn Device::supported_output_configs(
 ///|
 pub fn Device::supported_input_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
   match self {
     Null(d) => d.supported_input_configs()
     CoreAudio(d) =>
-      match (try? d.supported_input_configs()) {
-        Ok(xs) => xs
-        Err(_) => []
+      try d.supported_input_configs() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
+          raise @moon_cpal.supported_stream_configs_error_device_not_available()
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.supported_stream_configs_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        xs => xs
       }
   }
 }
@@ -121,14 +210,16 @@ pub fn Device::try_default_output_config(
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
     Null(d) =>
-      match (try? d.default_output_config()) {
-        Ok(cfg) => Some(cfg)
-        Err(_) => None
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
       }
     CoreAudio(d) =>
-      match (try? d.default_output_config()) {
-        Ok(cfg) => Some(cfg)
-        Err(_) => None
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
       }
   }
 }
@@ -139,14 +230,92 @@ pub fn Device::try_default_input_config(
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
     Null(d) =>
-      match (try? d.default_input_config()) {
-        Ok(cfg) => Some(cfg)
-        Err(_) => None
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
       }
     CoreAudio(d) =>
-      match (try? d.default_input_config()) {
-        Ok(cfg) => Some(cfg)
-        Err(_) => None
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
       }
+  }
+}
+
+///|
+pub fn Device::default_output_config(
+  self : Device,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  match self {
+    Null(d) => d.default_output_config()
+    CoreAudio(d) => d.default_output_config()
+  }
+}
+
+///|
+pub fn Device::default_input_config(
+  self : Device,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  match self {
+    Null(d) => d.default_input_config()
+    CoreAudio(d) => d.default_input_config()
+  }
+}
+
+///|
+pub fn Device::build_output_stream(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  match self {
+    Null(d) =>
+      Stream::Null(
+        d.build_output_stream(config, data_callback, error_callback, timeout),
+      )
+    CoreAudio(d) =>
+      Stream::CoreAudio(
+        d.build_output_stream(config, data_callback, error_callback, timeout),
+      )
+  }
+}
+
+///|
+pub fn Device::build_input_stream(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  match self {
+    Null(d) =>
+      Stream::Null(
+        d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
+    CoreAudio(d) =>
+      Stream::CoreAudio(
+        d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
+  }
+}
+
+///|
+pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
+  match self {
+    Null(s) => s.play()
+    CoreAudio(s) => s.play()
+  }
+}
+
+///|
+pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
+  match self {
+    Null(s) => s.pause()
+    CoreAudio(s) => s.pause()
   }
 }
