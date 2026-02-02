@@ -1,7 +1,9 @@
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <AudioToolbox/AudioToolbox.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 static int32_t ca_err(OSStatus st) {
   if (st == noErr) {
@@ -401,4 +403,299 @@ int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
 
   return 0;
 #undef MATCH
+}
+
+// -----------------------------------------------------------------------------
+// AudioQueue stream lifecycle (MVP)
+// -----------------------------------------------------------------------------
+
+typedef struct {
+  AudioQueueRef queue;
+  int is_input;
+  uint32_t buffer_bytes;
+} moon_cpal_ca_stream_t;
+
+static void ca_output_callback(void *in_user_data,
+                               AudioQueueRef in_aq,
+                               AudioQueueBufferRef in_buffer) {
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)in_user_data;
+  if (s == NULL || in_buffer == NULL) {
+    return;
+  }
+  if (in_buffer->mAudioData != NULL && s->buffer_bytes > 0) {
+    memset(in_buffer->mAudioData, 0, s->buffer_bytes);
+    in_buffer->mAudioDataByteSize = s->buffer_bytes;
+  }
+  AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
+}
+
+static void ca_input_callback(void *in_user_data,
+                              AudioQueueRef in_aq,
+                              AudioQueueBufferRef in_buffer,
+                              const AudioTimeStamp *in_start_time,
+                              UInt32 in_num_packets,
+                              const AudioStreamPacketDescription *in_packet_desc) {
+  (void)in_start_time;
+  (void)in_num_packets;
+  (void)in_packet_desc;
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)in_user_data;
+  if (s == NULL || in_buffer == NULL) {
+    return;
+  }
+  // Discard input for now; re-enqueue buffer for continued capture.
+  in_buffer->mAudioDataByteSize = s->buffer_bytes;
+  AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
+}
+
+static int32_t ca_make_asbd(double sample_rate,
+                            uint32_t channels,
+                            uint32_t sample_format_tag,
+                            AudioStreamBasicDescription *out) {
+  if (out == NULL || channels == 0 || sample_rate <= 0.0) {
+    return -1;
+  }
+
+  uint32_t bytes_per_sample = 0;
+  uint32_t bits_per_channel = 0;
+  uint32_t flags = kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked;
+
+  switch (sample_format_tag) {
+    case 1: // F32
+      bytes_per_sample = 4;
+      bits_per_channel = 32;
+      flags |= kAudioFormatFlagIsFloat;
+      break;
+    case 2: // I16
+      bytes_per_sample = 2;
+      bits_per_channel = 16;
+      flags |= kAudioFormatFlagIsSignedInteger;
+      break;
+    default:
+      // Match `moon_cpal_ca_osstatus_kind`: treat as "stream type not supported".
+      return ca_err(kAudioDeviceUnsupportedFormatError);
+  }
+
+  memset(out, 0, sizeof(*out));
+  out->mSampleRate = sample_rate;
+  out->mFormatID = kAudioFormatLinearPCM;
+  out->mFormatFlags = flags;
+  out->mFramesPerPacket = 1;
+  out->mChannelsPerFrame = channels;
+  out->mBitsPerChannel = bits_per_channel;
+  out->mBytesPerFrame = channels * bytes_per_sample;
+  out->mBytesPerPacket = out->mBytesPerFrame;
+  return 0;
+}
+
+static int32_t ca_setup_queue_device(AudioQueueRef q, uint32_t device_id) {
+  if (q == NULL) {
+    return -1;
+  }
+  AudioDeviceID dev = (AudioDeviceID)device_id;
+  OSStatus st = AudioQueueSetProperty(q,
+                                      kAudioQueueProperty_CurrentDevice,
+                                      &dev,
+                                      (UInt32)sizeof(dev));
+  if (st != noErr) {
+    return ca_err(st);
+  }
+  return 0;
+}
+
+static uint32_t ca_default_buffer_frames(uint32_t requested) {
+  // A conservative default similar to typical cpal buffers.
+  return requested > 0 ? requested : 512;
+}
+
+static uint32_t ca_safe_mul_u32(uint32_t a, uint32_t b) {
+  if (a == 0 || b == 0) {
+    return 0;
+  }
+  if (a > UINT32_MAX / b) {
+    return 0;
+  }
+  return a * b;
+}
+
+int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
+                                        double sample_rate,
+                                        uint32_t channels,
+                                        uint32_t sample_format_tag,
+                                        uint32_t buffer_frames,
+                                        uint64_t *out_handles,
+                                        int32_t out_len) {
+  if (out_handles == NULL || out_len <= 0) {
+    return -1;
+  }
+  out_handles[0] = 0;
+
+  AudioStreamBasicDescription asbd;
+  int32_t st = ca_make_asbd(sample_rate, channels, sample_format_tag, &asbd);
+  if (st != 0) {
+    return st;
+  }
+
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)malloc(sizeof(*s));
+  if (s == NULL) {
+    return -1;
+  }
+  memset(s, 0, sizeof(*s));
+  s->is_input = 0;
+
+  OSStatus os = AudioQueueNewOutput(&asbd,
+                                   ca_output_callback,
+                                   s,
+                                   NULL,
+                                   NULL,
+                                   0,
+                                   &s->queue);
+  if (os != noErr) {
+    free(s);
+    return ca_err(os);
+  }
+
+  st = ca_setup_queue_device(s->queue, device_id);
+  if (st != 0) {
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return st;
+  }
+
+  uint32_t frames = ca_default_buffer_frames(buffer_frames);
+  uint32_t buffer_bytes = ca_safe_mul_u32(frames, asbd.mBytesPerFrame);
+  if (buffer_bytes == 0) {
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return -1;
+  }
+  s->buffer_bytes = buffer_bytes;
+
+  // Prime with a few silence buffers.
+  for (int i = 0; i < 3; i++) {
+    AudioQueueBufferRef buf = NULL;
+    os = AudioQueueAllocateBuffer(s->queue, buffer_bytes, &buf);
+    if (os != noErr) {
+      AudioQueueDispose(s->queue, true);
+      free(s);
+      return ca_err(os);
+    }
+    memset(buf->mAudioData, 0, buffer_bytes);
+    buf->mAudioDataByteSize = buffer_bytes;
+    os = AudioQueueEnqueueBuffer(s->queue, buf, 0, NULL);
+    if (os != noErr) {
+      AudioQueueDispose(s->queue, true);
+      free(s);
+      return ca_err(os);
+    }
+  }
+
+  out_handles[0] = (uint64_t)(uintptr_t)s;
+  return 0;
+}
+
+int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
+                                       double sample_rate,
+                                       uint32_t channels,
+                                       uint32_t sample_format_tag,
+                                       uint32_t buffer_frames,
+                                       uint64_t *out_handles,
+                                       int32_t out_len) {
+  if (out_handles == NULL || out_len <= 0) {
+    return -1;
+  }
+  out_handles[0] = 0;
+
+  AudioStreamBasicDescription asbd;
+  int32_t st = ca_make_asbd(sample_rate, channels, sample_format_tag, &asbd);
+  if (st != 0) {
+    return st;
+  }
+
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)malloc(sizeof(*s));
+  if (s == NULL) {
+    return -1;
+  }
+  memset(s, 0, sizeof(*s));
+  s->is_input = 1;
+
+  OSStatus os = AudioQueueNewInput(&asbd,
+                                  ca_input_callback,
+                                  s,
+                                  NULL,
+                                  NULL,
+                                  0,
+                                  &s->queue);
+  if (os != noErr) {
+    free(s);
+    return ca_err(os);
+  }
+
+  st = ca_setup_queue_device(s->queue, device_id);
+  if (st != 0) {
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return st;
+  }
+
+  uint32_t frames = ca_default_buffer_frames(buffer_frames);
+  uint32_t buffer_bytes = ca_safe_mul_u32(frames, asbd.mBytesPerFrame);
+  if (buffer_bytes == 0) {
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return -1;
+  }
+  s->buffer_bytes = buffer_bytes;
+
+  // Enqueue a few buffers for capture.
+  for (int i = 0; i < 3; i++) {
+    AudioQueueBufferRef buf = NULL;
+    os = AudioQueueAllocateBuffer(s->queue, buffer_bytes, &buf);
+    if (os != noErr) {
+      AudioQueueDispose(s->queue, true);
+      free(s);
+      return ca_err(os);
+    }
+    buf->mAudioDataByteSize = buffer_bytes;
+    os = AudioQueueEnqueueBuffer(s->queue, buf, 0, NULL);
+    if (os != noErr) {
+      AudioQueueDispose(s->queue, true);
+      free(s);
+      return ca_err(os);
+    }
+  }
+
+  out_handles[0] = (uint64_t)(uintptr_t)s;
+  return 0;
+}
+
+int32_t moon_cpal_ca_stream_play(uint64_t handle) {
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)(uintptr_t)handle;
+  if (s == NULL || s->queue == NULL) {
+    return -1;
+  }
+  OSStatus st = AudioQueueStart(s->queue, NULL);
+  return ca_err(st);
+}
+
+int32_t moon_cpal_ca_stream_pause(uint64_t handle) {
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)(uintptr_t)handle;
+  if (s == NULL || s->queue == NULL) {
+    return -1;
+  }
+  OSStatus st = AudioQueuePause(s->queue);
+  return ca_err(st);
+}
+
+int32_t moon_cpal_ca_stream_destroy(uint64_t handle) {
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)(uintptr_t)handle;
+  if (s == NULL) {
+    return 0;
+  }
+  if (s->queue != NULL) {
+    AudioQueueStop(s->queue, true);
+    AudioQueueDispose(s->queue, true);
+    s->queue = NULL;
+  }
+  free(s);
+  return 0;
 }
