@@ -1,0 +1,64 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "zhengyu/moon_cpal/macos"
+
+import {
+  "zhengyu/moon_cpal",
+}
+
+// Values
+pub fn default_host() -> Host
+
+pub fn default_input_config(UInt) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+
+pub fn default_input_device_id() -> UInt? raise CoreAudioError
+
+pub fn default_output_config(UInt) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+
+pub fn default_output_device_id() -> UInt? raise CoreAudioError
+
+pub fn device_ids() -> Array[UInt] raise CoreAudioError
+
+pub fn device_name(UInt) -> String raise CoreAudioError
+
+pub fn supported_input_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+
+pub fn supported_output_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+
+// Errors
+pub suberror CoreAudioError {
+  CoreAudioError(String, Int)
+}
+
+pub suberror DefaultStreamConfigError {
+  DeviceNotAvailable
+  StreamTypeNotSupported
+  BackendSpecific(String, Int)
+}
+
+// Types and methods
+pub struct Device {
+  id : UInt
+}
+pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+pub fn Device::id(Self) -> UInt
+pub fn Device::name(Self) -> String raise CoreAudioError
+pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+pub impl Eq for Device
+pub impl Show for Device
+
+pub struct Host {
+  _unit : Unit
+}
+pub fn Host::default_input_device(Self) -> Device? raise CoreAudioError
+pub fn Host::default_output_device(Self) -> Device? raise CoreAudioError
+pub fn Host::devices(Self) -> Array[Device] raise CoreAudioError
+pub impl Eq for Host
+pub impl Show for Host
+
+// Type aliases
+pub type DeviceId = UInt
+
+// Traits
+

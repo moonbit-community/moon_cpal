@@ -1,0 +1,118 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "zhengyu/moon_cpal"
+
+// Values
+pub fn common_sample_rates() -> Array[Int]
+
+// Errors
+
+// Types and methods
+pub enum BufferSize {
+  Default
+  Fixed(Int)
+}
+pub impl Eq for BufferSize
+pub impl Show for BufferSize
+
+pub struct Duration {
+  secs : UInt64
+  nanos : Int
+}
+pub fn Duration::from_secs(UInt64) -> Self
+pub impl Eq for Duration
+pub impl Show for Duration
+
+pub(all) enum SampleFormat {
+  I8
+  I16
+  I24
+  I32
+  I64
+  U8
+  U16
+  U24
+  U32
+  U64
+  F32
+  F64
+  DsdU8
+  DsdU16
+  DsdU32
+}
+pub fn SampleFormat::bits_per_sample(Self) -> Int
+pub fn SampleFormat::is_dsd(Self) -> Bool
+pub fn SampleFormat::is_float(Self) -> Bool
+pub fn SampleFormat::is_int(Self) -> Bool
+pub fn SampleFormat::is_uint(Self) -> Bool
+pub fn SampleFormat::sample_size(Self) -> Int
+pub fn SampleFormat::to_debug_string(Self) -> String
+pub impl Eq for SampleFormat
+pub impl Show for SampleFormat
+
+pub struct StreamConfig {
+  channels : Int
+  sample_rate : Int
+  buffer_size : BufferSize
+}
+pub impl Eq for StreamConfig
+pub impl Show for StreamConfig
+
+pub struct StreamInstant {
+  secs : Int64
+  nanos : Int
+}
+pub fn StreamInstant::add(Self, Duration) -> Self?
+pub fn StreamInstant::duration_since(Self, Self) -> Duration?
+pub fn StreamInstant::new(Int64, Int) -> Self
+pub fn StreamInstant::sub(Self, Duration) -> Self?
+pub impl Eq for StreamInstant
+pub impl Show for StreamInstant
+
+pub(all) enum SupportedBufferSize {
+  Range(min~ : Int, max~ : Int)
+  Unknown
+}
+pub impl Eq for SupportedBufferSize
+pub impl Show for SupportedBufferSize
+
+pub struct SupportedStreamConfig {
+  buffer_size : SupportedBufferSize
+  channels : Int
+  sample_rate : Int
+  sample_format : SampleFormat
+}
+pub fn SupportedStreamConfig::buffer_size(Self) -> SupportedBufferSize
+pub fn SupportedStreamConfig::channels(Self) -> Int
+pub fn SupportedStreamConfig::config(Self) -> StreamConfig
+pub fn SupportedStreamConfig::new(Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfig::sample_format(Self) -> SampleFormat
+pub fn SupportedStreamConfig::sample_rate(Self) -> Int
+pub impl Eq for SupportedStreamConfig
+pub impl Show for SupportedStreamConfig
+
+pub struct SupportedStreamConfigRange {
+  buffer_size : SupportedBufferSize
+  channels : Int
+  min_sample_rate : Int
+  max_sample_rate : Int
+  sample_format : SampleFormat
+}
+pub fn SupportedStreamConfigRange::buffer_size(Self) -> SupportedBufferSize
+pub fn SupportedStreamConfigRange::channels(Self) -> Int
+pub fn SupportedStreamConfigRange::cmp_default_heuristics(Self, Self) -> Int
+pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int
+pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int
+pub fn SupportedStreamConfigRange::new(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfigRange::sample_format(Self) -> SampleFormat
+pub impl Eq for SupportedStreamConfigRange
+pub impl Show for SupportedStreamConfigRange
+
+// Type aliases
+pub type ChannelCount = Int
+
+pub type FrameCount = Int
+
+pub type SampleRate = Int
+
+// Traits
+

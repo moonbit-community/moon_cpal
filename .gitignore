@@ -1,0 +1,9 @@
+target/
+_build/
+.DS_Store
+
+# `moon` uses `_build/` but some setups also create a `target` symlink.
+target
+
+# Upstream reference checkout (not part of the MoonBit port).
+cpal-reference/

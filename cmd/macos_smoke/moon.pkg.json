@@ -1,0 +1,9 @@
+{
+  "is_main": true,
+  "import": ["zhengyu/moon_cpal/macos", "zhengyu/moon_cpal"],
+  "link": {
+    "native": {
+      "cc-link-flags": "-framework CoreAudio -framework CoreFoundation"
+    }
+  }
+}

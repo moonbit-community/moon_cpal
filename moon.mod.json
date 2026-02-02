@@ -1,0 +1,10 @@
+{
+  "name": "zhengyu/moon_cpal",
+  "version": "0.1.0",
+  "readme": "README.mbt.md",
+  "repository": "",
+  "license": "Apache-2.0",
+  "keywords": ["audio", "cpal", "port"],
+  "description": "A MoonBit port (subset) of RustAudio/cpal."
+}
+

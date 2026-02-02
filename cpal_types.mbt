@@ -1,0 +1,178 @@
+///|
+/// Core CPAL-like types that are deterministic and portable.
+///
+/// This is an incremental MoonBit port of RustAudio/cpal. The current slice focuses on the
+/// "pure core" types used by upstream unit tests.
+
+///|
+pub type ChannelCount = Int
+
+///|
+pub type SampleRate = Int
+
+///|
+pub type FrameCount = Int
+
+///|
+pub enum BufferSize {
+  Default
+  Fixed(FrameCount)
+} derive(Show, Eq)
+
+///|
+pub struct StreamConfig {
+  channels : ChannelCount
+  sample_rate : SampleRate
+  buffer_size : BufferSize
+} derive(Show, Eq)
+
+///|
+pub(all) enum SupportedBufferSize {
+  Range(min~ : FrameCount, max~ : FrameCount)
+  Unknown
+} derive(Show, Eq)
+
+///|
+pub(all) enum SampleFormat {
+  I8
+  I16
+  I24
+  I32
+  I64
+  U8
+  U16
+  U24
+  U32
+  U64
+  F32
+  F64
+  DsdU8
+  DsdU16
+  DsdU32
+} derive(Show, Eq)
+
+///|
+/// A single supported stream configuration (as opposed to a range).
+///
+/// Mirrors cpal's `SupportedStreamConfig` shape used by `default_*_config`.
+pub struct SupportedStreamConfig {
+  buffer_size : SupportedBufferSize
+  channels : ChannelCount
+  sample_rate : SampleRate
+  sample_format : SampleFormat
+} derive(Show, Eq)
+
+///|
+pub fn SupportedStreamConfig::new(
+  channels : ChannelCount,
+  sample_rate : SampleRate,
+  buffer_size : SupportedBufferSize,
+  sample_format : SampleFormat,
+) -> SupportedStreamConfig {
+  { channels, sample_rate, buffer_size, sample_format }
+}
+
+///|
+pub fn SupportedStreamConfig::channels(
+  self : SupportedStreamConfig,
+) -> ChannelCount {
+  self.channels
+}
+
+///|
+pub fn SupportedStreamConfig::sample_rate(
+  self : SupportedStreamConfig,
+) -> SampleRate {
+  self.sample_rate
+}
+
+///|
+pub fn SupportedStreamConfig::sample_format(
+  self : SupportedStreamConfig,
+) -> SampleFormat {
+  self.sample_format
+}
+
+///|
+pub fn SupportedStreamConfig::buffer_size(
+  self : SupportedStreamConfig,
+) -> SupportedBufferSize {
+  self.buffer_size
+}
+
+///|
+pub fn SupportedStreamConfig::config(
+  self : SupportedStreamConfig,
+) -> StreamConfig {
+  // Upstream cpal discards the "supported buffer size" range when producing
+  // a buildable `StreamConfig`.
+  {
+    channels: self.channels,
+    sample_rate: self.sample_rate,
+    buffer_size: BufferSize::Default,
+  }
+}
+
+///|
+pub struct SupportedStreamConfigRange {
+  buffer_size : SupportedBufferSize
+  channels : ChannelCount
+  min_sample_rate : SampleRate
+  max_sample_rate : SampleRate
+  sample_format : SampleFormat
+} derive(Show, Eq)
+
+///|
+/// Public constructor for black-box tests and downstream users.
+pub fn SupportedStreamConfigRange::new(
+  channels : ChannelCount,
+  min_sample_rate : SampleRate,
+  max_sample_rate : SampleRate,
+  buffer_size : SupportedBufferSize,
+  sample_format : SampleFormat,
+) -> SupportedStreamConfigRange {
+  { channels, min_sample_rate, max_sample_rate, buffer_size, sample_format }
+}
+
+///|
+pub fn SupportedStreamConfigRange::channels(
+  self : SupportedStreamConfigRange,
+) -> ChannelCount {
+  self.channels
+}
+
+///|
+pub fn SupportedStreamConfigRange::min_sample_rate(
+  self : SupportedStreamConfigRange,
+) -> SampleRate {
+  self.min_sample_rate
+}
+
+///|
+pub fn SupportedStreamConfigRange::max_sample_rate(
+  self : SupportedStreamConfigRange,
+) -> SampleRate {
+  self.max_sample_rate
+}
+
+///|
+pub fn SupportedStreamConfigRange::sample_format(
+  self : SupportedStreamConfigRange,
+) -> SampleFormat {
+  self.sample_format
+}
+
+///|
+pub fn SupportedStreamConfigRange::buffer_size(
+  self : SupportedStreamConfigRange,
+) -> SupportedBufferSize {
+  self.buffer_size
+}
+
+///|
+pub fn common_sample_rates() -> Array[SampleRate] {
+  [
+    5512, 8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 64000, 88200,
+    96000, 176400, 192000, 352800, 384000, 705600, 768000, 1411200, 1536000,
+  ]
+}
