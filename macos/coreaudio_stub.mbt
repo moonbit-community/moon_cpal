@@ -3,6 +3,11 @@
 pub type DeviceId = UInt
 
 ///|
+fn osstatus_kind(_status : Int) -> Int {
+  0
+}
+
+///|
 pub fn default_output_device_id() -> DeviceId? raise CoreAudioError {
   raise_osstatus("default_output_device_id (non-native backend)", -1)
 }

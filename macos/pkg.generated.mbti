@@ -27,6 +27,7 @@ pub fn supported_output_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigR
 // Errors
 pub suberror CoreAudioError {
   CoreAudioError(String, Int)
+  DeviceNotAvailable(String, Int)
 }
 
 pub suberror DefaultStreamConfigError {

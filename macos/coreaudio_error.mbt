@@ -1,6 +1,7 @@
 ///|
 pub suberror CoreAudioError {
   CoreAudioError(String, Int)
+  DeviceNotAvailable(String, Int)
 }
 
 ///|
@@ -16,7 +17,10 @@ pub suberror DefaultStreamConfigError {
 
 ///|
 fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
-  raise CoreAudioError(op, status)
+  match osstatus_kind(status) {
+    1 => raise CoreAudioError::DeviceNotAvailable(op, status)
+    _ => raise CoreAudioError(op, status)
+  }
 }
 
 ///|
@@ -24,5 +28,9 @@ fn[A] raise_default_osstatus(
   op : String,
   status : Int,
 ) -> A raise DefaultStreamConfigError {
-  raise DefaultStreamConfigError::BackendSpecific(op, status)
+  match osstatus_kind(status) {
+    1 => raise DefaultStreamConfigError::DeviceNotAvailable
+    2 => raise DefaultStreamConfigError::StreamTypeNotSupported
+    _ => raise DefaultStreamConfigError::BackendSpecific(op, status)
+  }
 }

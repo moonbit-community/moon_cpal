@@ -170,6 +170,57 @@ pub fn SupportedStreamConfigRange::buffer_size(
 }
 
 ///|
+/// Retrieve a `SupportedStreamConfig` with the given sample rate.
+///
+/// # Panics
+///
+/// Panics if `sample_rate` is outside `[min_sample_rate, max_sample_rate]`.
+pub fn SupportedStreamConfigRange::with_sample_rate(
+  self : SupportedStreamConfigRange,
+  sample_rate : SampleRate,
+) -> SupportedStreamConfig {
+  match self.try_with_sample_rate(sample_rate) {
+    Some(cfg) => cfg
+    None => panic()
+  }
+}
+
+///|
+/// Retrieve a `SupportedStreamConfig` with the given sample rate.
+///
+/// Returns `None` if `sample_rate` is outside `[min_sample_rate, max_sample_rate]`.
+pub fn SupportedStreamConfigRange::try_with_sample_rate(
+  self : SupportedStreamConfigRange,
+  sample_rate : SampleRate,
+) -> SupportedStreamConfig? {
+  if self.min_sample_rate <= sample_rate && sample_rate <= self.max_sample_rate {
+    Some(
+      SupportedStreamConfig::new(
+        self.channels,
+        sample_rate,
+        self.buffer_size,
+        self.sample_format,
+      ),
+    )
+  } else {
+    None
+  }
+}
+
+///|
+/// Turns this range into a `SupportedStreamConfig` corresponding to the maximum sample rate.
+pub fn SupportedStreamConfigRange::with_max_sample_rate(
+  self : SupportedStreamConfigRange,
+) -> SupportedStreamConfig {
+  SupportedStreamConfig::new(
+    self.channels,
+    self.max_sample_rate,
+    self.buffer_size,
+    self.sample_format,
+  )
+}
+
+///|
 pub fn common_sample_rates() -> Array[SampleRate] {
   [
     5512, 8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000, 64000, 88200,

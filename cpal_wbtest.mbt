@@ -125,3 +125,51 @@ test "sample_format properties (ported from upstream cpal/src/samples_formats.rs
     content="[\"i8:size=1:bits=8:int=true:uint=false:float=false:dsd=false\", \"i16:size=2:bits=16:int=true:uint=false:float=false:dsd=false\", \"i24:size=4:bits=24:int=true:uint=false:float=false:dsd=false\", \"i32:size=4:bits=32:int=true:uint=false:float=false:dsd=false\", \"i64:size=8:bits=64:int=true:uint=false:float=false:dsd=false\", \"u8:size=1:bits=8:int=false:uint=true:float=false:dsd=false\", \"u16:size=2:bits=16:int=false:uint=true:float=false:dsd=false\", \"u24:size=4:bits=24:int=false:uint=true:float=false:dsd=false\", \"u32:size=4:bits=32:int=false:uint=true:float=false:dsd=false\", \"u64:size=8:bits=64:int=false:uint=true:float=false:dsd=false\", \"f32:size=4:bits=32:int=false:uint=false:float=true:dsd=false\", \"f64:size=8:bits=64:int=false:uint=false:float=true:dsd=false\", \"dsdu8:size=1:bits=1:int=false:uint=false:float=false:dsd=true\", \"dsdu16:size=2:bits=1:int=false:uint=false:float=false:dsd=true\", \"dsdu32:size=4:bits=1:int=false:uint=false:float=false:dsd=true\"]",
   )
 }
+
+///|
+test "supported_config_range sample-rate helpers" {
+  let range = SupportedStreamConfigRange::new(
+    2,
+    10,
+    20,
+    Range(min=128, max=256),
+    I16,
+  )
+  inspect(range.try_with_sample_rate(9), content="None")
+  match range.try_with_sample_rate(10) {
+    None => inspect(false, content="true")
+    Some(cfg) => {
+      inspect(cfg.channels(), content="2")
+      inspect(cfg.sample_rate(), content="10")
+      inspect(cfg.sample_format(), content="I16")
+      inspect(cfg.buffer_size(), content="Range(min=128, max=256)")
+    }
+  }
+  let cfg_max = range.with_max_sample_rate()
+  inspect(cfg_max.sample_rate(), content="20")
+  let cfg_in = range.with_sample_rate(15)
+  inspect(cfg_in.sample_rate(), content="15")
+}
+
+///|
+test "callback timestamp types" {
+  let callback = StreamInstant::new(1L, 2)
+  let capture = StreamInstant::new(3L, 4)
+  let playback = StreamInstant::new(5L, 6)
+  let in_ts = InputStreamTimestamp::new(callback, capture)
+  let out_ts = OutputStreamTimestamp::new(callback, playback)
+  inspect(in_ts.callback(), content="{secs: 1, nanos: 2}")
+  inspect(in_ts.capture(), content="{secs: 3, nanos: 4}")
+  inspect(out_ts.callback(), content="{secs: 1, nanos: 2}")
+  inspect(out_ts.playback(), content="{secs: 5, nanos: 6}")
+  let in_info = InputCallbackInfo::new(in_ts)
+  let out_info = OutputCallbackInfo::new(out_ts)
+  inspect(
+    in_info.timestamp(),
+    content="{callback: {secs: 1, nanos: 2}, capture: {secs: 3, nanos: 4}}",
+  )
+  inspect(
+    out_info.timestamp(),
+    content="{callback: {secs: 1, nanos: 2}, playback: {secs: 5, nanos: 6}}",
+  )
+}

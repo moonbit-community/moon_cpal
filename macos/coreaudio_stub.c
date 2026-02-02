@@ -3,13 +3,22 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+static int32_t ca_err(OSStatus st) {
+  if (st == noErr) {
+    return 0;
+  }
+  int32_t s = (int32_t)st;
+  // Ensure all errors are negative regardless of OSStatus sign convention.
+  return s < 0 ? s : -s;
+}
+
 static int32_t ca_get_property_data_size(AudioObjectID object,
                                         const AudioObjectPropertyAddress *addr,
                                         uint32_t *out_size) {
   UInt32 size = 0;
   OSStatus st = AudioObjectGetPropertyDataSize(object, addr, 0, NULL, &size);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
   *out_size = (uint32_t)size;
   return 0;
@@ -22,7 +31,7 @@ static int32_t ca_get_property_data(AudioObjectID object,
   UInt32 size = (UInt32)(*io_size);
   OSStatus st = AudioObjectGetPropertyData(object, addr, 0, NULL, &size, out_data);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
   *io_size = (uint32_t)size;
   return 0;
@@ -172,7 +181,7 @@ static int32_t ca_stream_channel_count(uint32_t device_id,
   OSStatus st =
       AudioObjectGetPropertyDataSize((AudioObjectID)device_id, &addr, 0, NULL, &size);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
   if (size == 0) {
     return 0;
@@ -186,7 +195,7 @@ static int32_t ca_stream_channel_count(uint32_t device_id,
   st = AudioObjectGetPropertyData((AudioObjectID)device_id, &addr, 0, NULL, &size, list);
   if (st != noErr) {
     free(list);
-    return -(int32_t)st;
+    return ca_err(st);
   }
 
   uint32_t n_buffers = list->mNumberBuffers;
@@ -221,7 +230,7 @@ static int32_t ca_sample_rate_ranges_count(uint32_t device_id,
   OSStatus st =
       AudioObjectGetPropertyDataSize((AudioObjectID)device_id, &addr, 0, NULL, &size);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
   return (int32_t)(size / (uint32_t)sizeof(AudioValueRange));
 }
@@ -246,7 +255,7 @@ static int32_t ca_sample_rate_ranges(uint32_t device_id,
   OSStatus st =
       AudioObjectGetPropertyDataSize((AudioObjectID)device_id, &addr, 0, NULL, &size);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
 
   int32_t count = (int32_t)(size / (uint32_t)sizeof(AudioValueRange));
@@ -265,7 +274,7 @@ static int32_t ca_sample_rate_ranges(uint32_t device_id,
   st = AudioObjectGetPropertyData((AudioObjectID)device_id, &addr, 0, NULL, &size, ranges);
   if (st != noErr) {
     free(ranges);
-    return -(int32_t)st;
+    return ca_err(st);
   }
 
   for (int32_t i = 0; i < count; i++) {
@@ -316,7 +325,7 @@ int32_t moon_cpal_ca_buffer_frame_size_range(uint32_t device_id,
   OSStatus st =
       AudioObjectGetPropertyData((AudioObjectID)device_id, &addr, 0, NULL, &size, &range);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
 
   out[0] = (uint32_t)range.mMinimum;
@@ -343,7 +352,7 @@ int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
   OSStatus st =
       AudioObjectGetPropertyData((AudioObjectID)device_id, &addr, 0, NULL, &size, &asbd);
   if (st != noErr) {
-    return -(int32_t)st;
+    return ca_err(st);
   }
 
   // Match upstream cpal's behavior on macOS: support f32 and i16 for default config.
@@ -363,4 +372,33 @@ int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
   out[1] = (uint32_t)asbd.mChannelsPerFrame;
   out[2] = sample_format_tag;
   return 0;
+}
+
+// Classify a CPAL stub error code (negative) into a small set of categories.
+//
+// Returns:
+// - 0: other/unknown
+// - 1: device not available
+// - 2: stream type not supported
+int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
+  if (status == 0) {
+    return 0;
+  }
+  // `status` is a negative error code (see `ca_err`). We try both sign conventions.
+  OSStatus a = (OSStatus)status;
+  OSStatus b = (OSStatus)(-status);
+
+#define MATCH(x) (a == (x) || b == (x))
+
+  if (MATCH(kAudioHardwareBadDeviceError) || MATCH(kAudioHardwareNotRunningError) ||
+      MATCH(kAudioHardwareBadObjectError)) {
+    return 1;
+  }
+
+  if (MATCH(kAudioDeviceUnsupportedFormatError)) {
+    return 2;
+  }
+
+  return 0;
+#undef MATCH
 }

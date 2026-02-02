@@ -22,6 +22,42 @@ pub fn Duration::from_secs(UInt64) -> Self
 pub impl Eq for Duration
 pub impl Show for Duration
 
+pub struct InputCallbackInfo {
+  timestamp : InputStreamTimestamp
+}
+pub fn InputCallbackInfo::new(InputStreamTimestamp) -> Self
+pub fn InputCallbackInfo::timestamp(Self) -> InputStreamTimestamp
+pub impl Eq for InputCallbackInfo
+pub impl Show for InputCallbackInfo
+
+pub struct InputStreamTimestamp {
+  callback : StreamInstant
+  capture : StreamInstant
+}
+pub fn InputStreamTimestamp::callback(Self) -> StreamInstant
+pub fn InputStreamTimestamp::capture(Self) -> StreamInstant
+pub fn InputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
+pub impl Eq for InputStreamTimestamp
+pub impl Show for InputStreamTimestamp
+
+pub struct OutputCallbackInfo {
+  timestamp : OutputStreamTimestamp
+}
+pub fn OutputCallbackInfo::new(OutputStreamTimestamp) -> Self
+pub fn OutputCallbackInfo::timestamp(Self) -> OutputStreamTimestamp
+pub impl Eq for OutputCallbackInfo
+pub impl Show for OutputCallbackInfo
+
+pub struct OutputStreamTimestamp {
+  callback : StreamInstant
+  playback : StreamInstant
+}
+pub fn OutputStreamTimestamp::callback(Self) -> StreamInstant
+pub fn OutputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
+pub fn OutputStreamTimestamp::playback(Self) -> StreamInstant
+pub impl Eq for OutputStreamTimestamp
+pub impl Show for OutputStreamTimestamp
+
 pub(all) enum SampleFormat {
   I8
   I16
@@ -104,6 +140,9 @@ pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int
 pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int
 pub fn SupportedStreamConfigRange::new(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
 pub fn SupportedStreamConfigRange::sample_format(Self) -> SampleFormat
+pub fn SupportedStreamConfigRange::try_with_sample_rate(Self, Int) -> SupportedStreamConfig?
+pub fn SupportedStreamConfigRange::with_max_sample_rate(Self) -> SupportedStreamConfig
+pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int) -> SupportedStreamConfig
 pub impl Eq for SupportedStreamConfigRange
 pub impl Show for SupportedStreamConfigRange
 

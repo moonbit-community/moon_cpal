@@ -76,6 +76,14 @@ extern "C" fn ca_default_stream_config(
 ) -> Int = "moon_cpal_ca_default_stream_config"
 
 ///|
+extern "C" fn ca_osstatus_kind(status : Int) -> Int = "moon_cpal_ca_osstatus_kind"
+
+///|
+fn osstatus_kind(status : Int) -> Int {
+  ca_osstatus_kind(status)
+}
+
+///|
 fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int) -> String {
   let res = StringBuilder::new()
   let len = if length < bytes.length() { length } else { bytes.length() }
