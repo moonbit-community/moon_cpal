@@ -2,17 +2,139 @@
 package "zhengyu/moon_cpal"
 
 // Values
+pub fn available_hosts() -> Array[HostId]
+
+pub fn build_stream_error_backend_specific(String) -> BuildStreamError
+
+pub fn build_stream_error_device_busy() -> BuildStreamError
+
+pub fn build_stream_error_device_not_available() -> BuildStreamError
+
+pub fn build_stream_error_invalid_argument() -> BuildStreamError
+
+pub fn build_stream_error_stream_config_not_supported() -> BuildStreamError
+
+pub fn build_stream_error_stream_id_overflow() -> BuildStreamError
+
 pub fn common_sample_rates() -> Array[Int]
 
+pub fn default_stream_config_error_backend_specific(String) -> DefaultStreamConfigError
+
+pub fn default_stream_config_error_device_busy() -> DefaultStreamConfigError
+
+pub fn default_stream_config_error_device_not_available() -> DefaultStreamConfigError
+
+pub fn default_stream_config_error_stream_type_not_supported() -> DefaultStreamConfigError
+
+pub fn pause_stream_error_backend_specific(String) -> PauseStreamError
+
+pub fn pause_stream_error_device_not_available() -> PauseStreamError
+
+pub fn play_stream_error_backend_specific(String) -> PlayStreamError
+
+pub fn play_stream_error_device_not_available() -> PlayStreamError
+
+pub fn stream_error_backend_specific(String) -> StreamError
+
+pub fn stream_error_buffer_underrun() -> StreamError
+
+pub fn stream_error_device_not_available() -> StreamError
+
+pub fn stream_error_stream_invalidated() -> StreamError
+
 // Errors
+pub suberror BuildStreamError {
+  DeviceNotAvailable
+  DeviceBusy
+  StreamConfigNotSupported
+  InvalidArgument
+  StreamIdOverflow
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for BuildStreamError
+pub impl Show for BuildStreamError
+
+pub suberror DefaultStreamConfigError {
+  DeviceNotAvailable
+  DeviceBusy
+  StreamTypeNotSupported
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for DefaultStreamConfigError
+pub impl Show for DefaultStreamConfigError
+
+pub suberror DeviceIdError {
+  UnsupportedPlatform
+  BackendSpecific(String)
+}
+pub impl Eq for DeviceIdError
+pub impl Show for DeviceIdError
+
+pub suberror HostUnavailable {
+  HostUnavailable(String)
+}
+pub impl Eq for HostUnavailable
+pub impl Show for HostUnavailable
+
+pub suberror PauseStreamError {
+  DeviceNotAvailable
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for PauseStreamError
+pub impl Show for PauseStreamError
+
+pub suberror PlayStreamError {
+  DeviceNotAvailable
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for PlayStreamError
+pub impl Show for PlayStreamError
+
+pub suberror StreamError {
+  DeviceNotAvailable
+  StreamInvalidated
+  BufferUnderrun
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for StreamError
+pub impl Show for StreamError
+
+pub suberror SupportedStreamConfigsError {
+  DeviceNotAvailable
+  DeviceBusy
+  InvalidArgument
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for SupportedStreamConfigsError
+pub impl Show for SupportedStreamConfigsError
 
 // Types and methods
+pub struct BackendSpecificError {
+  description : String
+}
+pub fn BackendSpecificError::description(Self) -> String
+pub fn BackendSpecificError::new(String) -> Self
+pub impl Eq for BackendSpecificError
+pub impl Show for BackendSpecificError
+
 pub enum BufferSize {
   Default
   Fixed(Int)
 }
 pub impl Eq for BufferSize
 pub impl Show for BufferSize
+
+pub struct DeviceId {
+  host_id : HostId
+  device_id : String
+}
+pub fn DeviceId::device_id(Self) -> String
+pub fn DeviceId::from_string(String) -> Self raise DeviceIdError
+pub fn DeviceId::host_id(Self) -> HostId
+pub fn DeviceId::new(HostId, String) -> Self
+pub fn DeviceId::to_string(Self) -> String
+pub impl Eq for DeviceId
+pub impl Show for DeviceId
 
 pub struct Duration {
   secs : UInt64
@@ -21,6 +143,26 @@ pub struct Duration {
 pub fn Duration::from_secs(UInt64) -> Self
 pub impl Eq for Duration
 pub impl Show for Duration
+
+pub(all) enum HostId {
+  AAudio
+  Alsa
+  Asio
+  CoreAudio
+  Custom
+  Emscripten
+  Jack
+  Null
+  Wasapi
+  WebAudio
+  AudioWorklet
+}
+pub fn HostId::from_string(String) -> Self?
+pub fn HostId::from_view(StringView) -> Self?
+pub fn HostId::parse(String) -> Self raise HostUnavailable
+pub fn HostId::to_string(Self) -> String
+pub impl Eq for HostId
+pub impl Show for HostId
 
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp

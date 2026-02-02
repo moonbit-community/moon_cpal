@@ -44,17 +44,17 @@ pub fn supported_output_configs(
 ///|
 pub fn default_input_config(
   _device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
-  raise DefaultStreamConfigError::BackendSpecific(
-    "default_input_config (non-native backend)", -1,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  raise @moon_cpal.default_stream_config_error_backend_specific(
+    "default_input_config (non-native backend)",
   )
 }
 
 ///|
 pub fn default_output_config(
   _device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
-  raise DefaultStreamConfigError::BackendSpecific(
-    "default_output_config (non-native backend)", -1,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  raise @moon_cpal.default_stream_config_error_backend_specific(
+    "default_output_config (non-native backend)",
   )
 }

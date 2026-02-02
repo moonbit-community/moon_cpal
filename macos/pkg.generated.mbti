@@ -8,11 +8,11 @@ import {
 // Values
 pub fn default_host() -> Host
 
-pub fn default_input_config(UInt) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+pub fn default_input_config(UInt) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
 
 pub fn default_input_device_id() -> UInt? raise CoreAudioError
 
-pub fn default_output_config(UInt) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+pub fn default_output_config(UInt) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
 
 pub fn default_output_device_id() -> UInt? raise CoreAudioError
 
@@ -30,18 +30,12 @@ pub suberror CoreAudioError {
   DeviceNotAvailable(String, Int)
 }
 
-pub suberror DefaultStreamConfigError {
-  DeviceNotAvailable
-  StreamTypeNotSupported
-  BackendSpecific(String, Int)
-}
-
 // Types and methods
 pub struct Device {
   id : UInt
 }
-pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
-pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError
+pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
 pub fn Device::id(Self) -> UInt
 pub fn Device::name(Self) -> String raise CoreAudioError
 pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError

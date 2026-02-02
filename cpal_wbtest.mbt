@@ -173,3 +173,57 @@ test "callback timestamp types" {
     content="{callback: {secs: 1, nanos: 2}, playback: {secs: 5, nanos: 6}}",
   )
 }
+
+///|
+test "host_id parsing and available_hosts" {
+  inspect(HostId::from_string("coreaudio"), content="Some(CoreAudio)")
+  inspect(HostId::from_string("CoReAuDiO"), content="Some(CoreAudio)")
+  inspect(HostId::from_string("unknown"), content="None")
+  try HostId::parse("unknown") catch {
+    HostUnavailable("unknown") => inspect(true, content="true")
+    _ => inspect(false, content="true")
+  } noraise {
+    _ => inspect(false, content="true")
+  }
+  let hs = available_hosts()
+  inspect(hs.length() > 0, content="true")
+}
+
+///|
+test "device_id parsing and formatting" {
+  let id = DeviceId::new(CoreAudio, "abc")
+  inspect(id.to_string(), content="coreaudio:abc")
+  inspect(
+    try? DeviceId::from_string("coreaudio:abc"),
+    content="Ok({host_id: CoreAudio, device_id: \"abc\"})",
+  )
+  try DeviceId::from_string("unknown:abc") catch {
+    UnsupportedPlatform => inspect(true, content="true")
+    _ => inspect(false, content="true")
+  } noraise {
+    _ => inspect(false, content="true")
+  }
+  try DeviceId::from_string("coreaudio") catch {
+    BackendSpecific(_) => inspect(true, content="true")
+    _ => inspect(false, content="true")
+  } noraise {
+    _ => inspect(false, content="true")
+  }
+}
+
+///|
+test "error helper constructors" {
+  inspect(
+    build_stream_error_device_not_available(),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    play_stream_error_backend_specific("x"),
+    content="BackendSpecific({description: \"x\"})",
+  )
+  inspect(
+    pause_stream_error_device_not_available(),
+    content="DeviceNotAvailable",
+  )
+  inspect(stream_error_stream_invalidated(), content="StreamInvalidated")
+}

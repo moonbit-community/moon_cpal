@@ -67,13 +67,13 @@ pub fn Device::supported_output_configs(
 ///|
 pub fn Device::default_input_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
   default_input_config(self.id)
 }
 
 ///|
 pub fn Device::default_output_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
   default_output_config(self.id)
 }

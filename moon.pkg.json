@@ -1,5 +1,9 @@
 {
   "import": [
     "moonbitlang/core/bigint"
-  ]
+  ],
+  "targets": {
+    "cpal_available_hosts_native.mbt": ["native"],
+    "cpal_available_hosts_stub.mbt": ["not", "native"]
+  }
 }

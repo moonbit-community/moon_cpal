@@ -1,0 +1,46 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "zhengyu/moon_cpal/platform"
+
+import {
+  "zhengyu/moon_cpal",
+  "zhengyu/moon_cpal/macos",
+  "zhengyu/moon_cpal/null",
+}
+
+// Values
+pub fn available_hosts() -> Array[@moon_cpal.HostId]
+
+pub fn default_host() -> Host
+
+pub fn host_from_id(@moon_cpal.HostId) -> Host?
+
+// Errors
+
+// Types and methods
+pub enum Device {
+  Null(@null.Device)
+  CoreAudio(@macos.Device)
+}
+pub fn Device::name(Self) -> String
+pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange]
+pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange]
+pub fn Device::try_default_input_config(Self) -> @moon_cpal.SupportedStreamConfig?
+pub fn Device::try_default_output_config(Self) -> @moon_cpal.SupportedStreamConfig?
+pub impl Eq for Device
+pub impl Show for Device
+
+pub enum Host {
+  Null(@null.Host)
+  CoreAudio(@macos.Host)
+}
+pub fn Host::default_input_device(Self) -> Device?
+pub fn Host::default_output_device(Self) -> Device?
+pub fn Host::devices(Self) -> Array[Device]
+pub fn Host::id(Self) -> @moon_cpal.HostId
+pub impl Eq for Host
+pub impl Show for Host
+
+// Type aliases
+
+// Traits
+

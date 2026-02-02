@@ -144,7 +144,7 @@ fn get_buffer_frame_size_range(
 ///|
 fn get_buffer_frame_size_range_default(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedBufferSize raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedBufferSize raise @moon_cpal.DefaultStreamConfigError {
   let out = FixedArray::make(2, (0 : UInt))
   let st = ca_buffer_frame_size_range(device_id, out, 2)
   if st < 0 {
@@ -160,7 +160,7 @@ fn get_buffer_frame_size_range_default(
 fn default_stream_config(
   device_id : DeviceId,
   input~ : Bool,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
   // Layout: [sample_rate, channels, sample_format_tag]
   // - sample_format_tag: 1 => F32, 2 => I16, other => unsupported
   let out = FixedArray::make(3, (0 : UInt))
@@ -182,7 +182,8 @@ fn default_stream_config(
   let sample_format = match out[2] {
     1 => @moon_cpal.SampleFormat::F32
     2 => @moon_cpal.SampleFormat::I16
-    _ => raise DefaultStreamConfigError::StreamTypeNotSupported
+    _ =>
+      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
   }
   let buffer_size = get_buffer_frame_size_range_default(device_id)
   @moon_cpal.SupportedStreamConfig::new(
@@ -386,13 +387,13 @@ pub fn supported_output_configs(
 ///|
 pub fn default_input_config(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
   default_stream_config(device_id, input=true)
 }
 
 ///|
 pub fn default_output_config(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise DefaultStreamConfigError {
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
   default_stream_config(device_id, input=false)
 }

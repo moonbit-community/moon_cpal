@@ -12,7 +12,8 @@ test "macos default_output_config basic invariants" {
             // Some devices may expose a default format that cpal considers unsupported.
             StreamTypeNotSupported => inspect(true, content="true")
             DeviceNotAvailable => inspect(true, content="true")
-            BackendSpecific(_, _) => inspect(true, content="true")
+            DeviceBusy => inspect(true, content="true")
+            BackendSpecific(_) => inspect(true, content="true")
           } noraise {
             cfg => {
               inspect(cfg.channels() > 0, content="true")
@@ -69,7 +70,8 @@ test "macos default_input_config basic invariants (if any)" {
           try dev.default_input_config() catch {
             StreamTypeNotSupported => inspect(true, content="true")
             DeviceNotAvailable => inspect(true, content="true")
-            BackendSpecific(_, _) => inspect(true, content="true")
+            DeviceBusy => inspect(true, content="true")
+            BackendSpecific(_) => inspect(true, content="true")
           } noraise {
             cfg => {
               inspect(cfg.channels() > 0, content="true")
