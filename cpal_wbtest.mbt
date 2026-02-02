@@ -226,4 +226,12 @@ test "error helper constructors" {
     content="DeviceNotAvailable",
   )
   inspect(stream_error_stream_invalidated(), content="StreamInvalidated")
+  inspect(
+    devices_error_backend_specific("x"),
+    content="BackendSpecific({description: \"x\"})",
+  )
+  inspect(
+    device_name_error_backend_specific("x"),
+    content="BackendSpecific({description: \"x\"})",
+  )
 }

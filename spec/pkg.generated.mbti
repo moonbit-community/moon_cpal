@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "zhengyu/moon_cpal/spec"
+
+import {
+  "zhengyu/moon_cpal",
+}
+
+// Values
+pub fn default_host() -> Host
+
+pub fn host_from_id(@moon_cpal.HostId) -> Host raise @moon_cpal.HostUnavailable
+
+// Errors
+
+// Types and methods
+pub struct Data {
+  _unit : Unit
+}
+pub fn Data::bytes(Self) -> Bytes
+pub fn Data::len(Self) -> Int
+pub fn Data::sample_format(Self) -> @moon_cpal.SampleFormat
+pub impl Eq for Data
+pub impl Show for Data
+
+pub struct Device {
+  _unit : Unit
+}
+pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
+pub fn Device::build_output_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.OutputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
+pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+pub fn Device::name(Self) -> String raise @moon_cpal.DeviceNameError
+pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
+pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
+pub impl Eq for Device
+pub impl Show for Device
+
+pub struct Host {
+  _unit : Unit
+}
+pub fn Host::default_input_device(Self) -> Device? raise @moon_cpal.DevicesError
+pub fn Host::default_output_device(Self) -> Device? raise @moon_cpal.DevicesError
+pub fn Host::devices(Self) -> Array[Device] raise @moon_cpal.DevicesError
+pub fn Host::id(Self) -> @moon_cpal.HostId
+pub impl Eq for Host
+pub impl Show for Host
+
+pub struct Stream {
+  _unit : Unit
+}
+pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
+pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
+pub impl Eq for Stream
+pub impl Show for Stream
+
+// Type aliases
+
+// Traits
+

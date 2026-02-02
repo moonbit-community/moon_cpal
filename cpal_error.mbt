@@ -37,6 +37,18 @@ pub suberror SupportedStreamConfigsError {
 } derive(Show, Eq)
 
 ///|
+/// An error that might occur while attempting to enumerate devices.
+pub suberror DevicesError {
+  BackendSpecific(BackendSpecificError)
+} derive(Show, Eq)
+
+///|
+/// An error that may occur while attempting to retrieve a device name.
+pub suberror DeviceNameError {
+  BackendSpecific(BackendSpecificError)
+} derive(Show, Eq)
+
+///|
 /// Error that can happen when creating a stream.
 pub suberror BuildStreamError {
   DeviceNotAvailable
@@ -87,6 +99,42 @@ pub fn default_stream_config_error_backend_specific(
   description : String,
 ) -> DefaultStreamConfigError {
   BackendSpecific(BackendSpecificError::new(description))
+}
+
+///|
+pub fn supported_stream_configs_error_device_not_available() -> SupportedStreamConfigsError {
+  SupportedStreamConfigsError::DeviceNotAvailable
+}
+
+///|
+pub fn supported_stream_configs_error_device_busy() -> SupportedStreamConfigsError {
+  SupportedStreamConfigsError::DeviceBusy
+}
+
+///|
+pub fn supported_stream_configs_error_invalid_argument() -> SupportedStreamConfigsError {
+  SupportedStreamConfigsError::InvalidArgument
+}
+
+///|
+pub fn supported_stream_configs_error_backend_specific(
+  description : String,
+) -> SupportedStreamConfigsError {
+  SupportedStreamConfigsError::BackendSpecific(
+    BackendSpecificError::new(description),
+  )
+}
+
+///|
+pub fn devices_error_backend_specific(description : String) -> DevicesError {
+  DevicesError::BackendSpecific(BackendSpecificError::new(description))
+}
+
+///|
+pub fn device_name_error_backend_specific(
+  description : String,
+) -> DeviceNameError {
+  DeviceNameError::BackendSpecific(BackendSpecificError::new(description))
 }
 
 ///|

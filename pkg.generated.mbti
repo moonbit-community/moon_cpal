@@ -26,6 +26,12 @@ pub fn default_stream_config_error_device_not_available() -> DefaultStreamConfig
 
 pub fn default_stream_config_error_stream_type_not_supported() -> DefaultStreamConfigError
 
+pub fn device_name_error_backend_specific(String) -> DeviceNameError
+
+pub fn devices_error_backend_specific(String) -> DevicesError
+
+pub fn host_unavailable(String) -> HostUnavailable
+
 pub fn pause_stream_error_backend_specific(String) -> PauseStreamError
 
 pub fn pause_stream_error_device_not_available() -> PauseStreamError
@@ -41,6 +47,14 @@ pub fn stream_error_buffer_underrun() -> StreamError
 pub fn stream_error_device_not_available() -> StreamError
 
 pub fn stream_error_stream_invalidated() -> StreamError
+
+pub fn supported_stream_configs_error_backend_specific(String) -> SupportedStreamConfigsError
+
+pub fn supported_stream_configs_error_device_busy() -> SupportedStreamConfigsError
+
+pub fn supported_stream_configs_error_device_not_available() -> SupportedStreamConfigsError
+
+pub fn supported_stream_configs_error_invalid_argument() -> SupportedStreamConfigsError
 
 // Errors
 pub suberror BuildStreamError {
@@ -69,6 +83,18 @@ pub suberror DeviceIdError {
 }
 pub impl Eq for DeviceIdError
 pub impl Show for DeviceIdError
+
+pub suberror DeviceNameError {
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for DeviceNameError
+pub impl Show for DeviceNameError
+
+pub suberror DevicesError {
+  BackendSpecific(BackendSpecificError)
+}
+pub impl Eq for DevicesError
+pub impl Show for DevicesError
 
 pub suberror HostUnavailable {
   HostUnavailable(String)

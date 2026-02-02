@@ -110,3 +110,8 @@ pub fn HostId::parse(s : String) -> HostId raise HostUnavailable {
     None => raise HostUnavailable(s)
   }
 }
+
+///|
+pub fn host_unavailable(s : String) -> HostUnavailable {
+  HostUnavailable(s)
+}
