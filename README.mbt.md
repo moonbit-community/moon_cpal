@@ -11,11 +11,18 @@ Pinned upstream reference: see `UPSTREAM.md`.
   - device listing + names
   - supported input/output config ranges (`SupportedStreamConfigRange`) for a device
   - default input/output config (`SupportedStreamConfig`) for a device
+  - AudioQueue-backed input/output streams with MoonBit callback bridging (native)
 
 ## macOS smoke test (native)
 
 ```
 moon run --target native cmd/macos_smoke
+```
+
+## macOS stream smoke test (native)
+
+```
+moon run --target native cmd/macos_stream_smoke
 ```
 
 Note: framework link flags currently live in the *main* package (see `cmd/macos_smoke/moon.pkg.json`).

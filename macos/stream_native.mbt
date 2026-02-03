@@ -1,10 +1,13 @@
 ///|
 /// CoreAudio streams (macOS, native target).
 ///
-/// Implementation strategy (MVP):
+/// Implementation strategy:
 /// - Use `AudioQueue` to create output/input streams.
-/// - Output stream currently plays silence; input stream currently discards data.
-/// - MoonBit callback bridging will be implemented in follow-up tasks.
+/// - Bridge AudioQueue buffers into MoonBit callbacks via C trampolines.
+///   - Output callback receives a writable `Data` buffer that will be copied into AudioQueue.
+///   - Input callback receives captured bytes copied from AudioQueue.
+/// - Timestamps are best-effort: input uses AudioQueue start host time when available; output uses
+///   AudioQueue current time host time when available; otherwise fallback to `mach_absolute_time`.
 
 ///|
 #borrow(out_handles)
