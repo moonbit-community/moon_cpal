@@ -1,5 +1,11 @@
 {
-  "import": ["zhengyu/moon_cpal", "zhengyu/moon_cpal/macos", "zhengyu/moon_cpal/null"],
+  "import": [
+    "zhengyu/moon_cpal",
+    "zhengyu/moon_cpal/alsa",
+    "zhengyu/moon_cpal/macos",
+    "zhengyu/moon_cpal/null",
+    "zhengyu/moon_cpal/wasapi"
+  ],
   "targets": {
     "platform_native.mbt": ["native"],
     "platform_stub.mbt": ["not", "native"],
@@ -7,4 +13,3 @@
     "platform_stub_test.mbt": ["not", "native"]
   }
 }
-

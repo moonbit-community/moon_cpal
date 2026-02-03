@@ -1,3 +1,217 @@
+#if !defined(__APPLE__) || !defined(__MACH__)
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include "moonbit.h"
+
+// -----------------------------------------------------------------------------
+// Non-Apple native builds
+// -----------------------------------------------------------------------------
+//
+// Moon does not currently provide OS-conditional compilation in `moon.pkg.json` (only backend/mode),
+// but the `platform` package imports the `macos` package unconditionally on native targets.
+//
+// To keep the module building on Linux/Windows native targets, we provide a minimal set of
+// **stub** exports here. These symbols satisfy the FFI bindings but do not implement CoreAudio.
+
+uint32_t moon_cpal_ca_default_output_device_id(void) { return 0; }
+uint32_t moon_cpal_ca_default_input_device_id(void) { return 0; }
+
+void moon_cpal_ca_run_loop_for(double seconds) { (void)seconds; }
+
+int32_t moon_cpal_ca_device_count(void) { return 0; }
+int32_t moon_cpal_ca_get_devices(uint32_t *out, int32_t max) {
+  (void)out;
+  (void)max;
+  return 0;
+}
+
+int32_t moon_cpal_ca_device_name_utf8_len(uint32_t device_id) {
+  (void)device_id;
+  return -1;
+}
+
+int32_t moon_cpal_ca_device_name_utf8(uint32_t device_id, moonbit_bytes_t out, int32_t out_len) {
+  (void)device_id;
+  (void)out;
+  (void)out_len;
+  return -1;
+}
+
+int32_t moon_cpal_ca_input_channel_count(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+int32_t moon_cpal_ca_output_channel_count(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+
+int32_t moon_cpal_ca_input_sample_rate_ranges_count(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+int32_t moon_cpal_ca_output_sample_rate_ranges_count(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+
+int32_t moon_cpal_ca_input_sample_rate_ranges(uint32_t device_id,
+                                              double *out_mins,
+                                              double *out_maxs,
+                                              int32_t max) {
+  (void)device_id;
+  (void)out_mins;
+  (void)out_maxs;
+  (void)max;
+  return 0;
+}
+
+int32_t moon_cpal_ca_output_sample_rate_ranges(uint32_t device_id,
+                                               double *out_mins,
+                                               double *out_maxs,
+                                               int32_t max) {
+  (void)device_id;
+  (void)out_mins;
+  (void)out_maxs;
+  (void)max;
+  return 0;
+}
+
+int32_t moon_cpal_ca_buffer_frame_size_range(uint32_t device_id, uint32_t *out, int32_t out_len) {
+  (void)device_id;
+  (void)out;
+  (void)out_len;
+  return -1;
+}
+
+int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
+                                          int32_t input,
+                                          uint32_t *out,
+                                          int32_t out_len) {
+  (void)device_id;
+  (void)input;
+  (void)out;
+  (void)out_len;
+  return -1;
+}
+
+int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
+  (void)status;
+  return 0;
+}
+
+int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
+                                        double sample_rate,
+                                        uint32_t channels,
+                                        uint32_t sample_format_tag,
+                                        uint32_t buffer_frames,
+                                        void (*call_data_callback)(void *,
+                                                                  uint32_t,
+                                                                  moonbit_bytes_t,
+                                                                  int64_t,
+                                                                  int32_t,
+                                                                  int64_t,
+                                                                  int32_t),
+                                        void *data_callback,
+                                        void (*call_error_callback)(void *, int32_t, int32_t),
+                                        void *error_callback,
+                                        uint64_t *out_handles,
+                                        int32_t out_len) {
+  (void)device_id;
+  (void)sample_rate;
+  (void)channels;
+  (void)sample_format_tag;
+  (void)buffer_frames;
+  (void)call_data_callback;
+  (void)call_error_callback;
+  if (out_handles != NULL && out_len > 0) {
+    out_handles[0] = 0;
+  }
+  // Owned params must be decref'd by the callee on native targets.
+  moonbit_decref(data_callback);
+  moonbit_decref(error_callback);
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
+                                       double sample_rate,
+                                       uint32_t channels,
+                                       uint32_t sample_format_tag,
+                                       uint32_t buffer_frames,
+                                       void (*call_data_callback)(void *,
+                                                                 uint32_t,
+                                                                 moonbit_bytes_t,
+                                                                 int64_t,
+                                                                 int32_t,
+                                                                 int64_t,
+                                                                 int32_t),
+                                       void *data_callback,
+                                       void (*call_error_callback)(void *, int32_t, int32_t),
+                                       void *error_callback,
+                                       uint64_t *out_handles,
+                                       int32_t out_len) {
+  (void)device_id;
+  (void)sample_rate;
+  (void)channels;
+  (void)sample_format_tag;
+  (void)buffer_frames;
+  (void)call_data_callback;
+  (void)call_error_callback;
+  if (out_handles != NULL && out_len > 0) {
+    out_handles[0] = 0;
+  }
+  moonbit_decref(data_callback);
+  moonbit_decref(error_callback);
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_play(uint64_t handle) {
+  (void)handle;
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_pause(uint64_t handle) {
+  (void)handle;
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_destroy(uint64_t handle) {
+  (void)handle;
+  return -1;
+}
+
+typedef struct moon_cpal_ca_stream_owner_payload_t {
+  uint64_t handle;
+} moon_cpal_ca_stream_owner_payload_t;
+
+static void moon_cpal_ca_stream_owner_finalize(void *self) { (void)self; }
+
+void *moon_cpal_ca_stream_owner_new(uint64_t handle) {
+  moon_cpal_ca_stream_owner_payload_t *p = (moon_cpal_ca_stream_owner_payload_t *)
+      moonbit_make_external_object(moon_cpal_ca_stream_owner_finalize, (uint32_t)sizeof(*p));
+  if (p != NULL) {
+    p->handle = handle;
+  }
+  return p;
+}
+
+int32_t moon_cpal_ca_stream_owner_play(void *owner) {
+  (void)owner;
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_owner_pause(void *owner) {
+  (void)owner;
+  return -1;
+}
+
+int32_t moon_cpal_ca_stream_owner_close(void *owner) {
+  (void)owner;
+  return 0;
+}
+
+#else
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -1062,3 +1276,5 @@ int32_t moon_cpal_ca_stream_owner_close(void *owner) {
   }
   return 0;
 }
+
+#endif

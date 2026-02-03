@@ -190,6 +190,43 @@ test "host_id parsing and available_hosts" {
 }
 
 ///|
+test "available_hosts depends on native_os (native only)" {
+  // On non-native targets `native_os()` is `Unknown` and `available_hosts()` is `[Null]`.
+  let os = native_os()
+  let hs = available_hosts()
+  fn has(xs : Array[HostId], x : HostId) -> Bool {
+    for y in xs {
+      if y == x {
+        return true
+      }
+    }
+    false
+  }
+
+  match os {
+    NativeOs::Macos => {
+      inspect(has(hs, CoreAudio), content="true")
+      inspect(has(hs, Null), content="true")
+      inspect(!has(hs, Alsa), content="true")
+      inspect(!has(hs, Wasapi), content="true")
+    }
+    NativeOs::Linux => {
+      inspect(has(hs, Alsa), content="true")
+      inspect(has(hs, Null), content="true")
+      inspect(!has(hs, CoreAudio), content="true")
+      inspect(!has(hs, Wasapi), content="true")
+    }
+    NativeOs::Windows => {
+      inspect(has(hs, Wasapi), content="true")
+      inspect(has(hs, Null), content="true")
+      inspect(!has(hs, CoreAudio), content="true")
+      inspect(!has(hs, Alsa), content="true")
+    }
+    NativeOs::Unknown => inspect(hs, content="[Null]")
+  }
+}
+
+///|
 test "device_id parsing and formatting" {
   let id = DeviceId::new(CoreAudio, "abc")
   inspect(id.to_string(), content="coreaudio:abc")

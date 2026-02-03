@@ -4,24 +4,32 @@
 /// This is a small MoonBit analogue of upstream `cpal::platform` dynamic dispatch types.
 /// For now, this only wraps:
 /// - Null backend (always available)
-/// - macOS CoreAudio discovery backend (native only; uses stub on non-native)
+/// - macOS CoreAudio backend (native only; uses stub on non-native)
+/// - ALSA backend stubs
+/// - WASAPI backend stubs
 
 ///|
 pub enum Host {
   Null(@null.Host)
   CoreAudio(@macos.Host)
+  Alsa(@alsa.Host)
+  Wasapi(@wasapi.Host)
 } derive(Show, Eq)
 
 ///|
 pub enum Device {
   Null(@null.Device)
   CoreAudio(@macos.Device)
+  Alsa(@alsa.Device)
+  Wasapi(@wasapi.Device)
 } derive(Show, Eq)
 
 ///|
 pub enum Stream {
   Null(@null.Stream)
   CoreAudio(@macos.Stream)
+  Alsa(@alsa.Stream)
+  Wasapi(@wasapi.Stream)
 } derive(Show, Eq)
 
 ///|
@@ -29,6 +37,8 @@ pub fn Host::id(self : Host) -> @moon_cpal.HostId {
   match self {
     Null(_) => @moon_cpal.HostId::Null
     CoreAudio(_) => @moon_cpal.HostId::CoreAudio
+    Alsa(_) => @moon_cpal.HostId::Alsa
+    Wasapi(_) => @moon_cpal.HostId::Wasapi
   }
 }
 
@@ -54,7 +64,9 @@ pub fn host_from_id(
   }
   match id {
     CoreAudio => Host::CoreAudio(@macos.default_host())
+    Alsa => Host::Alsa(@alsa.default_host())
     Null => Host::Null(@null.default_host())
+    Wasapi => Host::Wasapi(@wasapi.default_host())
     _ => raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
   }
 }
@@ -92,6 +104,16 @@ pub fn Host::default_output_device(
         None => None
         Some(d) => Some(Device::CoreAudio(d))
       }
+    Alsa(h) =>
+      match h.default_output_device() {
+        None => None
+        Some(d) => Some(Device::Alsa(d))
+      }
+    Wasapi(h) =>
+      match h.default_output_device() {
+        None => None
+        Some(d) => Some(Device::Wasapi(d))
+      }
   }
 }
 
@@ -119,6 +141,16 @@ pub fn Host::default_input_device(
         None => None
         Some(d) => Some(Device::CoreAudio(d))
       }
+    Alsa(h) =>
+      match h.default_input_device() {
+        None => None
+        Some(d) => Some(Device::Alsa(d))
+      }
+    Wasapi(h) =>
+      match h.default_input_device() {
+        None => None
+        Some(d) => Some(Device::Wasapi(d))
+      }
   }
 }
 
@@ -141,6 +173,8 @@ pub fn Host::devices(
       } noraise {
         ds => ds.map(fn(d) { Device::CoreAudio(d) })
       }
+    Alsa(h) => h.devices().map(fn(d) { Device::Alsa(d) })
+    Wasapi(h) => h.devices().map(fn(d) { Device::Wasapi(d) })
   }
 }
 
@@ -161,6 +195,8 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
       } noraise {
         s => s
       }
+    Alsa(d) => d.name()
+    Wasapi(d) => d.name()
   }
 }
 
@@ -181,6 +217,8 @@ pub fn Device::supported_output_configs(
       } noraise {
         xs => xs
       }
+    Alsa(d) => d.supported_output_configs()
+    Wasapi(d) => d.supported_output_configs()
   }
 }
 
@@ -201,6 +239,8 @@ pub fn Device::supported_input_configs(
       } noraise {
         xs => xs
       }
+    Alsa(d) => d.supported_input_configs()
+    Wasapi(d) => d.supported_input_configs()
   }
 }
 
@@ -216,6 +256,18 @@ pub fn Device::try_default_output_config(
         cfg => Some(cfg)
       }
     CoreAudio(d) =>
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
+    Alsa(d) =>
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
+    Wasapi(d) =>
       try d.default_output_config() catch {
         _ => None
       } noraise {
@@ -241,6 +293,18 @@ pub fn Device::try_default_input_config(
       } noraise {
         cfg => Some(cfg)
       }
+    Alsa(d) =>
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
+    Wasapi(d) =>
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
   }
 }
 
@@ -251,6 +315,8 @@ pub fn Device::default_output_config(
   match self {
     Null(d) => d.default_output_config()
     CoreAudio(d) => d.default_output_config()
+    Alsa(d) => d.default_output_config()
+    Wasapi(d) => d.default_output_config()
   }
 }
 
@@ -261,6 +327,8 @@ pub fn Device::default_input_config(
   match self {
     Null(d) => d.default_input_config()
     CoreAudio(d) => d.default_input_config()
+    Alsa(d) => d.default_input_config()
+    Wasapi(d) => d.default_input_config()
   }
 }
 
@@ -279,6 +347,14 @@ pub fn Device::build_output_stream(
       )
     CoreAudio(d) =>
       Stream::CoreAudio(
+        d.build_output_stream(config, data_callback, error_callback, timeout),
+      )
+    Alsa(d) =>
+      Stream::Alsa(
+        d.build_output_stream(config, data_callback, error_callback, timeout),
+      )
+    Wasapi(d) =>
+      Stream::Wasapi(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
   }
@@ -301,6 +377,14 @@ pub fn Device::build_input_stream(
       Stream::CoreAudio(
         d.build_input_stream(config, data_callback, error_callback, timeout),
       )
+    Alsa(d) =>
+      Stream::Alsa(
+        d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
+    Wasapi(d) =>
+      Stream::Wasapi(
+        d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
   }
 }
 
@@ -309,6 +393,8 @@ pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
   match self {
     Null(s) => s.play()
     CoreAudio(s) => s.play()
+    Alsa(s) => s.play()
+    Wasapi(s) => s.play()
   }
 }
 
@@ -317,5 +403,7 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
   match self {
     Null(s) => s.pause()
     CoreAudio(s) => s.pause()
+    Alsa(s) => s.pause()
+    Wasapi(s) => s.pause()
   }
 }

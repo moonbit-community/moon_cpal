@@ -32,6 +32,8 @@ pub fn devices_error_backend_specific(String) -> DevicesError
 
 pub fn host_unavailable(String) -> HostUnavailable
 
+pub fn native_os() -> NativeOs
+
 pub fn pause_stream_error_backend_specific(String) -> PauseStreamError
 
 pub fn pause_stream_error_device_not_available() -> PauseStreamError
@@ -235,6 +237,15 @@ pub fn InputStreamTimestamp::capture(Self) -> StreamInstant
 pub fn InputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
 pub impl Eq for InputStreamTimestamp
 pub impl Show for InputStreamTimestamp
+
+pub enum NativeOs {
+  Unknown
+  Macos
+  Windows
+  Linux
+}
+pub impl Eq for NativeOs
+pub impl Show for NativeOs
 
 pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
