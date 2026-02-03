@@ -2,7 +2,7 @@
 /// OS detection stub for non-native targets.
 
 ///|
-pub enum NativeOs {
+pub(all) enum NativeOs {
   Unknown
   Macos
   Windows

@@ -5,7 +5,7 @@
 /// so we expose a tiny native helper implemented in C.
 
 ///|
-pub enum NativeOs {
+pub(all) enum NativeOs {
   Unknown
   Macos
   Windows

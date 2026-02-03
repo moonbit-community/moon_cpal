@@ -11,7 +11,7 @@ pub struct Host {
 
 ///|
 pub struct Device {
-  _unit : Unit
+  id : String
 } derive(Show, Eq)
 
 ///|
@@ -20,23 +20,41 @@ pub fn default_host() -> Host {
 }
 
 ///|
+fn default_device() -> Device {
+  // Mirrors typical ALSA "default" PCM.
+  { id: "default" }
+}
+
+///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  []
+  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+    [default_device()]
+  } else {
+    []
+  }
 }
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  None
+  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+    Some(default_device())
+  } else {
+    None
+  }
 }
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  None
+  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+    Some(default_device())
+  } else {
+    None
+  }
 }
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  "alsa"
+  _self.id
 }
 
 ///|

@@ -238,7 +238,7 @@ pub fn InputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
 pub impl Eq for InputStreamTimestamp
 pub impl Show for InputStreamTimestamp
 
-pub enum NativeOs {
+pub(all) enum NativeOs {
   Unknown
   Macos
   Windows
