@@ -28,7 +28,20 @@ fn default_device() -> Device {
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    [default_device()]
+    let bytes = devices_utf8()
+    let s = @moon_cpal.utf8_bytes_to_string(bytes, bytes.length())
+    let out : Array[Device] = []
+    for v in s[:].split("\n"[:]) {
+      let id = v.trim().to_string()
+      if id.length() > 0 {
+        out.push({ id, })
+      }
+    }
+    if out.length() == 0 {
+      [default_device()]
+    } else {
+      out
+    }
   } else {
     []
   }
@@ -37,7 +50,10 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_device())
+    match Host::devices(_self).get(0) {
+      None => Some(default_device())
+      Some(d) => Some(d)
+    }
   } else {
     None
   }
@@ -46,7 +62,10 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_device())
+    match Host::devices(_self).get(0) {
+      None => Some(default_device())
+      Some(d) => Some(d)
+    }
   } else {
     None
   }

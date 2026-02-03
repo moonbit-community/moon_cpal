@@ -60,6 +60,8 @@ pub fn supported_stream_configs_error_device_not_available() -> SupportedStreamC
 
 pub fn supported_stream_configs_error_invalid_argument() -> SupportedStreamConfigsError
 
+pub fn utf8_bytes_to_string(Bytes, Int) -> String
+
 // Errors
 pub suberror BuildStreamError {
   DeviceNotAvailable

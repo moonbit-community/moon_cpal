@@ -1,4 +1,8 @@
 {
-  "import": ["zhengyu/moon_cpal"]
+  "import": ["zhengyu/moon_cpal"],
+  "targets": {
+    "ffi_native.mbt": ["native"],
+    "ffi_stub.mbt": ["not", "native"]
+  },
+  "native-stub": ["alsa_stub.c"]
 }
-

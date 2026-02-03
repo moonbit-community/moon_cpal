@@ -8,6 +8,8 @@ import {
 // Values
 pub fn default_host() -> Host
 
+pub fn devices_utf8() -> Bytes
+
 // Errors
 
 // Types and methods
