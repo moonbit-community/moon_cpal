@@ -57,6 +57,7 @@ pub impl Show for Host
 pub struct Stream {
   kind : StreamKind
   handle : UInt64
+  owner : StreamOwner
 }
 pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
@@ -70,6 +71,8 @@ pub enum StreamKind {
 }
 pub impl Eq for StreamKind
 pub impl Show for StreamKind
+
+type StreamOwner
 
 // Type aliases
 pub type DeviceId = UInt

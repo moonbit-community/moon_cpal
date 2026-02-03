@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "moonbit.h"
 
 static int32_t ca_err(OSStatus st) {
   if (st == noErr) {
@@ -697,5 +698,71 @@ int32_t moon_cpal_ca_stream_destroy(uint64_t handle) {
     s->queue = NULL;
   }
   free(s);
+  return 0;
+}
+
+// -----------------------------------------------------------------------------
+// MoonBit-owned stream handle (finalizer-backed)
+// -----------------------------------------------------------------------------
+
+typedef struct {
+  uint64_t handle;
+} moon_cpal_ca_stream_owner_payload_t;
+
+static void moon_cpal_ca_stream_owner_finalize(void *self) {
+  moon_cpal_ca_stream_owner_payload_t *p = (moon_cpal_ca_stream_owner_payload_t *)self;
+  if (p == NULL) {
+    return;
+  }
+  if (p->handle != 0) {
+    moon_cpal_ca_stream_destroy(p->handle);
+    p->handle = 0;
+  }
+}
+
+void *moon_cpal_ca_stream_owner_new(uint64_t handle) {
+  moon_cpal_ca_stream_owner_payload_t *p =
+      (moon_cpal_ca_stream_owner_payload_t *)moonbit_make_external_object(
+          moon_cpal_ca_stream_owner_finalize, (uint32_t)sizeof(*p));
+  if (p == NULL) {
+    return NULL;
+  }
+  p->handle = handle;
+  return (void *)p;
+}
+
+static uint64_t moon_cpal_ca_stream_owner_handle(void *owner) {
+  moon_cpal_ca_stream_owner_payload_t *p = (moon_cpal_ca_stream_owner_payload_t *)owner;
+  if (p == NULL) {
+    return 0;
+  }
+  return p->handle;
+}
+
+int32_t moon_cpal_ca_stream_owner_play(void *owner) {
+  uint64_t h = moon_cpal_ca_stream_owner_handle(owner);
+  if (h == 0) {
+    return -1;
+  }
+  return moon_cpal_ca_stream_play(h);
+}
+
+int32_t moon_cpal_ca_stream_owner_pause(void *owner) {
+  uint64_t h = moon_cpal_ca_stream_owner_handle(owner);
+  if (h == 0) {
+    return -1;
+  }
+  return moon_cpal_ca_stream_pause(h);
+}
+
+int32_t moon_cpal_ca_stream_owner_close(void *owner) {
+  moon_cpal_ca_stream_owner_payload_t *p = (moon_cpal_ca_stream_owner_payload_t *)owner;
+  if (p == NULL) {
+    return 0;
+  }
+  if (p->handle != 0) {
+    moon_cpal_ca_stream_destroy(p->handle);
+    p->handle = 0;
+  }
   return 0;
 }

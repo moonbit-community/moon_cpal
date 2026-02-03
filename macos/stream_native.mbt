@@ -40,6 +40,21 @@ extern "C" fn ca_stream_pause(handle : UInt64) -> Int = "moon_cpal_ca_stream_pau
 extern "C" fn ca_stream_destroy(handle : UInt64) -> Int = "moon_cpal_ca_stream_destroy"
 
 ///|
+extern "C" fn ca_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_ca_stream_owner_new"
+
+///|
+#borrow(owner)
+extern "C" fn ca_stream_owner_play(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_play"
+
+///|
+#borrow(owner)
+extern "C" fn ca_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_pause"
+
+///|
+#borrow(owner)
+extern "C" fn ca_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_close"
+
+///|
 fn[A] raise_build_osstatus(
   op : String,
   status : Int,
@@ -142,7 +157,11 @@ pub fn Device::build_output_stream(
   if st < 0 {
     raise_build_osstatus("ca_stream_build_output", st)
   }
-  { kind: StreamKind::Output, handle: out[0] }
+  {
+    kind: StreamKind::Output,
+    handle: out[0],
+    owner: ca_stream_owner_new(out[0]),
+  }
 }
 
 ///|
@@ -176,7 +195,11 @@ pub fn Device::build_input_stream(
   if st < 0 {
     raise_build_osstatus("ca_stream_build_input", st)
   }
-  { kind: StreamKind::Input, handle: out[0] }
+  {
+    kind: StreamKind::Input,
+    handle: out[0],
+    owner: ca_stream_owner_new(out[0]),
+  }
 }
 
 ///|
@@ -184,7 +207,7 @@ pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
   if self.handle == 0 {
     raise @moon_cpal.play_stream_error_backend_specific("invalid stream handle")
   }
-  let st = ca_stream_play(self.handle)
+  let st = ca_stream_owner_play(self.owner)
   if st < 0 {
     raise_play_osstatus("ca_stream_play", st)
   }
@@ -197,7 +220,7 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
       "invalid stream handle",
     )
   }
-  let st = ca_stream_pause(self.handle)
+  let st = ca_stream_owner_pause(self.owner)
   if st < 0 {
     raise_pause_osstatus("ca_stream_pause", st)
   }
@@ -208,5 +231,5 @@ pub fn Stream::close(self : Stream) -> Unit {
   if self.handle == 0 {
     return
   }
-  ca_stream_destroy(self.handle) |> ignore
+  ca_stream_owner_close(self.owner) |> ignore
 }
