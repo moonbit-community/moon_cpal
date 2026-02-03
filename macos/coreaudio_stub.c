@@ -507,7 +507,9 @@ static void ca_fill_output_buffer(moon_cpal_ca_stream_t *s,
   uint32_t idx = s->mb_buffer_pool_index % s->mb_buffer_pool_len;
   s->mb_buffer_pool_index = (idx + 1) % s->mb_buffer_pool_len;
   moonbit_bytes_t bytes = s->mb_buffer_pool[idx];
-  memset(bytes, 0, s->buffer_bytes);
+  // Do not clear the buffer here: output callbacks are expected to fill the whole buffer.
+  // (Matches typical CPAL expectations where output buffers may be uninitialized.)
+  // Note: we still memcpy() from the MoonBit buffer into the AudioQueue buffer; see macos/ZERO_COPY.md.
 
   int64_t cb_secs = 0;
   int32_t cb_nanos = 0;
@@ -577,9 +579,7 @@ static void ca_input_callback(void *in_user_data,
       n = cap;
     }
     memcpy(bytes, in_buffer->mAudioData, n);
-    if (n < cap) {
-      memset(bytes + n, 0, cap - n);
-    }
+    // Do not clear the remainder: `mAudioDataByteSize` is expected to match the configured size.
 
     int64_t cb_secs = 0;
     int32_t cb_nanos = 0;
@@ -808,6 +808,7 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
       free(s);
       return -1;
     }
+    memset(s->mb_buffer_pool[i], 0, buffer_bytes);
   }
 
   // Prime with a few buffers. Fill using the user callback so the stream is non-silent immediately.
@@ -918,6 +919,7 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
     free(s);
     return -1;
   }
+  memset(s->mb_buffer_pool[0], 0, buffer_bytes);
 
   // Enqueue a few buffers for capture.
   for (int i = 0; i < 3; i++) {
