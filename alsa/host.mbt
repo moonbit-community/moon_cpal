@@ -80,22 +80,68 @@ pub fn Device::name(_self : Device) -> String {
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {
-  []
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    return []
+  }
+  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
+  [
+    @moon_cpal.SupportedStreamConfigRange::new(
+      2,
+      8000,
+      192000,
+      buf,
+      @moon_cpal.SampleFormat::F32,
+    ),
+    @moon_cpal.SupportedStreamConfigRange::new(
+      2,
+      8000,
+      192000,
+      buf,
+      @moon_cpal.SampleFormat::I16,
+    ),
+  ]
 }
 
 ///|
 pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {
-  []
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    return []
+  }
+  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
+  [
+    @moon_cpal.SupportedStreamConfigRange::new(
+      2,
+      8000,
+      192000,
+      buf,
+      @moon_cpal.SampleFormat::F32,
+    ),
+    @moon_cpal.SupportedStreamConfigRange::new(
+      2,
+      8000,
+      192000,
+      buf,
+      @moon_cpal.SampleFormat::I16,
+    ),
+  ]
 }
 
 ///|
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
-    "alsa default_input_config: unimplemented",
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    raise @moon_cpal.default_stream_config_error_backend_specific(
+      "alsa default_input_config: not available on this OS",
+    )
+  }
+  @moon_cpal.SupportedStreamConfig::new(
+    2,
+    48000,
+    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
+    @moon_cpal.SampleFormat::F32,
   )
 }
 
@@ -103,7 +149,15 @@ pub fn Device::default_input_config(
 pub fn Device::default_output_config(
   _self : Device,
 ) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
-    "alsa default_output_config: unimplemented",
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    raise @moon_cpal.default_stream_config_error_backend_specific(
+      "alsa default_output_config: not available on this OS",
+    )
+  }
+  @moon_cpal.SupportedStreamConfig::new(
+    2,
+    48000,
+    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
+    @moon_cpal.SampleFormat::F32,
   )
 }
