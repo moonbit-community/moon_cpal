@@ -154,11 +154,11 @@ pub impl Show for BufferSize
 
 pub struct Data {
   sample_format : SampleFormat
-  bytes : Bytes
+  bytes : FixedArray[Byte]
 }
-pub fn Data::bytes(Self) -> Bytes
+pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::len(Self) -> Int
-pub fn Data::new(SampleFormat, Bytes) -> Self
+pub fn Data::new(SampleFormat, FixedArray[Byte]) -> Self
 pub fn Data::sample_format(Self) -> SampleFormat
 pub fn Data::try_as_f32(Self) -> Array[Float]?
 pub fn Data::try_as_i16(Self) -> Array[Int16]?

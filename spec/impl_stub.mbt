@@ -137,6 +137,6 @@ pub fn Data::len(_self : Data) -> Int {
 }
 
 ///|
-pub fn Data::bytes(_self : Data) -> Bytes {
-  Bytes::new(0)
+pub fn Data::bytes(_self : Data) -> FixedArray[Byte] {
+  FixedArray::make(0, Int::to_byte(0))
 }

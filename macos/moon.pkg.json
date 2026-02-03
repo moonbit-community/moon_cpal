@@ -3,6 +3,7 @@
   "targets": {
     "coreaudio_native.mbt": ["native"],
     "coreaudio_stub.mbt": ["not", "native"],
+    "stream_callback_bridge.mbt": ["native"],
     "stream_native.mbt": ["native"],
     "stream_stub.mbt": ["not", "native"],
     "coreaudio_configs_wbtest.mbt": ["native"],

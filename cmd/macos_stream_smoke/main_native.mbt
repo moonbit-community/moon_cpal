@@ -2,6 +2,9 @@
 extern "C" fn sleep(secs : UInt) -> UInt = "sleep"
 
 ///|
+extern "C" fn sin(x : Double) -> Double = "sin"
+
+///|
 fn main {
   let host = @macos.default_host()
   let maybe_out = try! host.default_output_device()
@@ -16,17 +19,97 @@ fn main {
         let supported = ranges[0].with_max_sample_rate()
         let cfg = supported.config()
         println("building output stream: \{supported}")
-        let stream = try! dev.build_output_stream(
-          cfg,
-          fn(_data, _info) { () },
-          fn(err) { println("stream error: \{err}") },
-          None,
-        )
-        try! stream.play()
-        ignore(sleep(1))
-        try! stream.pause()
-        stream.close()
-        println("output stream ok")
+        let phase : Array[Double] = [0.0]
+        let calls : Array[Int] = [0]
+        let sr = cfg.sample_rate.to_double()
+        let ch = cfg.channels
+        let two_pi = 6.283185307179586
+        let freq = 440.0
+        let step = two_pi * freq / sr
+        try
+          dev.build_output_stream(
+            cfg,
+            fn(data, _info) {
+              calls[0] = calls[0] + 1
+              match data.sample_format() {
+                @moon_cpal.SampleFormat::F32 => {
+                  let bytes = data.bytes()
+                  let n_samples = bytes.length() / 4
+                  let frames = if ch > 0 { n_samples / ch } else { 0 }
+                  let mut off = 0
+                  for _ in 0..<frames {
+                    let v = Float::from_double(sin(phase[0]) * 0.2)
+                    phase[0] = phase[0] + step
+                    // Keep phase bounded to avoid extreme growth over long runs.
+                    if phase[0] > two_pi {
+                      phase[0] = phase[0] - two_pi
+                    }
+                    let bits = Float::reinterpret_as_uint(v)
+                    for _ in 0..<ch {
+                      bytes.unsafe_write_uint32_le(off, bits)
+                      off = off + 4
+                    }
+                  }
+                }
+                @moon_cpal.SampleFormat::I16 => {
+                  let bytes = data.bytes()
+                  let n_samples = bytes.length() / 2
+                  let frames = if ch > 0 { n_samples / ch } else { 0 }
+                  let mut off = 0
+                  for _ in 0..<frames {
+                    let v = sin(phase[0]) * 0.2
+                    phase[0] = phase[0] + step
+                    if phase[0] > two_pi {
+                      phase[0] = phase[0] - two_pi
+                    }
+                    // Scale to i16.
+                    let s = (v * 32767.0).to_int()
+                    let s = if s < -32768 {
+                      -32768
+                    } else if s > 32767 {
+                      32767
+                    } else {
+                      s
+                    }
+                    let bits = Int16::from_int(s).reinterpret_as_uint16()
+                    for _ in 0..<ch {
+                      bytes.unsafe_write_uint16_le(off, bits)
+                      off = off + 2
+                    }
+                  }
+                }
+                _ => ()
+              }
+            },
+            fn(err) { println("stream error: \{err}") },
+            None,
+          )
+        catch {
+          e => {
+            println("output stream build failed: \{e}")
+            return
+          }
+        } noraise {
+          stream => {
+            try stream.play() catch {
+              e => {
+                println("output stream play failed: \{e}")
+                stream.close()
+                return
+              }
+            } noraise {
+              _ => ()
+            }
+            ignore(sleep(1))
+            try stream.pause() catch {
+              e => println("output stream pause failed: \{e}")
+            } noraise {
+              _ => ()
+            }
+            stream.close()
+            println("output stream ok (callbacks=\{calls[0]})")
+          }
+        }
       }
     }
   }
@@ -42,10 +125,27 @@ fn main {
         let supported = ranges[0].with_max_sample_rate()
         let cfg = supported.config()
         println("building input stream: \{supported}")
+        let calls : Array[Int] = [0]
+        let printed : Array[Bool] = [false]
         try
           dev.build_input_stream(
             cfg,
-            fn(_data, _info) { () },
+            fn(data, info) {
+              calls[0] = calls[0] + 1
+              if !printed[0] {
+                printed[0] = true
+                println("input ts: \{info.timestamp()}")
+                match data.try_as_f32() {
+                  None => println("input first buffer: (not f32)")
+                  Some(xs) =>
+                    if xs.is_empty() {
+                      println("input first buffer: empty")
+                    } else {
+                      println("input first sample: \{xs[0]}")
+                    }
+                }
+              }
+            },
             fn(err) { println("stream error: \{err}") },
             None,
           )
@@ -73,6 +173,7 @@ fn main {
             }
             stream.close()
             println("input stream ok")
+            println("input callbacks=\{calls[0]}")
           }
         }
       }

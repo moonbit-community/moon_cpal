@@ -153,6 +153,6 @@ pub fn Data::len(self : Data) -> Int {
 
 ///|
 #declaration_only
-pub fn Data::bytes(self : Data) -> Bytes {
+pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
   ...
 }

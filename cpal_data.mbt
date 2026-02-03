@@ -11,11 +11,14 @@
 ///|
 pub struct Data {
   sample_format : SampleFormat
-  bytes : Bytes
+  bytes : FixedArray[Byte]
 } derive(Show, Eq)
 
 ///|
-pub fn Data::new(sample_format : SampleFormat, bytes : Bytes) -> Data {
+pub fn Data::new(
+  sample_format : SampleFormat,
+  bytes : FixedArray[Byte],
+) -> Data {
   { sample_format, bytes }
 }
 
@@ -36,12 +39,12 @@ pub fn Data::len(self : Data) -> Int {
 }
 
 ///|
-pub fn Data::bytes(self : Data) -> Bytes {
+pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
   self.bytes
 }
 
 ///|
-fn read_u16_le(bytes : Bytes, offset : Int) -> UInt16? {
+fn read_u16_le(bytes : FixedArray[Byte], offset : Int) -> UInt16? {
   match (bytes.get(offset), bytes.get(offset + 1)) {
     (Some(b0), Some(b1)) => {
       let v = b0.to_int() | (b1.to_int() << 8)
@@ -52,7 +55,7 @@ fn read_u16_le(bytes : Bytes, offset : Int) -> UInt16? {
 }
 
 ///|
-fn read_u32_le(bytes : Bytes, offset : Int) -> UInt? {
+fn read_u32_le(bytes : FixedArray[Byte], offset : Int) -> UInt? {
   match
     (
       bytes.get(offset),
@@ -76,7 +79,7 @@ pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
   if self.sample_format != SampleFormat::U8 {
     return None
   }
-  Some(self.bytes.to_array())
+  Some(self.bytes.op_as_view().to_array())
 }
 
 ///|

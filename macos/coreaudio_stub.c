@@ -1,6 +1,7 @@
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <AudioToolbox/AudioToolbox.h>
+#include <mach/mach_time.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +65,15 @@ uint32_t moon_cpal_ca_default_input_device_id(void) {
     return 0;
   }
   return (uint32_t)dev;
+}
+
+// Drive the current thread's CFRunLoop for the given duration (seconds).
+// Useful for CLI smoke tests where no GUI runloop is running.
+void moon_cpal_ca_run_loop_for(double seconds) {
+  if (seconds <= 0.0) {
+    return;
+  }
+  (void)CFRunLoopRunInMode(kCFRunLoopDefaultMode, seconds, false);
 }
 
 int32_t moon_cpal_ca_device_count(void) {
@@ -414,7 +424,79 @@ typedef struct {
   AudioQueueRef queue;
   int is_input;
   uint32_t buffer_bytes;
+  uint32_t sample_format_tag;
+  uint32_t channels;
+
+  // MoonBit callbacks (closures) + trampolines (closed function pointers).
+  //
+  // NOTE: We must keep the closures alive across callbacks. Each invocation of the trampoline will
+  // decref its parameters, so we incref the stored closure before calling the trampoline.
+  void *mb_data_callback;
+  void *mb_error_callback;
+  void (*call_data_callback)(void *data_cb,
+                             uint32_t sample_format_tag,
+                             moonbit_bytes_t bytes,
+                             int64_t callback_secs,
+                             int32_t callback_nanos,
+                             int64_t other_secs,
+                             int32_t other_nanos);
+  void (*call_error_callback)(void *err_cb, int32_t op_tag, int32_t status);
 } moon_cpal_ca_stream_t;
+
+static void ca_now_stream_instant(int64_t *out_secs, int32_t *out_nanos) {
+  if (out_secs == NULL || out_nanos == NULL) {
+    return;
+  }
+  static mach_timebase_info_data_t tb = {0};
+  if (tb.denom == 0) {
+    (void)mach_timebase_info(&tb);
+  }
+  uint64_t t = mach_absolute_time();
+  __int128 ns = (__int128)t * (__int128)tb.numer / (__int128)tb.denom;
+  __int128 s = ns / 1000000000;
+  __int128 n = ns - s * 1000000000;
+  *out_secs = (int64_t)s;
+  *out_nanos = (int32_t)n;
+}
+
+static void ca_invoke_error(moon_cpal_ca_stream_t *s, int32_t op_tag, int32_t status) {
+  if (s == NULL || s->call_error_callback == NULL || s->mb_error_callback == NULL) {
+    return;
+  }
+  // Keep the stored closure alive across the trampoline call.
+  moonbit_incref(s->mb_error_callback);
+  s->call_error_callback(s->mb_error_callback, op_tag, status);
+}
+
+static void ca_fill_output_buffer(moon_cpal_ca_stream_t *s, AudioQueueBufferRef in_buffer) {
+  if (s == NULL || in_buffer == NULL || in_buffer->mAudioData == NULL || s->buffer_bytes == 0 ||
+      s->call_data_callback == NULL || s->mb_data_callback == NULL) {
+    return;
+  }
+  // Create a MoonBit-owned scratch buffer, let user callback fill it, then copy into AQ buffer.
+  //
+  // NOTE: Use the generic scalar valtype array allocator here. It matches `FixedArray[Byte]`'s ABI.
+  moonbit_bytes_t bytes = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)s->buffer_bytes, 1);
+  memset(bytes, 0, s->buffer_bytes);
+
+  // Keep bytes alive after the trampoline returns so we can memcpy from it.
+  moonbit_incref(bytes);
+
+  int64_t cb_secs = 0;
+  int32_t cb_nanos = 0;
+  ca_now_stream_instant(&cb_secs, &cb_nanos);
+
+  // Keep the stored closure alive across the trampoline call.
+  moonbit_incref(s->mb_data_callback);
+  s->call_data_callback(s->mb_data_callback, s->sample_format_tag, bytes, cb_secs, cb_nanos, cb_secs,
+                        cb_nanos);
+
+  memcpy(in_buffer->mAudioData, bytes, s->buffer_bytes);
+  in_buffer->mAudioDataByteSize = s->buffer_bytes;
+
+  // Release our extra ref; the trampoline already decref'd its view of `bytes`.
+  moonbit_decref(bytes);
+}
 
 static void ca_output_callback(void *in_user_data,
                                AudioQueueRef in_aq,
@@ -423,11 +505,14 @@ static void ca_output_callback(void *in_user_data,
   if (s == NULL || in_buffer == NULL) {
     return;
   }
-  if (in_buffer->mAudioData != NULL && s->buffer_bytes > 0) {
-    memset(in_buffer->mAudioData, 0, s->buffer_bytes);
-    in_buffer->mAudioDataByteSize = s->buffer_bytes;
+  ca_fill_output_buffer(s, in_buffer);
+  OSStatus st = AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
+  if (st != noErr) {
+    // During Reset/Stop/Dispose, enqueueing is not permitted; don't surface this as a user error.
+    if (st != kAudioQueueErr_EnqueueDuringReset && st != kAudioQueueErr_DisposalPending) {
+      ca_invoke_error(s, 1 /* AudioQueueEnqueueBuffer */, ca_err(st));
+    }
   }
-  AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
 }
 
 static void ca_input_callback(void *in_user_data,
@@ -443,9 +528,30 @@ static void ca_input_callback(void *in_user_data,
   if (s == NULL || in_buffer == NULL) {
     return;
   }
-  // Discard input for now; re-enqueue buffer for continued capture.
+  if (s->call_data_callback != NULL && s->mb_data_callback != NULL &&
+      in_buffer->mAudioData != NULL && in_buffer->mAudioDataByteSize > 0) {
+    uint32_t n = (uint32_t)in_buffer->mAudioDataByteSize;
+    moonbit_bytes_t bytes = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)n, 1);
+    memcpy(bytes, in_buffer->mAudioData, n);
+
+    int64_t cb_secs = 0;
+    int32_t cb_nanos = 0;
+    ca_now_stream_instant(&cb_secs, &cb_nanos);
+
+    // Keep the stored closure alive across the trampoline call.
+    moonbit_incref(s->mb_data_callback);
+    s->call_data_callback(s->mb_data_callback, s->sample_format_tag, bytes, cb_secs, cb_nanos, cb_secs,
+                          cb_nanos);
+  }
+
+  // Re-enqueue buffer for continued capture.
   in_buffer->mAudioDataByteSize = s->buffer_bytes;
-  AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
+  OSStatus st = AudioQueueEnqueueBuffer(in_aq, in_buffer, 0, NULL);
+  if (st != noErr) {
+    if (st != kAudioQueueErr_EnqueueDuringReset && st != kAudioQueueErr_DisposalPending) {
+      ca_invoke_error(s, 1 /* AudioQueueEnqueueBuffer */, ca_err(st));
+    }
+  }
 }
 
 static int32_t ca_make_asbd(double sample_rate,
@@ -488,17 +594,47 @@ static int32_t ca_make_asbd(double sample_rate,
   return 0;
 }
 
+static int32_t ca_copy_device_uid(AudioDeviceID dev, CFStringRef *out_uid) {
+  if (out_uid == NULL) {
+    return -1;
+  }
+  *out_uid = NULL;
+  AudioObjectPropertyAddress addr = {kAudioDevicePropertyDeviceUID,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  UInt32 size = (UInt32)sizeof(CFStringRef);
+  CFStringRef uid = NULL;
+  OSStatus st = AudioObjectGetPropertyData(dev, &addr, 0, NULL, &size, &uid);
+  if (st != noErr) {
+    return ca_err(st);
+  }
+  // Be conservative and retain; CoreAudio property ownership rules can be subtle.
+  if (uid != NULL) {
+    CFRetain(uid);
+  }
+  *out_uid = uid;
+  return 0;
+}
+
 static int32_t ca_setup_queue_device(AudioQueueRef q, uint32_t device_id) {
   if (q == NULL) {
     return -1;
   }
   AudioDeviceID dev = (AudioDeviceID)device_id;
-  OSStatus st = AudioQueueSetProperty(q,
-                                      kAudioQueueProperty_CurrentDevice,
-                                      &dev,
-                                      (UInt32)sizeof(dev));
-  if (st != noErr) {
-    return ca_err(st);
+
+  // On modern macOS, `kAudioQueueProperty_CurrentDevice` expects a `CFStringRef` device UID
+  // (not an `AudioDeviceID`).
+  CFStringRef uid = NULL;
+  int32_t st = ca_copy_device_uid(dev, &uid);
+  if (st != 0) {
+    return st;
+  }
+  OSStatus os = AudioQueueSetProperty(q, kAudioQueueProperty_CurrentDevice, &uid, (UInt32)sizeof(uid));
+  if (uid != NULL) {
+    CFRelease(uid);
+  }
+  if (os != noErr) {
+    return ca_err(os);
   }
   return 0;
 }
@@ -523,6 +659,11 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
                                         uint32_t channels,
                                         uint32_t sample_format_tag,
                                         uint32_t buffer_frames,
+                                        void (*call_data_callback)(void *, uint32_t, moonbit_bytes_t, int64_t, int32_t,
+                                                                  int64_t, int32_t),
+                                        void *data_callback,
+                                        void (*call_error_callback)(void *, int32_t, int32_t),
+                                        void *error_callback,
                                         uint64_t *out_handles,
                                         int32_t out_len) {
   if (out_handles == NULL || out_len <= 0) {
@@ -538,10 +679,18 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
 
   moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)malloc(sizeof(*s));
   if (s == NULL) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     return -1;
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 0;
+  s->sample_format_tag = sample_format_tag;
+  s->channels = channels;
+  s->call_data_callback = call_data_callback;
+  s->mb_data_callback = data_callback;
+  s->call_error_callback = call_error_callback;
+  s->mb_error_callback = error_callback;
 
   OSStatus os = AudioQueueNewOutput(&asbd,
                                    ca_output_callback,
@@ -551,12 +700,16 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
                                    0,
                                    &s->queue);
   if (os != noErr) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     free(s);
     return ca_err(os);
   }
 
   st = ca_setup_queue_device(s->queue, device_id);
   if (st != 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     AudioQueueDispose(s->queue, true);
     free(s);
     return st;
@@ -565,25 +718,30 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
   uint32_t frames = ca_default_buffer_frames(buffer_frames);
   uint32_t buffer_bytes = ca_safe_mul_u32(frames, asbd.mBytesPerFrame);
   if (buffer_bytes == 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     AudioQueueDispose(s->queue, true);
     free(s);
     return -1;
   }
   s->buffer_bytes = buffer_bytes;
 
-  // Prime with a few silence buffers.
+  // Prime with a few buffers. Fill using the user callback so the stream is non-silent immediately.
   for (int i = 0; i < 3; i++) {
     AudioQueueBufferRef buf = NULL;
     os = AudioQueueAllocateBuffer(s->queue, buffer_bytes, &buf);
     if (os != noErr) {
+      moonbit_decref(data_callback);
+      moonbit_decref(error_callback);
       AudioQueueDispose(s->queue, true);
       free(s);
       return ca_err(os);
     }
-    memset(buf->mAudioData, 0, buffer_bytes);
-    buf->mAudioDataByteSize = buffer_bytes;
+    ca_fill_output_buffer(s, buf);
     os = AudioQueueEnqueueBuffer(s->queue, buf, 0, NULL);
     if (os != noErr) {
+      moonbit_decref(data_callback);
+      moonbit_decref(error_callback);
       AudioQueueDispose(s->queue, true);
       free(s);
       return ca_err(os);
@@ -599,6 +757,11 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
                                        uint32_t channels,
                                        uint32_t sample_format_tag,
                                        uint32_t buffer_frames,
+                                       void (*call_data_callback)(void *, uint32_t, moonbit_bytes_t, int64_t, int32_t,
+                                                                  int64_t, int32_t),
+                                       void *data_callback,
+                                       void (*call_error_callback)(void *, int32_t, int32_t),
+                                       void *error_callback,
                                        uint64_t *out_handles,
                                        int32_t out_len) {
   if (out_handles == NULL || out_len <= 0) {
@@ -614,10 +777,18 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
 
   moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)malloc(sizeof(*s));
   if (s == NULL) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     return -1;
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 1;
+  s->sample_format_tag = sample_format_tag;
+  s->channels = channels;
+  s->call_data_callback = call_data_callback;
+  s->mb_data_callback = data_callback;
+  s->call_error_callback = call_error_callback;
+  s->mb_error_callback = error_callback;
 
   OSStatus os = AudioQueueNewInput(&asbd,
                                   ca_input_callback,
@@ -627,12 +798,16 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
                                   0,
                                   &s->queue);
   if (os != noErr) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     free(s);
     return ca_err(os);
   }
 
   st = ca_setup_queue_device(s->queue, device_id);
   if (st != 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     AudioQueueDispose(s->queue, true);
     free(s);
     return st;
@@ -641,6 +816,8 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
   uint32_t frames = ca_default_buffer_frames(buffer_frames);
   uint32_t buffer_bytes = ca_safe_mul_u32(frames, asbd.mBytesPerFrame);
   if (buffer_bytes == 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
     AudioQueueDispose(s->queue, true);
     free(s);
     return -1;
@@ -652,6 +829,8 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
     AudioQueueBufferRef buf = NULL;
     os = AudioQueueAllocateBuffer(s->queue, buffer_bytes, &buf);
     if (os != noErr) {
+      moonbit_decref(data_callback);
+      moonbit_decref(error_callback);
       AudioQueueDispose(s->queue, true);
       free(s);
       return ca_err(os);
@@ -659,6 +838,8 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
     buf->mAudioDataByteSize = buffer_bytes;
     os = AudioQueueEnqueueBuffer(s->queue, buf, 0, NULL);
     if (os != noErr) {
+      moonbit_decref(data_callback);
+      moonbit_decref(error_callback);
       AudioQueueDispose(s->queue, true);
       free(s);
       return ca_err(os);
@@ -696,6 +877,14 @@ int32_t moon_cpal_ca_stream_destroy(uint64_t handle) {
     AudioQueueStop(s->queue, true);
     AudioQueueDispose(s->queue, true);
     s->queue = NULL;
+  }
+  if (s->mb_data_callback != NULL) {
+    moonbit_decref(s->mb_data_callback);
+    s->mb_data_callback = NULL;
+  }
+  if (s->mb_error_callback != NULL) {
+    moonbit_decref(s->mb_error_callback);
+    s->mb_error_callback = NULL;
   }
   free(s);
   return 0;

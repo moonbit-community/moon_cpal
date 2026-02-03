@@ -8,24 +8,58 @@
 
 ///|
 #borrow(out_handles)
+#owned(data_callback, error_callback)
 extern "C" fn ca_stream_build_output(
   device_id : UInt,
   sample_rate : Double,
   channels : UInt,
   sample_format_tag : UInt,
   buffer_frames : UInt,
+  call_data_callback : FuncRef[
+    (
+      (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+      UInt,
+      FixedArray[Byte],
+      Int64,
+      Int,
+      Int64,
+      Int,
+    ) -> Unit,
+  ],
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[
+    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
+  ],
+  error_callback : (@moon_cpal.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_ca_stream_build_output"
 
 ///|
 #borrow(out_handles)
+#owned(data_callback, error_callback)
 extern "C" fn ca_stream_build_input(
   device_id : UInt,
   sample_rate : Double,
   channels : UInt,
   sample_format_tag : UInt,
   buffer_frames : UInt,
+  call_data_callback : FuncRef[
+    (
+      (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+      UInt,
+      FixedArray[Byte],
+      Int64,
+      Int,
+      Int64,
+      Int,
+    ) -> Unit,
+  ],
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[
+    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
+  ],
+  error_callback : (@moon_cpal.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_ca_stream_build_input"
@@ -130,8 +164,8 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 pub fn Device::build_output_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   let ranges = try self.supported_output_configs() catch {
@@ -151,6 +185,10 @@ pub fn Device::build_output_stream(
     config.channels.reinterpret_as_uint(),
     fmt_tag,
     buffer_frames_from_config(config),
+    call_output_data_callback_fr,
+    data_callback,
+    call_stream_error_callback_fr,
+    error_callback,
     out,
     1,
   )
@@ -168,8 +206,8 @@ pub fn Device::build_output_stream(
 pub fn Device::build_input_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   let ranges = try self.supported_input_configs() catch {
@@ -189,6 +227,10 @@ pub fn Device::build_input_stream(
     config.channels.reinterpret_as_uint(),
     fmt_tag,
     buffer_frames_from_config(config),
+    call_input_data_callback_fr,
+    data_callback,
+    call_stream_error_callback_fr,
+    error_callback,
     out,
     1,
   )

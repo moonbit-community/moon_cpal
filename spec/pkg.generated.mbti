@@ -16,7 +16,7 @@ pub fn host_from_id(@moon_cpal.HostId) -> Host raise @moon_cpal.HostUnavailable
 pub struct Data {
   _unit : Unit
 }
-pub fn Data::bytes(Self) -> Bytes
+pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::len(Self) -> Int
 pub fn Data::sample_format(Self) -> @moon_cpal.SampleFormat
 pub impl Eq for Data
