@@ -77,6 +77,7 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 
 #include <mmdeviceapi.h>
 #include <propidl.h>
+#include <propvarutil.h>
 #include <functiondiscoverykeys_devpkey.h>
 
 static int wstr_is_default(const wchar_t *s) {
