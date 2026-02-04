@@ -154,6 +154,70 @@ fn main {
     }
   }
   if !in_ok {
-    println("no usable input device")
+    println("no usable input device; trying WASAPI loopback capture")
+    match host.default_output_device() {
+      None => {
+        println("no default output device; cannot run loopback capture")
+        panic()
+      }
+      Some(dev) => {
+        let cfg = try dev.default_output_config() catch {
+          e => {
+            println("default output config failed: \{e}")
+            panic()
+          }
+        } noraise {
+          supported => supported.config()
+        }
+        let calls : Array[Int] = [0]
+        try
+          dev.build_loopback_input_stream(
+            cfg,
+            fn(data, info) {
+              calls[0] = calls[0] + 1
+              if calls[0] == 1 {
+                println("loopback ts: \{info.timestamp()}")
+                match data.try_as_f32() {
+                  None => println("loopback first buffer: (not f32)")
+                  Some(xs) =>
+                    if xs.is_empty() {
+                      println("loopback first buffer: empty")
+                    } else {
+                      println("loopback first sample: \{xs[0]}")
+                    }
+                }
+              }
+            },
+            fn(err) { println("stream error: \{err}") },
+            None,
+          )
+        catch {
+          e => {
+            println("loopback stream build failed: \{e}")
+            panic()
+          }
+        } noraise {
+          stream => {
+            try stream.play() catch {
+              e => {
+                println("loopback stream play failed: \{e}")
+                stream.close()
+                panic()
+              }
+            } noraise {
+              _ => ()
+            }
+            sleep_ms(1000)
+            try stream.pause() catch {
+              e => println("loopback stream pause failed: \{e}")
+            } noraise {
+              _ => ()
+            }
+            stream.close()
+            println("loopback stream ok (callbacks=\{calls[0]})")
+          }
+        }
+      }
+    }
   }
 }

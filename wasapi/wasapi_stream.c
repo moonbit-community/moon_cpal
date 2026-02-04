@@ -16,6 +16,7 @@
 
 typedef struct moon_cpal_wasapi_stream_t {
   int is_input;
+  int is_loopback;
   uint32_t sample_format_tag;
   uint32_t channels;
   double sample_rate;
@@ -64,6 +65,13 @@ static int wasapi_utf8_is_default(const char *s) {
   return strcmp(s, "default") == 0;
 }
 
+static int wasapi_utf8_is_loopback(const char *s) {
+  if (s == NULL) {
+    return 0;
+  }
+  return strcmp(s, "loopback") == 0;
+}
+
 static wchar_t *wasapi_endpoint_id_from_utf8_bytes(uint8_t *bytes, int32_t len) {
   if (bytes == NULL || len <= 0) {
     return NULL;
@@ -76,7 +84,7 @@ static wchar_t *wasapi_endpoint_id_from_utf8_bytes(uint8_t *bytes, int32_t len) 
   }
   memcpy(tmp, bytes, n);
   tmp[n] = '\0';
-  if (tmp[0] == '\0' || wasapi_utf8_is_default(tmp)) {
+  if (tmp[0] == '\0' || wasapi_utf8_is_default(tmp) || wasapi_utf8_is_loopback(tmp)) {
     return NULL;
   }
 
@@ -93,6 +101,20 @@ static wchar_t *wasapi_endpoint_id_from_utf8_bytes(uint8_t *bytes, int32_t len) 
     return NULL;
   }
   return ws;
+}
+
+static uint32_t wasapi_guess_sample_format_tag_from_wfx(const WAVEFORMATEX *wfx) {
+  if (wfx == NULL) {
+    return 0;
+  }
+  // Keep this conservative: we only surface F32/I16 to MoonBit today.
+  if (wfx->wBitsPerSample == 32) {
+    return 1; // F32
+  }
+  if (wfx->wBitsPerSample == 16) {
+    return 2; // I16
+  }
+  return 0;
 }
 
 static void wasapi_now(int64_t *out_secs, int32_t *out_nanos) {
@@ -229,11 +251,12 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     if (FAILED(hr) || s->device == NULL) {
       // Fall back to default endpoint if the id is stale/unavailable.
       wasapi_invoke_error(s, 6 /* DeviceInit */, (int32_t)hr);
-      EDataFlow flow = s->is_input ? eCapture : eRender;
+      // Loopback capture uses a render endpoint but still captures.
+      EDataFlow flow = (s->is_input && !s->is_loopback) ? eCapture : eRender;
       hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(s->enumerator, flow, eConsole, &s->device);
     }
   } else {
-    EDataFlow flow = s->is_input ? eCapture : eRender;
+    EDataFlow flow = (s->is_input && !s->is_loopback) ? eCapture : eRender;
     hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(s->enumerator, flow, eConsole, &s->device);
   }
   if (FAILED(hr)) {
@@ -269,6 +292,10 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
   }
 
   // Shared mode, event callback.
+  DWORD stream_flags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
+  if (s->is_input && s->is_loopback) {
+    stream_flags |= AUDCLNT_STREAMFLAGS_LOOPBACK;
+  }
   REFERENCE_TIME hns = 0;
   if (s->requested_frames > 0 && s->sample_rate > 0.0) {
     hns = (REFERENCE_TIME)(10000000.0 * ((double)s->requested_frames / s->sample_rate));
@@ -276,8 +303,18 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     // ~10ms default.
     hns = (REFERENCE_TIME)100000;
   }
-  hr = IAudioClient_Initialize(s->client, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, hns, 0,
-                              s->wfx, NULL);
+  hr = IAudioClient_Initialize(s->client, AUDCLNT_SHAREMODE_SHARED, stream_flags, hns, 0, s->wfx, NULL);
+  if (FAILED(hr) && s->is_input && s->is_loopback) {
+    // Loopback capture is picky about formats; fall back to the device mix format.
+    if (s->wfx) {
+      CoTaskMemFree(s->wfx);
+      s->wfx = NULL;
+    }
+    hr = IAudioClient_GetMixFormat(s->client, &s->wfx);
+    if (SUCCEEDED(hr)) {
+      hr = IAudioClient_Initialize(s->client, AUDCLNT_SHAREMODE_SHARED, stream_flags, hns, 0, s->wfx, NULL);
+    }
+  }
   if (FAILED(hr)) {
     wasapi_invoke_error(s, 6 /* DeviceInit */, (int32_t)hr);
     s->init_hr = hr;
@@ -305,6 +342,16 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
   }
   if (s->frames_per_cb > s->buffer_frame_count) {
     s->frames_per_cb = s->buffer_frame_count;
+  }
+
+  // Normalize the runtime format to what WASAPI accepted.
+  if (s->wfx != NULL) {
+    s->channels = (uint32_t)s->wfx->nChannels;
+    s->sample_rate = (double)s->wfx->nSamplesPerSec;
+    uint32_t tag = wasapi_guess_sample_format_tag_from_wfx(s->wfx);
+    if (tag != 0) {
+      s->sample_format_tag = tag;
+    }
   }
 
   s->bytes_per_frame = s->channels * wasapi_bytes_per_sample_from_tag(s->sample_format_tag);
@@ -541,6 +588,7 @@ static void wasapi_stream_destroy(moon_cpal_wasapi_stream_t *s) {
 }
 
 static int wasapi_stream_new(int is_input,
+                             int is_loopback,
                              double sample_rate,
                              uint32_t channels,
                              uint32_t sample_format_tag,
@@ -563,6 +611,7 @@ static int wasapi_stream_new(int is_input,
     return -1;
   }
   s->is_input = is_input ? 1 : 0;
+  s->is_loopback = is_loopback ? 1 : 0;
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = sample_rate;
@@ -638,7 +687,7 @@ int32_t moon_cpal_wasapi_stream_build_output(uint8_t *device_id_utf8,
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = wasapi_stream_new(0, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
+  int st = wasapi_stream_new(0, 0, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
                              call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;
@@ -660,7 +709,25 @@ int32_t moon_cpal_wasapi_stream_build_input(uint8_t *device_id_utf8,
                                            void *error_callback,
                                            uint64_t *out_handles,
                                            int32_t out_len) {
-  wchar_t *endpoint_id_w = wasapi_endpoint_id_from_utf8_bytes(device_id_utf8, device_id_len);
+  int is_loopback = 0;
+  {
+    // Detect the special "loopback" device id. It's an internal sentinel used by smoke tests to
+    // exercise input capture on Windows CI even when no capture endpoints exist.
+    //
+    // Note: `device_id_utf8` is not NUL-terminated; use a bounded copy.
+    char tmp[32];
+    size_t n = (device_id_len <= 0) ? 0 : (size_t)device_id_len;
+    if (n >= sizeof(tmp)) {
+      n = sizeof(tmp) - 1;
+    }
+    memcpy(tmp, device_id_utf8, n);
+    tmp[n] = '\0';
+    if (wasapi_utf8_is_loopback(tmp)) {
+      is_loopback = 1;
+    }
+  }
+
+  wchar_t *endpoint_id_w = is_loopback ? NULL : wasapi_endpoint_id_from_utf8_bytes(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
 
   if (out_handles == NULL || out_len <= 0) {
@@ -674,7 +741,7 @@ int32_t moon_cpal_wasapi_stream_build_input(uint8_t *device_id_utf8,
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = wasapi_stream_new(1, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
+  int st = wasapi_stream_new(1, is_loopback, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
                              call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;

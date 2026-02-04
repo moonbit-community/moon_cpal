@@ -224,6 +224,54 @@ pub fn Device::build_input_stream(
 }
 
 ///|
+/// Build a loopback capture stream (Windows-only).
+///
+/// This captures audio from the default render (output) endpoint using WASAPI loopback mode.
+/// It is primarily used by CI smoke tests to validate the input pipeline when no capture
+/// devices exist on the machine.
+pub fn Device::build_loopback_input_stream(
+  _self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  _timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+    raise_build_hresult("wasapi build_loopback_input_stream", -1)
+  }
+  // We pass a special sentinel id to the C layer to enable loopback.
+  let dev = @moon_cpal.string_to_utf8_bytes("loopback")
+  let ranges = _self.supported_input_configs()
+  let fmt_tag = match choose_format_tag(ranges, config) {
+    Some(t) => t
+    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+  let out = FixedArray::make(1, (0 : UInt64))
+  let st = wasapi_stream_build_input(
+    dev,
+    dev.length(),
+    config.sample_rate.to_double(),
+    config.channels.reinterpret_as_uint(),
+    fmt_tag,
+    buffer_frames_from_config(config),
+    call_input_data_callback_fr,
+    data_callback,
+    call_stream_error_callback_fr,
+    error_callback,
+    out,
+    1,
+  )
+  if st < 0 {
+    raise_build_hresult("wasapi_stream_build_input(loopback)", st)
+  }
+  {
+    kind: StreamKind::Input,
+    handle: out[0],
+    owner: wasapi_stream_owner_new(out[0]),
+  }
+}
+
+///|
 pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
   let st = wasapi_stream_owner_play(self.owner)
   if st < 0 {
