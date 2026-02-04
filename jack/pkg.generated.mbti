@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/jack"
+package "Milky2018/moon_cpal/jack"
 
 import {
-  "zhengyu/moon_cpal",
+  "Milky2018/moon_cpal",
 }
 
 // Values
@@ -15,6 +15,7 @@ pub fn default_server_config() -> (Int, Int)?
 // Types and methods
 pub struct Device {
   id : String
+  direction : @moon_cpal.DeviceDirection
 }
 pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
 pub fn Device::build_input_stream_raw(Self, @moon_cpal.StreamConfig, @moon_cpal.SampleFormat, (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError

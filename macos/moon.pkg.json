@@ -1,5 +1,5 @@
 {
-  "import": ["zhengyu/moon_cpal"],
+  "import": ["Milky2018/moon_cpal"],
   "targets": {
     "coreaudio_native.mbt": ["native"],
     "coreaudio_stub.mbt": ["not", "native"],

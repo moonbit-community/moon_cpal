@@ -1,5 +1,5 @@
 {
-  "import": ["zhengyu/moon_cpal"],
+  "import": ["Milky2018/moon_cpal"],
   "targets": {
     "ffi_native.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],

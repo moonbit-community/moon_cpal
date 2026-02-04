@@ -1,6 +1,6 @@
 {
   "is_main": true,
-  "import": ["zhengyu/moon_cpal/alsa", "zhengyu/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/alsa", "Milky2018/moon_cpal"],
   "targets": {
     "main_native.mbt": ["native"],
     "main_stub.mbt": ["not", "native"]

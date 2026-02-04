@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal"
+package "Milky2018/moon_cpal"
 
 // Values
 pub fn available_hosts() -> Array[HostId]
@@ -174,12 +174,28 @@ pub fn Data::len(Self) -> Int
 pub fn Data::new(SampleFormat, FixedArray[Byte]) -> Self
 pub fn Data::sample_format(Self) -> SampleFormat
 pub fn Data::try_as_f32(Self) -> Array[Float]?
+pub fn Data::try_as_f64(Self) -> Array[Double]?
 pub fn Data::try_as_i16(Self) -> Array[Int16]?
+pub fn Data::try_as_i24(Self) -> Array[I24]?
+pub fn Data::try_as_i32(Self) -> Array[Int]?
+pub fn Data::try_as_i64(Self) -> Array[Int64]?
+pub fn Data::try_as_i8(Self) -> Array[Int]?
 pub fn Data::try_as_u16(Self) -> Array[UInt16]?
+pub fn Data::try_as_u24(Self) -> Array[U24]?
+pub fn Data::try_as_u32(Self) -> Array[UInt]?
+pub fn Data::try_as_u64(Self) -> Array[UInt64]?
 pub fn Data::try_as_u8(Self) -> Array[Byte]?
 pub fn Data::write_f32(Self, Array[Float]) -> Bool
+pub fn Data::write_f64(Self, Array[Double]) -> Bool
 pub fn Data::write_i16(Self, Array[Int16]) -> Bool
+pub fn Data::write_i24(Self, Array[I24]) -> Bool
+pub fn Data::write_i32(Self, Array[Int]) -> Bool
+pub fn Data::write_i64(Self, Array[Int64]) -> Bool
+pub fn Data::write_i8(Self, Array[Int]) -> Bool
 pub fn Data::write_u16(Self, Array[UInt16]) -> Bool
+pub fn Data::write_u24(Self, Array[U24]) -> Bool
+pub fn Data::write_u32(Self, Array[UInt]) -> Bool
+pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
 pub fn Data::write_u8(Self, Array[Byte]) -> Bool
 pub impl Eq for Data
 pub impl Show for Data
@@ -319,11 +335,11 @@ pub struct I24 {
 }
 pub fn I24::new(Int) -> Self
 pub fn I24::to_int(Self) -> Int
-pub impl Eq for I24
-pub impl Show for I24
 pub impl FromSample for I24
 pub impl Sample for I24
 pub impl SizedSample for I24
+pub impl Eq for I24
+pub impl Show for I24
 
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
@@ -499,11 +515,11 @@ pub struct U24 {
 }
 pub fn U24::new(Int) -> Self
 pub fn U24::to_int(Self) -> Int
-pub impl Eq for U24
-pub impl Show for U24
 pub impl FromSample for U24
 pub impl Sample for U24
 pub impl SizedSample for U24
+pub impl Eq for U24
+pub impl Show for U24
 
 // Type aliases
 pub type ChannelCount = Int

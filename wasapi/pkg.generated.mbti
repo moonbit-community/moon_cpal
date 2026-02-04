@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/wasapi"
+package "Milky2018/moon_cpal/wasapi"
 
 import {
-  "zhengyu/moon_cpal",
+  "Milky2018/moon_cpal",
 }
 
 // Values
@@ -11,6 +11,8 @@ pub fn data_flow_tag(String) -> Int?
 pub fn default_config_ex_u32(String, Bool) -> (UInt, UInt, UInt, UInt, UInt)?
 
 pub fn default_config_u32(String, Bool) -> (UInt, UInt, UInt)?
+
+pub fn default_device_id_utf8(Bool) -> String?
 
 pub fn default_host() -> Host
 

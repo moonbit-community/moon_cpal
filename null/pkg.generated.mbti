@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/null"
+package "Milky2018/moon_cpal/null"
 
 import {
-  "zhengyu/moon_cpal",
+  "Milky2018/moon_cpal",
 }
 
 // Values
@@ -39,13 +39,24 @@ pub impl Eq for Host
 pub impl Show for Host
 
 pub struct Stream {
-  state : FixedArray[Int]
+  kind : StreamKind
+  handle : UInt64
+  owner : StreamOwner
 }
 pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
 pub impl Eq for Stream
 pub impl Show for Stream
+
+pub enum StreamKind {
+  Output
+  Input
+}
+pub impl Eq for StreamKind
+pub impl Show for StreamKind
+
+type StreamOwner
 
 // Type aliases
 

@@ -1,5 +1,5 @@
 {
-  "import": ["zhengyu/moon_cpal"],
+  "import": ["Milky2018/moon_cpal"],
   "targets": {
     "host.mbt": ["native"],
     "ffi_native.mbt": ["native"],

@@ -1,8 +1,8 @@
 {
-  "name": "zhengyu/moon_cpal",
-  "version": "0.1.0",
+  "name": "Milky2018/moon_cpal",
+  "version": "0.2.0",
   "readme": "README.mbt.md",
-  "repository": "",
+  "repository": "https://github.com/Milky2018/moon_cpal",
   "license": "Apache-2.0",
   "keywords": ["audio", "cpal", "port"],
   "description": "A MoonBit port (subset) of RustAudio/cpal.",

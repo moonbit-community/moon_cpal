@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/spec"
+package "Milky2018/moon_cpal/spec"
 
 import {
-  "zhengyu/moon_cpal",
-  "zhengyu/moon_cpal/platform",
+  "Milky2018/moon_cpal",
+  "Milky2018/moon_cpal/platform",
 }
 
 // Values

@@ -1,5 +1,5 @@
 {
-  "import": ["zhengyu/moon_cpal", "zhengyu/moon_cpal/platform"],
+  "import": ["Milky2018/moon_cpal", "Milky2018/moon_cpal/platform"],
   "link": {
     "native": {
       "cc": "./scripts/moon_cc.sh",

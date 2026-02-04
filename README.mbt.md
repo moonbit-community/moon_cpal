@@ -6,8 +6,8 @@ Pinned upstream reference: see `UPSTREAM.md`.
 
 ## Status
 
-- `zhengyu/moon_cpal`: core CPAL-like types (configs, heuristics, timestamps, sample helpers).
-- `zhengyu/moon_cpal/spec`: CPAL-like host/device/stream API backed by `platform` dynamic dispatch.
+- `Milky2018/moon_cpal`: core CPAL-like types (configs, heuristics, timestamps, sample helpers).
+- `Milky2018/moon_cpal/spec`: CPAL-like host/device/stream API backed by `platform` dynamic dispatch.
 - Native backends (real I/O, callback-thread model):
   - macOS: CoreAudio (AudioQueue)
   - Linux: ALSA + JACK
