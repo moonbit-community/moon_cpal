@@ -164,6 +164,25 @@ test "supported_buffer_size contains" {
 }
 
 ///|
+test "device description formatting" {
+  let d0 = DeviceDescription::new("My Device")
+  inspect(d0.to_string(), content="My Device")
+  inspect(d0.supports_input(), content="false")
+  inspect(d0.supports_output(), content="false")
+
+  let d1 = DeviceDescription::new(
+    "My Device",
+    manufacturer=Some("ACME"),
+    device_type=DeviceType::Speaker,
+    interface_type=InterfaceType::Usb,
+    direction=DeviceDirection::Output,
+  )
+  inspect(d1.to_string(), content="My Device (ACME) [Speaker] via USB")
+  inspect(d1.supports_input(), content="false")
+  inspect(d1.supports_output(), content="true")
+}
+
+///|
 test "callback timestamp types" {
   let callback = StreamInstant::new(1L, 2)
   let capture = StreamInstant::new(3L, 4)

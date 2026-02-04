@@ -302,7 +302,7 @@ fn supported_configs(
 }
 
 ///|
-pub fn default_output_device_id() -> DeviceId? raise CoreAudioError {
+pub fn default_output_device_id() -> DeviceId? {
   let id = ca_default_output_device_id()
   if id == 0 {
     None
@@ -312,7 +312,7 @@ pub fn default_output_device_id() -> DeviceId? raise CoreAudioError {
 }
 
 ///|
-pub fn default_input_device_id() -> DeviceId? raise CoreAudioError {
+pub fn default_input_device_id() -> DeviceId? {
   let id = ca_default_input_device_id()
   if id == 0 {
     None

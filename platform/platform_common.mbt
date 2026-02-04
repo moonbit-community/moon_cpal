@@ -89,7 +89,7 @@ pub fn try_host_from_id(id : @moon_cpal.HostId) -> Host? {
 ///|
 pub fn Host::default_output_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   match self {
     Null(h) =>
       match h.default_output_device() {
@@ -97,16 +97,7 @@ pub fn Host::default_output_device(
         Some(d) => Some(Device::Null(d))
       }
     CoreAudio(h) =>
-      try h.default_output_device() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
-          raise @moon_cpal.devices_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
-          raise @moon_cpal.devices_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
-      } noraise {
+      match h.default_output_device() {
         None => None
         Some(d) => Some(Device::CoreAudio(d))
       }
@@ -131,7 +122,7 @@ pub fn Host::default_output_device(
 ///|
 pub fn Host::default_input_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   match self {
     Null(h) =>
       match h.default_input_device() {
@@ -139,16 +130,7 @@ pub fn Host::default_input_device(
         Some(d) => Some(Device::Null(d))
       }
     CoreAudio(h) =>
-      try h.default_input_device() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
-          raise @moon_cpal.devices_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
-          raise @moon_cpal.devices_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
-      } noraise {
+      match h.default_input_device() {
         None => None
         Some(d) => Some(Device::CoreAudio(d))
       }
@@ -215,6 +197,31 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
     Alsa(d) => d.name()
     Jack(d) => d.name()
     Wasapi(d) => d.name()
+  }
+}
+
+///|
+pub fn Device::description(
+  self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  match self {
+    Null(d) => d.description()
+    CoreAudio(d) =>
+      try d.description() catch {
+        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+          raise @moon_cpal.device_name_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+        @macos.CoreAudioError::CoreAudioError(op, status) =>
+          raise @moon_cpal.device_name_error_backend_specific(
+            "\{op} (OSStatus \{status})",
+          )
+      } noraise {
+        x => x
+      }
+    Alsa(d) => d.description()
+    Jack(d) => d.description()
+    Wasapi(d) => d.description()
   }
 }
 

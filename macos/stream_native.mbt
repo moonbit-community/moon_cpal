@@ -68,15 +68,6 @@ extern "C" fn ca_stream_build_input(
 ) -> Int = "moon_cpal_ca_stream_build_input"
 
 ///|
-extern "C" fn ca_stream_play(handle : UInt64) -> Int = "moon_cpal_ca_stream_play"
-
-///|
-extern "C" fn ca_stream_pause(handle : UInt64) -> Int = "moon_cpal_ca_stream_pause"
-
-///|
-extern "C" fn ca_stream_destroy(handle : UInt64) -> Int = "moon_cpal_ca_stream_destroy"
-
-///|
 extern "C" fn ca_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_ca_stream_owner_new"
 
 ///|

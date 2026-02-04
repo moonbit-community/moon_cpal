@@ -53,7 +53,7 @@ pub fn Host::devices(
 #declaration_only
 pub fn Host::default_output_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   ...
 }
 
@@ -61,13 +61,21 @@ pub fn Host::default_output_device(
 #declaration_only
 pub fn Host::default_input_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   ...
 }
 
 ///|
 #declaration_only
 pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::description(
+  self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
   ...
 }
 

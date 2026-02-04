@@ -51,7 +51,7 @@ pub fn Host::devices(
 ///|
 pub fn Host::default_output_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   match @platform.Host::default_output_device(self.inner) {
     None => None
     Some(d) => Some({ inner: d })
@@ -61,7 +61,7 @@ pub fn Host::default_output_device(
 ///|
 pub fn Host::default_input_device(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Device? {
   match @platform.Host::default_input_device(self.inner) {
     None => None
     Some(d) => Some({ inner: d })
@@ -71,6 +71,13 @@ pub fn Host::default_input_device(
 ///|
 pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
   @platform.Device::name(self.inner)
+}
+
+///|
+pub fn Device::description(
+  self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  @platform.Device::description(self.inner)
 }
 
 ///|

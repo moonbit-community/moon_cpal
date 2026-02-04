@@ -7,7 +7,7 @@ extern "C" fn sin(x : Double) -> Double = "sin"
 ///|
 fn main {
   let host = @macos.default_host()
-  let maybe_out = try! host.default_output_device()
+  let maybe_out = host.default_output_device()
   match maybe_out {
     None => println("no default output device")
     Some(dev) => {
@@ -134,7 +134,7 @@ fn main {
       }
     }
   }
-  let maybe_in = try! host.default_input_device()
+  let maybe_in = host.default_input_device()
   match maybe_in {
     None => println("no default input device")
     Some(dev) => {

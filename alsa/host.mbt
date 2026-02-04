@@ -118,6 +118,35 @@ pub fn Device::name(_self : Device) -> String {
 }
 
 ///|
+pub fn Device::description(
+  _self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  let name = Device::name(_self)
+  if name.length() == 0 {
+    raise @moon_cpal.device_name_error_backend_specific(
+      "alsa device description: empty name",
+    )
+  }
+  let has_in = _self.supported_input_configs().length() > 0
+  let has_out = _self.supported_output_configs().length() > 0
+  let direction = if has_in && has_out {
+    @moon_cpal.DeviceDirection::duplex()
+  } else if has_in {
+    @moon_cpal.DeviceDirection::input()
+  } else if has_out {
+    @moon_cpal.DeviceDirection::output()
+  } else {
+    @moon_cpal.DeviceDirection::unknown()
+  }
+  @moon_cpal.DeviceDescription::new(
+    name,
+    driver=Some("ALSA"),
+    direction=direction,
+    address=Some(_self.id),
+  )
+}
+
+///|
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {

@@ -45,22 +45,8 @@ fn main {
     }
 
     // Default devices.
-    let out_dev = try host.default_output_device() catch {
-      e => {
-        println("  default_output_device error: \{e}")
-        None
-      }
-    } noraise {
-      d => d
-    }
-    let in_dev = try host.default_input_device() catch {
-      e => {
-        println("  default_input_device error: \{e}")
-        None
-      }
-    } noraise {
-      d => d
-    }
+    let out_dev = host.default_output_device()
+    let in_dev = host.default_input_device()
     match out_dev {
       None => println("  default output device: None")
       Some(d) => {
@@ -73,6 +59,20 @@ fn main {
           s => s
         }
         println("  default output device: \{name}")
+        try d.description() catch {
+          e => println("  output device description error: \{e}")
+        } noraise {
+          desc => {
+            println("  output device description: \{desc.to_string()}")
+            match desc.driver() {
+              None => ()
+              Some(x) => println("  output device driver: \{x}")
+            }
+            println(
+              "  output device direction: \{desc.direction().to_string()}",
+            )
+          }
+        }
         let ranges = try d.supported_output_configs() catch {
           e => {
             println("  supported_output_configs error: \{e}")
@@ -97,6 +97,18 @@ fn main {
           s => s
         }
         println("  default input device: \{name}")
+        try d.description() catch {
+          e => println("  input device description error: \{e}")
+        } noraise {
+          desc => {
+            println("  input device description: \{desc.to_string()}")
+            match desc.driver() {
+              None => ()
+              Some(x) => println("  input device driver: \{x}")
+            }
+            println("  input device direction: \{desc.direction().to_string()}")
+          }
+        }
         let ranges = try d.supported_input_configs() catch {
           e => {
             println("  supported_input_configs error: \{e}")

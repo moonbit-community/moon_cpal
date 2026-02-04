@@ -7,9 +7,7 @@ fn main {
     let name = try! @macos.device_name(id)
     println("\{id}: \{name}")
   }
-  try @macos.default_output_device_id() catch {
-    _ => println("default output error")
-  } noraise {
+  match @macos.default_output_device_id() {
     Some(id) => {
       println("default output: \{id}")
       let cfgs = try! @macos.supported_output_configs(id)
@@ -25,9 +23,7 @@ fn main {
     }
     None => println("default output: none")
   }
-  try @macos.default_input_device_id() catch {
-    _ => println("default input error")
-  } noraise {
+  match @macos.default_input_device_id() {
     Some(id) => {
       println("default input: \{id}")
       try @macos.default_input_config(id) catch {

@@ -65,6 +65,24 @@ pub fn Device::name(_self : Device) -> String {
 }
 
 ///|
+pub fn Device::description(
+  _self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  let name = Device::name(_self)
+  if name.length() == 0 {
+    raise @moon_cpal.device_name_error_backend_specific(
+      "jack device description: empty name",
+    )
+  }
+  @moon_cpal.DeviceDescription::new(
+    name,
+    driver=Some("JACK"),
+    direction=@moon_cpal.DeviceDirection::duplex(),
+    address=Some(_self.id),
+  )
+}
+
+///|
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {

@@ -15,6 +15,11 @@ pub struct Device {
 } derive(Show, Eq)
 
 ///|
+pub fn Device::new() -> Device {
+  { _unit: () }
+}
+
+///|
 pub fn default_host() -> Host {
   { _unit: () }
 }
@@ -37,6 +42,25 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 ///|
 pub fn Device::name(_self : Device) -> String {
   "null"
+}
+
+///|
+pub fn Device::description(
+  _self : Device,
+) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  let name = Device::name(_self)
+  if name.length() == 0 {
+    raise @moon_cpal.device_name_error_backend_specific(
+      "null device description: empty name",
+    )
+  }
+  @moon_cpal.DeviceDescription::new(
+    name,
+    driver=Some("Null"),
+    device_type=@moon_cpal.DeviceType::virtual_(),
+    interface_type=@moon_cpal.InterfaceType::virtual_(),
+    direction=@moon_cpal.DeviceDirection::unknown(),
+  )
 }
 
 ///|
