@@ -44,6 +44,13 @@ jobs:
           # We compile `scripts/moon_cc.c` into `scripts/moon_cc.sh` so the path stays stable.
           cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
           chmod +x scripts/moon_cc.sh
+      - name: Start JACK dummy server (for unit tests)
+        shell: bash
+        run: |
+          # Keep a dummy JACK server running so unit tests can query JACK server config.
+          jackd -d dummy -r 48000 -p 256 &
+          sleep 2
+          pgrep -f "jackd .*dummy" >/dev/null
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -51,12 +58,7 @@ jobs:
       - name: Run ALSA smoke (real I/O)
         run: moon run --target native cmd/alsa_stream_smoke -q
       - name: Run JACK smoke (dummy server)
-        shell: bash
-        run: |
-          # Start a dummy JACK server so we can validate the JACK backend on CI without hardware.
-          jackd -d dummy -r 48000 -p 256 &
-          sleep 2
-          moon run --target native cmd/jack_stream_smoke -q
+        run: moon run --target native cmd/jack_stream_smoke -q
 
   test-macos-native:
     name: native (macos, CoreAudio)

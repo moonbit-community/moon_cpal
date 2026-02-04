@@ -8,6 +8,8 @@ import {
 // Values
 pub fn default_host() -> Host
 
+pub fn default_server_config() -> (Int, Int)?
+
 // Errors
 
 // Types and methods

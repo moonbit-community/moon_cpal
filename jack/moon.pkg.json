@@ -2,6 +2,7 @@
   "import": ["zhengyu/moon_cpal"],
   "targets": {
     "host.mbt": ["native"],
+    "ffi_native.mbt": ["native"],
     "stream_types.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],
     "stream_native.mbt": ["native"]

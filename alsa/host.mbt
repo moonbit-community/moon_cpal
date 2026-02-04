@@ -1,8 +1,7 @@
 ///|
 /// ALSA backend (Linux).
 ///
-/// This package is currently a stub: it exists so the cross-platform platform wrapper can
-/// typecheck on all targets. A real implementation will be added later.
+/// Configuration queries are best-effort and are implemented via libasound `hw_params` probing.
 
 ///|
 pub struct Host {
@@ -89,23 +88,7 @@ pub fn Device::supported_input_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::I16,
-    ),
-  ]
+  supported_configs(_self, true)
 }
 
 ///|
@@ -115,23 +98,7 @@ pub fn Device::supported_output_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::I16,
-    ),
-  ]
+  supported_configs(_self, false)
 }
 
 ///|
@@ -143,12 +110,7 @@ pub fn Device::default_input_config(
       "alsa default_input_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
-    @moon_cpal.SampleFormat::F32,
-  )
+  default_config(_self, true)
 }
 
 ///|
@@ -160,10 +122,104 @@ pub fn Device::default_output_config(
       "alsa default_output_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
-    @moon_cpal.SampleFormat::F32,
-  )
+  default_config(_self, false)
+}
+
+///|
+fn u32_le_to_int(b : Bytes, off : Int) -> Int {
+  if off + 4 > b.length() {
+    return 0
+  }
+  let b0 = b[off].to_int()
+  let b1 = b[off + 1].to_int()
+  let b2 = b[off + 2].to_int()
+  let b3 = b[off + 3].to_int()
+  b0 | (b1 << 8) | (b2 << 16) | (b3 << 24)
+}
+
+///|
+fn sample_format_from_bin_tag(tag : Int) -> @moon_cpal.SampleFormat? {
+  match tag {
+    1 => Some(@moon_cpal.SampleFormat::F32)
+    2 => Some(@moon_cpal.SampleFormat::I16)
+    _ => None
+  }
+}
+
+///|
+fn parse_supported_configs_bin(
+  b : Bytes,
+) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+  if b.length() < 4 {
+    return []
+  }
+  let n = u32_le_to_int(b, 0)
+  if n <= 0 {
+    return []
+  }
+  let out : Array[@moon_cpal.SupportedStreamConfigRange] = []
+  let mut off = 4
+  for _i in 0..<n {
+    if off + 24 > b.length() {
+      break
+    }
+    let tag = u32_le_to_int(b, off)
+    let ch = u32_le_to_int(b, off + 4)
+    let min_sr = u32_le_to_int(b, off + 8)
+    let max_sr = u32_le_to_int(b, off + 12)
+    let buf_min = u32_le_to_int(b, off + 16)
+    let buf_max = u32_le_to_int(b, off + 20)
+    off = off + 24
+    match sample_format_from_bin_tag(tag) {
+      None => ()
+      Some(fmt) => {
+        let buf = @moon_cpal.SupportedBufferSize::Range(
+          min=if buf_min > 0 { buf_min } else { 1 },
+          max=if buf_max >= buf_min && buf_max > 0 { buf_max } else { buf_min },
+        )
+        out.push(
+          @moon_cpal.SupportedStreamConfigRange::new(
+            ch, min_sr, max_sr, buf, fmt,
+          ),
+        )
+      }
+    }
+  }
+  out
+}
+
+///|
+fn supported_configs(
+  d : Device,
+  is_input : Bool,
+) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+  let b = supported_configs_bin(d.id, is_input)
+  parse_supported_configs_bin(b)
+}
+
+///|
+fn default_config(
+  d : Device,
+  is_input : Bool,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  let ranges = supported_configs(d, is_input)
+  if ranges.length() == 0 {
+    raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+  }
+
+  // Mirror upstream ALSA default selection:
+  // - Choose the "best" supported range using heuristics.
+  // - Use 44100Hz when within the chosen range, otherwise the max sample rate.
+  let mut best = ranges[0]
+  for r in ranges {
+    if r.cmp_default_heuristics(best) > 0 {
+      best = r
+    }
+  }
+  let hz_44100 = 44100
+  if best.min_sample_rate() <= hz_44100 && hz_44100 <= best.max_sample_rate() {
+    best.with_sample_rate(hz_44100)
+  } else {
+    best.with_max_sample_rate()
+  }
 }

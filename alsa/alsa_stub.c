@@ -356,3 +356,200 @@ int32_t moon_cpal_alsa_device_name_utf8(uint8_t *device_id_utf8,
   return -1;
 #endif
 }
+
+// -----------------------------------------------------------------------------
+// ALSA supported config query (binary)
+// -----------------------------------------------------------------------------
+//
+// Exported format (little-endian):
+// - u32 record_count
+// - repeated records of 6 u32 values:
+//   (sample_format_tag, channels, min_rate, max_rate, buffer_min, buffer_max)
+//
+// sample_format_tag:
+// - 1 => F32 (SND_PCM_FORMAT_FLOAT_LE)
+// - 2 => I16 (SND_PCM_FORMAT_S16_LE)
+//
+// On non-Linux platforms, or on error, returns an empty bytes value.
+
+static void write_u32_le(uint8_t *dst, uint32_t v) {
+  dst[0] = (uint8_t)(v & 0xFFu);
+  dst[1] = (uint8_t)((v >> 8) & 0xFFu);
+  dst[2] = (uint8_t)((v >> 16) & 0xFFu);
+  dst[3] = (uint8_t)((v >> 24) & 0xFFu);
+}
+
+moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
+                                                    int32_t device_id_len,
+                                                    uint32_t is_input) {
+#if defined(__linux__)
+  if (device_id_utf8 == NULL || device_id_len <= 0) {
+    moonbit_decref(device_id_utf8);
+    return moonbit_make_bytes_raw(0);
+  }
+
+  // Copy before decref: `device_id_utf8` is owned by this function.
+  char id_buf[256];
+  size_t id_len = (size_t)device_id_len;
+  if (id_len >= sizeof(id_buf)) {
+    id_len = sizeof(id_buf) - 1;
+  }
+  memcpy(id_buf, device_id_utf8, id_len);
+  id_buf[id_len] = '\0';
+  moonbit_decref(device_id_utf8);
+
+  snd_pcm_t *pcm = NULL;
+  snd_pcm_stream_t st = is_input ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK;
+  int err = snd_pcm_open(&pcm, id_buf, st, 0);
+  if (err < 0 || pcm == NULL) {
+    if (pcm != NULL) {
+      snd_pcm_close(pcm);
+    }
+    return moonbit_make_bytes_raw(0);
+  }
+
+  snd_pcm_hw_params_t *hw = NULL;
+  if (snd_pcm_hw_params_malloc(&hw) < 0 || hw == NULL) {
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+  if (snd_pcm_hw_params_any(pcm, hw) < 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+
+  // Supported formats: keep in sync with the MoonBit stream builder.
+  uint32_t fmt_tags[2];
+  size_t fmt_count = 0;
+  if (snd_pcm_hw_params_test_format(hw, SND_PCM_FORMAT_FLOAT_LE) == 0) {
+    fmt_tags[fmt_count++] = 1u;
+  }
+  if (snd_pcm_hw_params_test_format(hw, SND_PCM_FORMAT_S16_LE) == 0) {
+    fmt_tags[fmt_count++] = 2u;
+  }
+  if (fmt_count == 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+
+  unsigned int min_rate = 0, max_rate = 0;
+  int dir = 0;
+  if (snd_pcm_hw_params_get_rate_min(hw, &min_rate, &dir) < 0 ||
+      snd_pcm_hw_params_get_rate_max(hw, &max_rate, &dir) < 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+
+  // Decide whether to return a continuous range or a list of discrete common rates.
+  struct rate_pair {
+    uint32_t min;
+    uint32_t max;
+  };
+  struct rate_pair rates[64];
+  size_t rate_count = 0;
+
+  if (min_rate == max_rate || snd_pcm_hw_params_test_rate(hw, min_rate + 1, 0) == 0) {
+    rates[rate_count++] = (struct rate_pair){(uint32_t)min_rate, (uint32_t)max_rate};
+  } else {
+    static const uint32_t COMMON_RATES[] = {
+        5512u,   8000u,    11025u,   12000u,   16000u,  22050u,  24000u,
+        32000u,  44100u,   48000u,   64000u,   88200u,  96000u,  176400u,
+        192000u, 352800u,  384000u,  705600u,  768000u, 1411200u, 1536000u,
+    };
+    for (size_t i = 0; i < sizeof(COMMON_RATES) / sizeof(COMMON_RATES[0]); i++) {
+      uint32_t r = COMMON_RATES[i];
+      if (snd_pcm_hw_params_test_rate(hw, r, 0) == 0) {
+        rates[rate_count++] = (struct rate_pair){r, r};
+      }
+    }
+    if (rate_count == 0) {
+      rates[rate_count++] = (struct rate_pair){(uint32_t)min_rate, (uint32_t)max_rate};
+    }
+  }
+
+  unsigned int min_ch = 0, max_ch = 0;
+  if (snd_pcm_hw_params_get_channels_min(hw, &min_ch) < 0 ||
+      snd_pcm_hw_params_get_channels_max(hw, &max_ch) < 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+  if (max_ch > 32) {
+    max_ch = 32;
+  }
+
+  uint32_t channels[64];
+  size_t ch_count = 0;
+  for (unsigned int ch = min_ch; ch <= max_ch; ch++) {
+    if (snd_pcm_hw_params_test_channels(hw, ch) == 0) {
+      channels[ch_count++] = (uint32_t)ch;
+    }
+  }
+  if (ch_count == 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+
+  snd_pcm_uframes_t min_buf = 0, max_buf = 0;
+  if (snd_pcm_hw_params_get_buffer_size_min(hw, &min_buf) < 0 ||
+      snd_pcm_hw_params_get_buffer_size_max(hw, &max_buf) < 0) {
+    snd_pcm_hw_params_free(hw);
+    snd_pcm_close(pcm);
+    return moonbit_make_bytes_raw(0);
+  }
+  // Clamp into u32 range and avoid a zero-length buffer range.
+  uint32_t buf_min = (min_buf == 0) ? 1u
+                                    : (min_buf > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)min_buf);
+  uint32_t buf_max =
+      (max_buf == 0) ? buf_min
+                     : (max_buf > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)max_buf);
+  if (buf_max < buf_min) {
+    buf_max = buf_min;
+  }
+
+  snd_pcm_hw_params_free(hw);
+  snd_pcm_close(pcm);
+
+  uint64_t rec_count64 = (uint64_t)fmt_count * (uint64_t)ch_count * (uint64_t)rate_count;
+  if (rec_count64 == 0 || rec_count64 > 1000000u) {
+    return moonbit_make_bytes_raw(0);
+  }
+  uint32_t rec_count = (uint32_t)rec_count64;
+
+  size_t out_len = 4u + (size_t)rec_count * 24u;
+  moonbit_bytes_t out = moonbit_make_bytes_raw((int32_t)out_len);
+  if (out == NULL) {
+    return moonbit_make_bytes_raw(0);
+  }
+
+  uint8_t *p = (uint8_t *)out;
+  write_u32_le(p, rec_count);
+  p += 4;
+  for (size_t fi = 0; fi < fmt_count; fi++) {
+    uint32_t fmt_tag = fmt_tags[fi];
+    for (size_t ci = 0; ci < ch_count; ci++) {
+      uint32_t ch = channels[ci];
+      for (size_t ri = 0; ri < rate_count; ri++) {
+        write_u32_le(p + 0, fmt_tag);
+        write_u32_le(p + 4, ch);
+        write_u32_le(p + 8, rates[ri].min);
+        write_u32_le(p + 12, rates[ri].max);
+        write_u32_le(p + 16, buf_min);
+        write_u32_le(p + 20, buf_max);
+        p += 24;
+      }
+    }
+  }
+
+  return out;
+#else
+  (void)device_id_len;
+  (void)is_input;
+  moonbit_decref(device_id_utf8);
+  return moonbit_make_bytes_raw(0);
+#endif
+}

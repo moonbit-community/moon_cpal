@@ -12,6 +12,8 @@ pub fn device_name_utf8(String) -> String?
 
 pub fn devices_utf8() -> Bytes
 
+pub fn supported_configs_bin(String, Bool) -> Bytes
+
 // Errors
 
 // Types and methods

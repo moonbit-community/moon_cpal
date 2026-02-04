@@ -71,16 +71,7 @@ pub fn Device::supported_input_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=4096)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-  ]
+  supported_configs(_self)
 }
 
 ///|
@@ -90,16 +81,7 @@ pub fn Device::supported_output_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=4096)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-  ]
+  supported_configs(_self)
 }
 
 ///|
@@ -111,12 +93,7 @@ pub fn Device::default_input_config(
       "jack default_input_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=4096),
-    @moon_cpal.SampleFormat::F32,
-  )
+  default_config(_self)
 }
 
 ///|
@@ -128,10 +105,49 @@ pub fn Device::default_output_config(
       "jack default_output_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=4096),
-    @moon_cpal.SampleFormat::F32,
-  )
+  default_config(_self)
+}
+
+///|
+fn default_config(
+  _self : Device,
+) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+  match default_server_config() {
+    None => raise @moon_cpal.default_stream_config_error_device_not_available()
+    Some((sr, buf)) =>
+      @moon_cpal.SupportedStreamConfig::new(
+        2,
+        sr,
+        @moon_cpal.SupportedBufferSize::Range(min=buf, max=buf),
+        @moon_cpal.SampleFormat::F32,
+      )
+  }
+}
+
+///|
+fn supported_configs(
+  _self : Device,
+) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+  match default_server_config() {
+    None => []
+    Some((sr, buf)) => {
+      // Mirrors upstream cpal's JACK backend: fixed sample rate/buffer size from server,
+      // float32 sample format, and a small set of common channel counts.
+      let chans = [1, 2, 4, 6, 8, 16, 24, 32, 48, 64]
+      let buf_range = @moon_cpal.SupportedBufferSize::Range(min=buf, max=buf)
+      let out : Array[@moon_cpal.SupportedStreamConfigRange] = []
+      for ch in chans {
+        out.push(
+          @moon_cpal.SupportedStreamConfigRange::new(
+            ch,
+            sr,
+            sr,
+            buf_range,
+            @moon_cpal.SampleFormat::F32,
+          ),
+        )
+      }
+      out
+    }
+  }
 }
