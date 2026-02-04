@@ -2,7 +2,16 @@
   "import": ["zhengyu/moon_cpal"],
   "targets": {
     "ffi_native.mbt": ["native"],
-    "ffi_stub.mbt": ["not", "native"]
+    "ffi_stub.mbt": ["not", "native"],
+    "stream_callback_bridge.mbt": ["native"],
+    "stream_native.mbt": ["native"],
+    "stream.mbt": ["not", "native"]
   },
-  "native-stub": ["wasapi_stub.c"]
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-lole32 -luuid -lmmdevapi -lavrt"
+    }
+  },
+  "native-stub": ["wasapi_stub.c", "wasapi_stream.c"]
 }

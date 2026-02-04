@@ -46,3 +46,20 @@ pub fn utf8_bytes_to_string(bytes : Bytes, length : Int) -> String {
   }
   res.to_string()
 }
+
+///|
+/// Encode a string into ASCII bytes (best-effort).
+///
+/// This is intended for native backend identifiers like `default` or `hw:0,0`.
+/// Any non-ASCII chars are replaced with `?`.
+pub fn string_to_ascii_bytes(s : String) -> Bytes {
+  Bytes::makei(s.length(), fn(i) {
+    // For ASCII-only identifiers, code units equal chars.
+    let cu = s.code_unit_at(i).to_int()
+    if 0 <= cu && cu < 128 {
+      cu.to_byte()
+    } else {
+      (63 : Int).to_byte()
+    }
+  })
+}

@@ -2,11 +2,6 @@
 /// WASAPI stream stubs (Windows).
 
 ///|
-pub struct Stream {
-  _unit : Unit
-} derive(Show, Eq)
-
-///|
 pub fn Device::build_output_stream(
   _self : Device,
   _config : @moon_cpal.StreamConfig,
@@ -44,4 +39,9 @@ pub fn Stream::pause(_self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
   raise @moon_cpal.pause_stream_error_backend_specific(
     "wasapi pause: unimplemented",
   )
+}
+
+///|
+pub fn Stream::close(_self : Stream) -> Unit {
+  ()
 }

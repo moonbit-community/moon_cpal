@@ -407,3 +407,13 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
     Wasapi(s) => s.pause()
   }
 }
+
+///|
+pub fn Stream::close(self : Stream) -> Unit {
+  match self {
+    Null(s) => s.close()
+    CoreAudio(s) => s.close()
+    Alsa(s) => s.close()
+    Wasapi(s) => s.close()
+  }
+}

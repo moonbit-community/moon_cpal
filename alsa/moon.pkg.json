@@ -2,7 +2,16 @@
   "import": ["zhengyu/moon_cpal"],
   "targets": {
     "ffi_native.mbt": ["native"],
-    "ffi_stub.mbt": ["not", "native"]
+    "ffi_stub.mbt": ["not", "native"],
+    "stream_callback_bridge.mbt": ["native"],
+    "stream_native.mbt": ["native"],
+    "stream.mbt": ["not", "native"]
   },
-  "native-stub": ["alsa_stub.c"]
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -lasound"
+    }
+  },
+  "native-stub": ["alsa_stub.c", "alsa_stream.c"]
 }

@@ -36,6 +36,7 @@ pub impl Show for Host
 pub struct Stream {
   _unit : Unit
 }
+pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
 pub impl Eq for Stream

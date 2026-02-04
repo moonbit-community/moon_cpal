@@ -1,7 +1,7 @@
 ///|
 fn main {
   // Keep imports "used" on non-native targets to avoid warnings.
-  ignore(@macos.default_host())
+  ignore(@alsa.default_host())
   ignore(@moon_cpal.native_os())
-  println("macos_stream_smoke: native-only")
+  println("alsa_stream_smoke: native-only")
 }

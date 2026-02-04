@@ -40,3 +40,8 @@ pub fn Stream::play(_self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
 pub fn Stream::pause(_self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
   ()
 }
+
+///|
+pub fn Stream::close(_self : Stream) -> Unit {
+  ()
+}
