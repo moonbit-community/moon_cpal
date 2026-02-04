@@ -46,6 +46,8 @@ jobs:
           chmod +x scripts/moon_cc.sh
       - name: Run unit tests
         run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        run: moon run --target native cmd/enumerate -q
       - name: Run ALSA smoke (real I/O)
         run: moon run --target native cmd/alsa_stream_smoke -q
       - name: Run JACK smoke (dummy server)
@@ -75,6 +77,8 @@ jobs:
           chmod +x scripts/moon_cc.sh
       - name: Run unit tests
         run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        run: moon run --target native cmd/enumerate -q
       - name: Run CoreAudio smoke (real I/O)
         run: moon run --target native cmd/macos_stream_smoke -q
 
@@ -118,6 +122,9 @@ jobs:
       - name: Run unit tests
         shell: pwsh
         run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        shell: pwsh
+        run: moon run --target native cmd/enumerate -q
       - name: Run WASAPI smoke (real I/O)
         shell: pwsh
         run: moon run --target native cmd/wasapi_stream_smoke -q

@@ -1,0 +1,113 @@
+///|
+fn print_supported_ranges(
+  kind : String,
+  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
+) -> Unit {
+  println("  \{kind} supported ranges: \{ranges.length()}")
+  let n = if ranges.length() > 5 { 5 } else { ranges.length() }
+  for i in 0..<n {
+    let r = ranges[i]
+    println(
+      "    - ch=\{r.channels()} sr=\{r.min_sample_rate()}..\{r.max_sample_rate()} fmt=\{r.sample_format().to_debug_string()}",
+    )
+  }
+}
+
+///|
+fn print_default_config(
+  kind : String,
+  f : () -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError,
+) -> Unit {
+  try f() catch {
+    e => println("  \{kind} default config: error \{e}")
+  } noraise {
+    cfg =>
+      println(
+        "  \{kind} default config: ch=\{cfg.channels()} sr=\{cfg.sample_rate()} fmt=\{cfg.sample_format().to_debug_string()}",
+      )
+  }
+}
+
+///|
+fn main {
+  println("native_os: \{@moon_cpal.native_os()}")
+  let hs = @moon_cpal.available_hosts()
+  println("available_hosts: \{hs.length()}")
+  for id in hs {
+    println("- host: \{@moon_cpal.HostId::to_string(id)}")
+    let host = try @platform.host_from_id(id) catch {
+      e => {
+        println("  host_from_id failed: \{e}")
+        continue
+      }
+    } noraise {
+      h => h
+    }
+
+    // Default devices.
+    let out_dev = try host.default_output_device() catch {
+      e => {
+        println("  default_output_device error: \{e}")
+        None
+      }
+    } noraise {
+      d => d
+    }
+    let in_dev = try host.default_input_device() catch {
+      e => {
+        println("  default_input_device error: \{e}")
+        None
+      }
+    } noraise {
+      d => d
+    }
+    match out_dev {
+      None => println("  default output device: None")
+      Some(d) => {
+        let name = try d.name() catch {
+          e => {
+            println("  output device name error: \{e}")
+            "<error>".to_string()
+          }
+        } noraise {
+          s => s
+        }
+        println("  default output device: \{name}")
+        let ranges = try d.supported_output_configs() catch {
+          e => {
+            println("  supported_output_configs error: \{e}")
+            []
+          }
+        } noraise {
+          xs => xs
+        }
+        print_supported_ranges("output", ranges)
+        print_default_config("output", fn() { d.default_output_config() })
+      }
+    }
+    match in_dev {
+      None => println("  default input device: None")
+      Some(d) => {
+        let name = try d.name() catch {
+          e => {
+            println("  input device name error: \{e}")
+            "<error>".to_string()
+          }
+        } noraise {
+          s => s
+        }
+        println("  default input device: \{name}")
+        let ranges = try d.supported_input_configs() catch {
+          e => {
+            println("  supported_input_configs error: \{e}")
+            []
+          }
+        } noraise {
+          xs => xs
+        }
+        print_supported_ranges("input", ranges)
+        print_default_config("input", fn() { d.default_input_config() })
+      }
+    }
+  }
+}

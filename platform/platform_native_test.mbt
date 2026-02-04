@@ -14,3 +14,24 @@ test "platform default_host (native)" {
     _ => inspect(true, content="true")
   }
 }
+
+///|
+test "platform available_hosts + host_from_id (native)" {
+  let hs = available_hosts()
+  // Always includes Null.
+  inspect(hs.contains(@moon_cpal.HostId::Null), content="true")
+
+  // Linux should now include JACK as well.
+  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+    inspect(hs.contains(@moon_cpal.HostId::Jack), content="true")
+  }
+
+  // All advertised hosts should be constructible.
+  for id in hs {
+    try host_from_id(id) catch {
+      _ => inspect(false, content="true")
+    } noraise {
+      _ => inspect(true, content="true")
+    }
+  }
+}
