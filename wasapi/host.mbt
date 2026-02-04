@@ -76,39 +76,184 @@ pub fn Device::name(_self : Device) -> String {
 }
 
 ///|
+fn wasapi_ascii_upper(s : String) -> String {
+  let b = Bytes::makei(s.length(), fn(i) {
+    let cu = s.code_unit_at(i).to_int()
+    if cu >= 97 && cu <= 122 { // a-z
+      (cu - 32).to_byte()
+    } else {
+      cu.to_byte()
+    }
+  })
+  @moon_cpal.utf8_bytes_to_string(b, b.length())
+}
+
+///|
+fn wasapi_interface_type_from_enumerator(
+  enumerator_name : String,
+) -> @moon_cpal.InterfaceType? {
+  match wasapi_ascii_upper(enumerator_name.trim().to_string()) {
+    "HDAUDIO" => Some(@moon_cpal.InterfaceType::built_in())
+    "USB" => Some(@moon_cpal.InterfaceType::usb())
+    "BTHENUM" => Some(@moon_cpal.InterfaceType::bluetooth())
+    "MMDEVAPI" | "SW" => Some(@moon_cpal.InterfaceType::virtual_())
+    _ => None
+  }
+}
+
+///|
+fn wasapi_interface_type_from_jack_subtype(
+  jack_subtype : String,
+) -> @moon_cpal.InterfaceType? {
+  match wasapi_ascii_upper(jack_subtype.trim().to_string()) {
+    "{D9E55EA0-0C89-4692-84FF-EB3C4B0D172F}" =>
+      Some(@moon_cpal.InterfaceType::hdmi())
+    "{E47E4031-3EA6-418D-8F9B-B73843CCB2AD}" =>
+      Some(@moon_cpal.InterfaceType::display_port())
+    "{DFF21CE1-F70F-11D0-B917-00A0C9223196}" =>
+      Some(@moon_cpal.InterfaceType::spdif())
+    _ => None
+  }
+}
+
+///|
+fn wasapi_types_from_form_factor(
+  form_factor : UInt,
+) -> (@moon_cpal.DeviceType, @moon_cpal.InterfaceType?) {
+  match form_factor.reinterpret_as_int() {
+    // RemoteNetworkDevice
+    0 =>
+      (
+        @moon_cpal.DeviceType::unknown(),
+        Some(@moon_cpal.InterfaceType::network()),
+      )
+    // Speakers
+    1 => (@moon_cpal.DeviceType::speaker(), None)
+    // LineLevel
+    2 =>
+      (@moon_cpal.DeviceType::unknown(), Some(@moon_cpal.InterfaceType::line()))
+    // Headphones
+    3 => (@moon_cpal.DeviceType::headphones(), None)
+    // Microphone
+    4 => (@moon_cpal.DeviceType::microphone(), None)
+    // Headset
+    5 => (@moon_cpal.DeviceType::headset(), None)
+    // Handset
+    6 => (@moon_cpal.DeviceType::handset(), None)
+    // UnknownDigitalPassthrough
+    7 => (@moon_cpal.DeviceType::unknown(), None)
+    // SPDIF
+    8 =>
+      (
+        @moon_cpal.DeviceType::unknown(),
+        Some(@moon_cpal.InterfaceType::spdif()),
+      )
+    // DigitalAudioDisplayDevice
+    9 =>
+      (@moon_cpal.DeviceType::unknown(), Some(@moon_cpal.InterfaceType::hdmi()))
+    _ => (@moon_cpal.DeviceType::unknown(), None)
+  }
+}
+
+///|
 pub fn Device::description(
   _self : Device,
 ) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
-  let name = Device::name(_self)
+  let dev_desc = device_property_utf8(_self.id, 2)
+  let friendly = device_property_utf8(_self.id, 6)
+  let name = match dev_desc {
+    Some(s) if s.trim().length() > 0 => s
+    _ =>
+      match friendly {
+        Some(s) if s.trim().length() > 0 => s
+        _ => Device::name(_self)
+      }
+  }
   if name.length() == 0 {
     raise @moon_cpal.device_name_error_backend_specific(
       "wasapi device description: empty name",
     )
   }
-  let has_in = _self.supported_input_configs().length() > 0
-  let has_out = _self.supported_output_configs().length() > 0
-  let direction = if has_in && has_out {
-    @moon_cpal.DeviceDirection::duplex()
-  } else if has_in {
-    @moon_cpal.DeviceDirection::input()
-  } else if has_out {
-    @moon_cpal.DeviceDirection::output()
+  let direction = if !is_default_placeholder(_self.id) {
+    match data_flow_tag(_self.id) {
+      Some(1) => @moon_cpal.DeviceDirection::input()
+      Some(2) => @moon_cpal.DeviceDirection::output()
+      _ => @moon_cpal.DeviceDirection::unknown()
+    }
   } else {
-    @moon_cpal.DeviceDirection::unknown()
+    // For the synthetic "default" placeholder we don't have a stable endpoint id. Derive direction
+    // from capabilities.
+    let has_in = _self.supported_input_configs().length() > 0
+    let has_out = _self.supported_output_configs().length() > 0
+    if has_in && has_out {
+      @moon_cpal.DeviceDirection::duplex()
+    } else if has_in {
+      @moon_cpal.DeviceDirection::input()
+    } else if has_out {
+      @moon_cpal.DeviceDirection::output()
+    } else {
+      @moon_cpal.DeviceDirection::unknown()
+    }
   }
-  let device_type = match direction {
-    @moon_cpal.DeviceDirection::Input => @moon_cpal.DeviceType::microphone()
-    @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
-    _ => @moon_cpal.DeviceType::unknown()
+  let manufacturer = device_property_utf8(_self.id, 1)
+  let interface_name = device_property_utf8(_self.id, 3)
+  let enumerator_name = device_property_utf8(_self.id, 4)
+  let jack_subtype = device_property_utf8(_self.id, 5)
+  let (device_type, interface_type_seed) = match
+    device_form_factor_u32(_self.id) {
+    Some(ff) => wasapi_types_from_form_factor(ff)
+    None => (@moon_cpal.DeviceType::unknown(), None)
+  }
+  let mut interface_type_opt = interface_type_seed
+  match enumerator_name {
+    Some(s) =>
+      match wasapi_interface_type_from_enumerator(s) {
+        Some(it) => interface_type_opt = Some(it)
+        None => ()
+      }
+    None => ()
+  }
+  match jack_subtype {
+    Some(s) =>
+      match wasapi_interface_type_from_jack_subtype(s) {
+        Some(it) => interface_type_opt = Some(it)
+        None => ()
+      }
+    None => ()
+  }
+  let interface_type = match interface_type_opt {
+    None => @moon_cpal.InterfaceType::unknown()
+    Some(it) => it
+  }
+  let extended : Array[String] = ["endpoint_id=\{_self.id}"]
+  match dev_desc {
+    Some(s) => extended.push("device_desc=\{s}")
+    None => ()
+  }
+  match friendly {
+    Some(s) if s != name => extended.push("friendly_name=\{s}")
+    _ => ()
+  }
+  match enumerator_name {
+    Some(s) => extended.push("enumerator=\{s}")
+    None => ()
+  }
+  match jack_subtype {
+    Some(s) => extended.push("jack_subtype=\{s}")
+    None => ()
   }
   @moon_cpal.DeviceDescription::new(
     name,
-    driver=Some("WASAPI"),
+    manufacturer~,
+    driver=match interface_name {
+      Some(s) if s.trim().length() > 0 => Some(s)
+      _ => Some("WASAPI")
+    },
     device_type~,
-    interface_type=@moon_cpal.InterfaceType::unknown(),
+    interface_type~,
     direction~,
     address=Some(_self.id),
-    extended=["endpoint_id=\{_self.id}"],
+    extended~,
   )
 }
 

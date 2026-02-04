@@ -905,6 +905,225 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   CoUninitialize();
   return *out_name ? 0 : -1;
 }
+
+// -----------------------------------------------------------------------------
+// Device property helpers (Windows)
+// -----------------------------------------------------------------------------
+
+static int wasapi_open_property_store(const char *id_utf8,
+                                      size_t id_len,
+                                      IMMDeviceEnumerator **out_enumerator,
+                                      IMMDevice **out_device,
+                                      IPropertyStore **out_props) {
+  if (out_enumerator != NULL) {
+    *out_enumerator = NULL;
+  }
+  if (out_device != NULL) {
+    *out_device = NULL;
+  }
+  if (out_props != NULL) {
+    *out_props = NULL;
+  }
+  if (id_utf8 == NULL || id_len == 0 || out_props == NULL) {
+    return -1;
+  }
+  if (utf8_is_default(id_utf8, id_len)) {
+    return -1;
+  }
+
+  wchar_t *idw = utf8_to_wide_alloc(id_utf8, id_len);
+  if (idw == NULL) {
+    return -1;
+  }
+
+  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  if (FAILED(hr)) {
+    free(idw);
+    return -1;
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *dev = NULL;
+  IPropertyStore *props = NULL;
+
+  hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+                        (void **)&enumerator);
+  if (FAILED(hr) || enumerator == NULL) {
+    goto fail;
+  }
+
+  hr = IMMDeviceEnumerator_GetDevice(enumerator, idw, &dev);
+  if (FAILED(hr) || dev == NULL) {
+    goto fail;
+  }
+
+  hr = IMMDevice_OpenPropertyStore(dev, STGM_READ, &props);
+  if (FAILED(hr) || props == NULL) {
+    goto fail;
+  }
+
+  if (out_enumerator != NULL) {
+    *out_enumerator = enumerator;
+  }
+  if (out_device != NULL) {
+    *out_device = dev;
+  }
+  *out_props = props;
+  free(idw);
+  return 0;
+
+fail:
+  if (props != NULL) {
+    IPropertyStore_Release(props);
+    props = NULL;
+  }
+  if (dev != NULL) {
+    IMMDevice_Release(dev);
+    dev = NULL;
+  }
+  if (enumerator != NULL) {
+    IMMDeviceEnumerator_Release(enumerator);
+    enumerator = NULL;
+  }
+  free(idw);
+  CoUninitialize();
+  return -1;
+}
+
+static void wasapi_close_property_store(IMMDeviceEnumerator *enumerator,
+                                       IMMDevice *device,
+                                       IPropertyStore *props) {
+  if (props != NULL) {
+    IPropertyStore_Release(props);
+    props = NULL;
+  }
+  if (device != NULL) {
+    IMMDevice_Release(device);
+    device = NULL;
+  }
+  if (enumerator != NULL) {
+    IMMDeviceEnumerator_Release(enumerator);
+    enumerator = NULL;
+  }
+  CoUninitialize();
+}
+
+static int wasapi_get_property_string_utf8(const char *id_utf8,
+                                           size_t id_len,
+                                           const PROPERTYKEY *key,
+                                           char **out_str) {
+  if (out_str == NULL) {
+    return -1;
+  }
+  *out_str = NULL;
+  if (key == NULL) {
+    return -1;
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *dev = NULL;
+  IPropertyStore *props = NULL;
+  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props) != 0) {
+    return -1;
+  }
+
+  PROPVARIANT pv;
+  PropVariantInit(&pv);
+  HRESULT hr = IPropertyStore_GetValue(props, key, &pv);
+  if (SUCCEEDED(hr) && pv.vt == VT_LPWSTR && pv.pwszVal != NULL) {
+    int n = wide_to_utf8_len(pv.pwszVal);
+    if (n > 0) {
+      char *tmp = (char *)calloc((size_t)n + 1, 1);
+      if (tmp != NULL) {
+        int used = wide_to_utf8(pv.pwszVal, tmp, n + 1);
+        if (used > 0) {
+          tmp[used] = '\0';
+          *out_str = tmp;
+        } else {
+          free(tmp);
+        }
+      }
+    }
+  }
+  PropVariantClear(&pv);
+
+  wasapi_close_property_store(enumerator, dev, props);
+  return *out_str ? 0 : -1;
+}
+
+static int wasapi_get_property_u32(const char *id_utf8,
+                                   size_t id_len,
+                                   const PROPERTYKEY *key,
+                                   uint32_t *out_u32) {
+  if (out_u32 == NULL) {
+    return -1;
+  }
+  *out_u32 = 0;
+  if (key == NULL) {
+    return -1;
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *dev = NULL;
+  IPropertyStore *props = NULL;
+  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props) != 0) {
+    return -1;
+  }
+
+  PROPVARIANT pv;
+  PropVariantInit(&pv);
+  HRESULT hr = IPropertyStore_GetValue(props, key, &pv);
+  if (SUCCEEDED(hr) && pv.vt == VT_UI4) {
+    *out_u32 = (uint32_t)pv.ulVal;
+  }
+  PropVariantClear(&pv);
+  wasapi_close_property_store(enumerator, dev, props);
+  return 0;
+}
+
+static const PROPERTYKEY *wasapi_propkey_from_tag(int32_t prop_tag) {
+  // These correspond to the keys used in upstream CPAL's WASAPI `Device::description`.
+  switch (prop_tag) {
+  case 1:
+#if defined(PKEY_Device_Manufacturer)
+    return &PKEY_Device_Manufacturer;
+#else
+    return NULL;
+#endif
+  case 2:
+#if defined(PKEY_Device_DeviceDesc)
+    return &PKEY_Device_DeviceDesc;
+#else
+    return NULL;
+#endif
+  case 3:
+#if defined(PKEY_DeviceInterface_FriendlyName)
+    return &PKEY_DeviceInterface_FriendlyName;
+#else
+    return NULL;
+#endif
+  case 4:
+#if defined(PKEY_Device_EnumeratorName)
+    return &PKEY_Device_EnumeratorName;
+#else
+    return NULL;
+#endif
+  case 5:
+#if defined(PKEY_AudioEndpoint_JackSubType)
+    return &PKEY_AudioEndpoint_JackSubType;
+#else
+    return NULL;
+#endif
+  case 6:
+#if defined(PKEY_Device_FriendlyName)
+    return &PKEY_Device_FriendlyName;
+#else
+    return NULL;
+#endif
+  default:
+    return NULL;
+  }
+}
 #endif
 
 moonbit_bytes_t moon_cpal_wasapi_devices_utf8(void) {
@@ -928,6 +1147,126 @@ moonbit_bytes_t moon_cpal_wasapi_devices_utf8(void) {
   return out;
 #else
   return moonbit_make_bytes_raw(0);
+#endif
+}
+
+uint32_t moon_cpal_wasapi_device_form_factor_u32(uint8_t *device_id_utf8, int32_t device_id_len) {
+#if defined(_WIN32)
+  if (device_id_utf8 == NULL || device_id_len <= 0) {
+    return 0xFFFFFFFFu;
+  }
+
+  char id_buf[512];
+  size_t id_len = (size_t)device_id_len;
+  if (id_len >= sizeof(id_buf)) {
+    id_len = sizeof(id_buf) - 1;
+  }
+  memcpy(id_buf, device_id_utf8, id_len);
+  id_buf[id_len] = '\0';
+  moonbit_decref(device_id_utf8);
+
+#if !defined(PKEY_AudioEndpoint_FormFactor)
+  return 0xFFFFFFFFu;
+#else
+  uint32_t out = 0;
+  if (wasapi_get_property_u32(id_buf, id_len, &PKEY_AudioEndpoint_FormFactor, &out) != 0) {
+    return 0xFFFFFFFFu;
+  }
+  return out;
+#endif
+#else
+  (void)device_id_len;
+  moonbit_decref(device_id_utf8);
+  return 0xFFFFFFFFu;
+#endif
+}
+
+int32_t moon_cpal_wasapi_device_property_utf8_len(uint8_t *device_id_utf8,
+                                                  int32_t device_id_len,
+                                                  int32_t prop_tag) {
+#if defined(_WIN32)
+  if (device_id_utf8 == NULL || device_id_len <= 0) {
+    return -1;
+  }
+
+  char id_buf[512];
+  size_t id_len = (size_t)device_id_len;
+  if (id_len >= sizeof(id_buf)) {
+    id_len = sizeof(id_buf) - 1;
+  }
+  memcpy(id_buf, device_id_utf8, id_len);
+  id_buf[id_len] = '\0';
+  moonbit_decref(device_id_utf8);
+
+  const PROPERTYKEY *key = wasapi_propkey_from_tag(prop_tag);
+  if (key == NULL) {
+    return -1;
+  }
+
+  char *s = NULL;
+  if (wasapi_get_property_string_utf8(id_buf, id_len, key, &s) == 0 && s != NULL) {
+    int32_t n = (int32_t)strlen(s);
+    free(s);
+    return n;
+  }
+  return -1;
+#else
+  (void)device_id_len;
+  (void)prop_tag;
+  moonbit_decref(device_id_utf8);
+  return -1;
+#endif
+}
+
+int32_t moon_cpal_wasapi_device_property_utf8(uint8_t *device_id_utf8,
+                                              int32_t device_id_len,
+                                              int32_t prop_tag,
+                                              uint8_t *out,
+                                              int32_t out_len) {
+#if defined(_WIN32)
+  if (out == NULL || out_len <= 0) {
+    moonbit_decref(device_id_utf8);
+    return 0;
+  }
+  if (device_id_utf8 == NULL || device_id_len <= 0) {
+    moonbit_decref(device_id_utf8);
+    return -1;
+  }
+
+  char id_buf[512];
+  size_t id_len = (size_t)device_id_len;
+  if (id_len >= sizeof(id_buf)) {
+    id_len = sizeof(id_buf) - 1;
+  }
+  memcpy(id_buf, device_id_utf8, id_len);
+  id_buf[id_len] = '\0';
+  moonbit_decref(device_id_utf8);
+
+  const PROPERTYKEY *key = wasapi_propkey_from_tag(prop_tag);
+  if (key == NULL) {
+    return -1;
+  }
+
+  char *s = NULL;
+  if (wasapi_get_property_string_utf8(id_buf, id_len, key, &s) == 0 && s != NULL) {
+    size_t slen = strlen(s);
+    int32_t needed = (int32_t)slen;
+    if (needed > out_len) {
+      free(s);
+      return needed;
+    }
+    memcpy(out, s, slen);
+    free(s);
+    return needed;
+  }
+  return -1;
+#else
+  (void)device_id_len;
+  (void)prop_tag;
+  (void)out;
+  (void)out_len;
+  moonbit_decref(device_id_utf8);
+  return -1;
 #endif
 }
 

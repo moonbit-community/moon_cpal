@@ -18,7 +18,17 @@ pub fn default_output_device_id() -> UInt?
 
 pub fn device_ids() -> Array[UInt] raise CoreAudioError
 
+pub fn device_interface_type_tag(UInt) -> Int
+
+pub fn device_is_aggregate(UInt) -> Bool
+
+pub fn device_manufacturer(UInt) -> String?
+
 pub fn device_name(UInt) -> String raise CoreAudioError
+
+pub fn device_transport_type_u32(UInt) -> UInt
+
+pub fn device_uid(UInt) -> String?
 
 pub fn supported_input_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
 

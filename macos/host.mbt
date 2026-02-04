@@ -49,6 +49,24 @@ pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
 }
 
 ///|
+fn coreaudio_interface_type_from_tag(tag : Int) -> @moon_cpal.InterfaceType {
+  match tag {
+    1 => @moon_cpal.InterfaceType::built_in()
+    2 => @moon_cpal.InterfaceType::usb()
+    3 => @moon_cpal.InterfaceType::bluetooth()
+    4 => @moon_cpal.InterfaceType::pci()
+    5 => @moon_cpal.InterfaceType::fire_wire()
+    6 => @moon_cpal.InterfaceType::thunderbolt()
+    7 => @moon_cpal.InterfaceType::hdmi()
+    10 => @moon_cpal.InterfaceType::network()
+    11 => @moon_cpal.InterfaceType::virtual_()
+    12 => @moon_cpal.InterfaceType::display_port()
+    13 => @moon_cpal.InterfaceType::aggregate()
+    _ => @moon_cpal.InterfaceType::unknown()
+  }
+}
+
+///|
 pub fn Device::description(
   self : Device,
 ) -> @moon_cpal.DeviceDescription raise CoreAudioError {
@@ -71,14 +89,33 @@ pub fn Device::description(
     @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
     _ => @moon_cpal.DeviceType::unknown()
   }
+  let manufacturer = device_manufacturer(self.id)
+  let uid = device_uid(self.id)
+  let interface_type = coreaudio_interface_type_from_tag(
+    device_interface_type_tag(self.id),
+  )
+  let transport = device_transport_type_u32(self.id)
+  let address = match uid {
+    Some(s) if s.trim().length() > 0 => Some(s)
+    _ => Some(self.id.to_string())
+  }
+  let extended : Array[String] = ["AudioDeviceID=\{self.id}"]
+  match uid {
+    Some(s) if s.trim().length() > 0 => extended.push("uid=\{s}")
+    _ => ()
+  }
+  if transport != 0 {
+    extended.push("transport_type_u32=\{transport}")
+  }
   @moon_cpal.DeviceDescription::new(
     name,
+    manufacturer~,
     driver=Some("CoreAudio"),
     device_type~,
-    interface_type=@moon_cpal.InterfaceType::unknown(),
+    interface_type~,
     direction~,
-    address=Some(self.id.to_string()),
-    extended=["AudioDeviceID=\{self.id}"],
+    address~,
+    extended~,
   )
 }
 

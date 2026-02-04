@@ -29,6 +29,37 @@ extern "C" fn ca_device_name_utf8(
 ) -> Int = "moon_cpal_ca_device_name_utf8"
 
 ///|
+extern "C" fn ca_device_uid_utf8_len(device_id : UInt) -> Int = "moon_cpal_ca_device_uid_utf8_len"
+
+///|
+#borrow(out)
+extern "C" fn ca_device_uid_utf8(
+  device_id : UInt,
+  out : Bytes,
+  out_len : Int,
+) -> Int = "moon_cpal_ca_device_uid_utf8"
+
+///|
+extern "C" fn ca_device_manufacturer_utf8_len(device_id : UInt) -> Int = "moon_cpal_ca_device_manufacturer_utf8_len"
+
+///|
+#borrow(out)
+extern "C" fn ca_device_manufacturer_utf8(
+  device_id : UInt,
+  out : Bytes,
+  out_len : Int,
+) -> Int = "moon_cpal_ca_device_manufacturer_utf8"
+
+///|
+extern "C" fn ca_device_transport_type_u32(device_id : UInt) -> UInt = "moon_cpal_ca_device_transport_type_u32"
+
+///|
+extern "C" fn ca_device_is_aggregate(device_id : UInt) -> Int = "moon_cpal_ca_device_is_aggregate"
+
+///|
+extern "C" fn ca_device_interface_type_tag(device_id : UInt) -> Int = "moon_cpal_ca_device_interface_type_tag"
+
+///|
 extern "C" fn ca_input_channel_count(device_id : UInt) -> Int = "moon_cpal_ca_input_channel_count"
 
 ///|
@@ -368,6 +399,63 @@ pub fn device_name(device_id : DeviceId) -> String raise CoreAudioError {
     }
   }
   utf8_bytes_to_mbt_string(out, wrote)
+}
+
+///|
+pub fn device_uid(device_id : DeviceId) -> String? {
+  let need = ca_device_uid_utf8_len(device_id)
+  if need <= 0 {
+    return None
+  }
+  let mut out = Bytes::new(need)
+  let mut wrote = ca_device_uid_utf8(device_id, out, need)
+  if wrote <= 0 {
+    return None
+  }
+  if wrote > out.length() {
+    out = Bytes::new(wrote)
+    wrote = ca_device_uid_utf8(device_id, out, wrote)
+    if wrote <= 0 || wrote > out.length() {
+      return None
+    }
+  }
+  Some(utf8_bytes_to_mbt_string(out, wrote))
+}
+
+///|
+pub fn device_manufacturer(device_id : DeviceId) -> String? {
+  let need = ca_device_manufacturer_utf8_len(device_id)
+  if need <= 0 {
+    return None
+  }
+  let mut out = Bytes::new(need)
+  let mut wrote = ca_device_manufacturer_utf8(device_id, out, need)
+  if wrote <= 0 {
+    return None
+  }
+  if wrote > out.length() {
+    out = Bytes::new(wrote)
+    wrote = ca_device_manufacturer_utf8(device_id, out, wrote)
+    if wrote <= 0 || wrote > out.length() {
+      return None
+    }
+  }
+  Some(utf8_bytes_to_mbt_string(out, wrote))
+}
+
+///|
+pub fn device_transport_type_u32(device_id : DeviceId) -> UInt {
+  ca_device_transport_type_u32(device_id)
+}
+
+///|
+pub fn device_is_aggregate(device_id : DeviceId) -> Bool {
+  ca_device_is_aggregate(device_id) > 0
+}
+
+///|
+pub fn device_interface_type_tag(device_id : DeviceId) -> Int {
+  ca_device_interface_type_tag(device_id)
 }
 
 ///|

@@ -38,6 +38,47 @@ int32_t moon_cpal_ca_device_name_utf8(uint32_t device_id, moonbit_bytes_t out, i
   return -1;
 }
 
+int32_t moon_cpal_ca_device_uid_utf8_len(uint32_t device_id) {
+  (void)device_id;
+  return -1;
+}
+
+int32_t moon_cpal_ca_device_uid_utf8(uint32_t device_id, moonbit_bytes_t out, int32_t out_len) {
+  (void)device_id;
+  (void)out;
+  (void)out_len;
+  return -1;
+}
+
+int32_t moon_cpal_ca_device_manufacturer_utf8_len(uint32_t device_id) {
+  (void)device_id;
+  return -1;
+}
+
+int32_t moon_cpal_ca_device_manufacturer_utf8(uint32_t device_id,
+                                             moonbit_bytes_t out,
+                                             int32_t out_len) {
+  (void)device_id;
+  (void)out;
+  (void)out_len;
+  return -1;
+}
+
+uint32_t moon_cpal_ca_device_transport_type_u32(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+
+int32_t moon_cpal_ca_device_is_aggregate(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+
+int32_t moon_cpal_ca_device_interface_type_tag(uint32_t device_id) {
+  (void)device_id;
+  return 0;
+}
+
 int32_t moon_cpal_ca_input_channel_count(uint32_t device_id) {
   (void)device_id;
   return 0;
@@ -256,6 +297,8 @@ static int32_t ca_get_property_data(AudioObjectID object,
   return 0;
 }
 
+static int32_t ca_copy_device_uid(AudioDeviceID dev, CFStringRef *out_uid);
+
 uint32_t moon_cpal_ca_default_output_device_id(void) {
   AudioObjectPropertyAddress addr = {
       kAudioHardwarePropertyDefaultOutputDevice,
@@ -397,6 +440,173 @@ int32_t moon_cpal_ca_device_name_utf8(uint32_t device_id,
     return need > 0 ? need : -1;
   }
   return (int32_t)used;
+}
+
+int32_t moon_cpal_ca_device_uid_utf8_len(uint32_t device_id) {
+  CFStringRef uid = NULL;
+  int32_t st = ca_copy_device_uid((AudioDeviceID)device_id, &uid);
+  if (st != 0) {
+    return st;
+  }
+  if (uid == NULL) {
+    return -1;
+  }
+  CFRange range = CFRangeMake(0, CFStringGetLength(uid));
+  CFIndex used = 0;
+  CFStringGetBytes(uid, range, kCFStringEncodingUTF8, 0, false, NULL, 0, &used);
+  CFRelease(uid);
+  return (int32_t)used;
+}
+
+int32_t moon_cpal_ca_device_uid_utf8(uint32_t device_id, uint8_t *out, int32_t out_len) {
+  if (out == NULL || out_len <= 0) {
+    return 0;
+  }
+
+  CFStringRef uid = NULL;
+  int32_t st = ca_copy_device_uid((AudioDeviceID)device_id, &uid);
+  if (st != 0) {
+    return st;
+  }
+  if (uid == NULL) {
+    return -1;
+  }
+
+  CFRange range = CFRangeMake(0, CFStringGetLength(uid));
+  CFIndex used = 0;
+  CFIndex chars = CFStringGetBytes(uid,
+                                  range,
+                                  kCFStringEncodingUTF8,
+                                  0,
+                                  false,
+                                  out,
+                                  (CFIndex)out_len,
+                                  &used);
+  if (chars != range.length) {
+    int32_t need = moon_cpal_ca_device_uid_utf8_len(device_id);
+    CFRelease(uid);
+    return need > 0 ? need : -1;
+  }
+  CFRelease(uid);
+  return (int32_t)used;
+}
+
+int32_t moon_cpal_ca_device_manufacturer_utf8_len(uint32_t device_id) {
+  AudioObjectPropertyAddress addr = {kAudioObjectPropertyManufacturer,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  CFStringRef mfr = NULL;
+  uint32_t size = (uint32_t)sizeof(mfr);
+  int32_t st = ca_get_property_data((AudioObjectID)device_id, &addr, &size, &mfr);
+  if (st != 0) {
+    return st;
+  }
+  if (mfr == NULL) {
+    return -1;
+  }
+  CFRange range = CFRangeMake(0, CFStringGetLength(mfr));
+  CFIndex used = 0;
+  CFStringGetBytes(mfr, range, kCFStringEncodingUTF8, 0, false, NULL, 0, &used);
+  return (int32_t)used;
+}
+
+int32_t moon_cpal_ca_device_manufacturer_utf8(uint32_t device_id, uint8_t *out, int32_t out_len) {
+  if (out == NULL || out_len <= 0) {
+    return 0;
+  }
+
+  AudioObjectPropertyAddress addr = {kAudioObjectPropertyManufacturer,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  CFStringRef mfr = NULL;
+  uint32_t size = (uint32_t)sizeof(mfr);
+  int32_t st = ca_get_property_data((AudioObjectID)device_id, &addr, &size, &mfr);
+  if (st != 0) {
+    return st;
+  }
+  if (mfr == NULL) {
+    return -1;
+  }
+
+  CFRange range = CFRangeMake(0, CFStringGetLength(mfr));
+  CFIndex used = 0;
+  CFIndex chars = CFStringGetBytes(mfr,
+                                  range,
+                                  kCFStringEncodingUTF8,
+                                  0,
+                                  false,
+                                  out,
+                                  (CFIndex)out_len,
+                                  &used);
+  if (chars != range.length) {
+    int32_t need = moon_cpal_ca_device_manufacturer_utf8_len(device_id);
+    return need > 0 ? need : -1;
+  }
+  return (int32_t)used;
+}
+
+uint32_t moon_cpal_ca_device_transport_type_u32(uint32_t device_id) {
+  AudioObjectPropertyAddress addr = {kAudioDevicePropertyTransportType,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  uint32_t transport = 0;
+  uint32_t size = (uint32_t)sizeof(transport);
+  int32_t st = ca_get_property_data((AudioObjectID)device_id, &addr, &size, &transport);
+  if (st != 0) {
+    return 0;
+  }
+  return transport;
+}
+
+int32_t moon_cpal_ca_device_is_aggregate(uint32_t device_id) {
+  AudioObjectPropertyAddress addr = {kAudioObjectPropertyClass,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  uint32_t class_id = 0;
+  uint32_t size = (uint32_t)sizeof(class_id);
+  int32_t st = ca_get_property_data((AudioObjectID)device_id, &addr, &size, &class_id);
+  if (st != 0) {
+    return 0;
+  }
+  return class_id == (uint32_t)kAudioAggregateDeviceClassID ? 1 : 0;
+}
+
+// InterfaceType tags shared with MoonBit mapping:
+// 0 Unknown, 1 BuiltIn, 2 Usb, 3 Bluetooth, 4 Pci, 5 FireWire, 6 Thunderbolt, 7 Hdmi,
+// 10 Network, 11 Virtual, 12 DisplayPort, 13 Aggregate.
+int32_t moon_cpal_ca_device_interface_type_tag(uint32_t device_id) {
+  if (moon_cpal_ca_device_is_aggregate(device_id) != 0) {
+    return 13;
+  }
+
+  uint32_t transport = moon_cpal_ca_device_transport_type_u32(device_id);
+  switch (transport) {
+  case kAudioDeviceTransportTypeBuiltIn:
+    return 1;
+  case kAudioDeviceTransportTypeUSB:
+    return 2;
+  case kAudioDeviceTransportTypeBluetooth:
+    return 3;
+  case kAudioDeviceTransportTypePCI:
+    return 4;
+  case kAudioDeviceTransportTypeFireWire:
+    return 5;
+  case kAudioDeviceTransportTypeThunderbolt:
+    return 6;
+  case kAudioDeviceTransportTypeHDMI:
+    return 7;
+  case kAudioDeviceTransportTypeDisplayPort:
+    return 12;
+  case kAudioDeviceTransportTypeAirPlay:
+  case kAudioDeviceTransportTypeAVB:
+    return 10;
+  case kAudioDeviceTransportTypeVirtual:
+    return 11;
+  case kAudioDeviceTransportTypeAggregate:
+    return 13;
+  default:
+    return 0;
+  }
 }
 
 static int32_t ca_stream_channel_count(uint32_t device_id,
