@@ -1,4 +1,17 @@
 {
-  "import": ["zhengyu/moon_cpal"]
+  "import": ["zhengyu/moon_cpal"],
+  "targets": {
+    "stream_types.mbt": ["native"],
+    "stream_callback_bridge.mbt": ["native"],
+    "stream_native.mbt": ["native"],
+    "stream_timing_test.mbt": ["native"],
+    "stream_stub.mbt": ["not", "native"]
+  },
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread"
+    }
+  },
+  "native-stub": ["null_stream.c"]
 }
-

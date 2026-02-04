@@ -1,8 +1,8 @@
 ///|
-/// Null backend stream stubs.
+/// Null backend stream stubs (non-native targets).
 ///
-/// These allow the platform API to expose build/play/pause on all targets without doing any
-/// real audio I/O.
+/// On native targets we provide a real callback-thread model implementation in `stream_native.mbt`.
+/// These stubs exist only to keep package structure consistent on non-native builds.
 
 ///|
 pub struct Stream {
@@ -102,3 +102,4 @@ pub fn Stream::pause(_self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
 pub fn Stream::close(_self : Stream) -> Unit {
   _self.state[0] = 1
 }
+
