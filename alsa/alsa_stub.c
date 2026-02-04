@@ -442,6 +442,21 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
     snd_pcm_close(pcm);
     return moonbit_make_bytes_raw(0);
   }
+  // `min_rate`/`max_rate` may be reported as very large values by some virtual devices
+  // (e.g. "null" plugin). We serialize as u32 but decode into signed Int on the MoonBit
+  // side, so clamp to i32::MAX to avoid negative values after decoding.
+  if (min_rate == 0) {
+    min_rate = 1;
+  }
+  if (min_rate > 0x7FFFFFFFu) {
+    min_rate = 0x7FFFFFFFu;
+  }
+  if (max_rate > 0x7FFFFFFFu) {
+    max_rate = 0x7FFFFFFFu;
+  }
+  if (max_rate < min_rate) {
+    max_rate = min_rate;
+  }
 
   // Decide whether to return a continuous range or a list of discrete common rates.
   struct rate_pair {
@@ -501,12 +516,12 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
     snd_pcm_close(pcm);
     return moonbit_make_bytes_raw(0);
   }
-  // Clamp into u32 range and avoid a zero-length buffer range.
+  // Clamp into i32 range and avoid a zero-length buffer range (see note above).
   uint32_t buf_min = (min_buf == 0) ? 1u
-                                    : (min_buf > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)min_buf);
+                                    : (min_buf > 0x7FFFFFFFu ? 0x7FFFFFFFu : (uint32_t)min_buf);
   uint32_t buf_max =
       (max_buf == 0) ? buf_min
-                     : (max_buf > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)max_buf);
+                     : (max_buf > 0x7FFFFFFFu ? 0x7FFFFFFFu : (uint32_t)max_buf);
   if (buf_max < buf_min) {
     buf_max = buf_min;
   }
