@@ -63,3 +63,35 @@ pub fn string_to_ascii_bytes(s : String) -> Bytes {
     }
   })
 }
+
+///|
+/// Encode a string into UTF-8 bytes.
+///
+/// This is needed for native backends that require UTF-8 identifiers (e.g. WASAPI endpoint IDs).
+pub fn string_to_utf8_bytes(s : String) -> Bytes {
+  // Pass 1: compute output length.
+  let mut n = 0
+  for c in s {
+    let code = c.to_uint()
+    if code < 0x80 {
+      n += 1
+    } else if code < 0x0800 {
+      n += 2
+    } else if code < 0x010000 {
+      n += 3
+    } else {
+      n += 4
+    }
+  }
+  if n <= 0 {
+    return Bytes::default()
+  }
+
+  // Pass 2: write bytes.
+  let buf = FixedArray::make(n, (0 : Int).to_byte())
+  let mut off = 0
+  for c in s {
+    off = off + buf.set_utf8_char(off, c)
+  }
+  FixedArray::unsafe_reinterpret_as_bytes(buf)
+}

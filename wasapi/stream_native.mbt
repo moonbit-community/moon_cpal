@@ -155,7 +155,7 @@ pub fn Device::build_output_stream(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  let dev = @moon_cpal.string_to_ascii_bytes(self.id)
+  let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_output(
     dev,
@@ -197,7 +197,7 @@ pub fn Device::build_input_stream(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  let dev = @moon_cpal.string_to_ascii_bytes(self.id)
+  let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(
     dev,

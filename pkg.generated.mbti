@@ -54,6 +54,8 @@ pub fn stream_error_stream_invalidated() -> StreamError
 
 pub fn string_to_ascii_bytes(String) -> Bytes
 
+pub fn string_to_utf8_bytes(String) -> Bytes
+
 pub fn supported_stream_configs_error_backend_specific(String) -> SupportedStreamConfigsError
 
 pub fn supported_stream_configs_error_device_busy() -> SupportedStreamConfigsError

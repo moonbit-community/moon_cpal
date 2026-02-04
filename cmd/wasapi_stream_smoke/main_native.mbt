@@ -29,26 +29,23 @@ fn main {
     println("wasapi_stream_smoke: Windows-only (native)")
     return
   }
-
   let host = @wasapi.default_host()
   let devices = host.devices()
   println("devices: \{devices.length()}")
   for d in devices {
     println("  - \{d.name()}")
   }
-
   let mut out_ok = false
   for dev in devices {
     println("trying output device: \{dev.name()}")
-    let cfg =
-      try dev.default_output_config() catch {
-        e => {
-          println("default output config failed: \{e}")
-          continue
-        }
-      } noraise {
-        supported => supported.config()
+    let cfg = try dev.default_output_config() catch {
+      e => {
+        println("default output config failed: \{e}")
+        continue
       }
+    } noraise {
+      supported => supported.config()
+    }
     let calls : Array[Int] = [0]
     try
       dev.build_output_stream(
@@ -92,19 +89,17 @@ fn main {
   if !out_ok {
     println("no usable output device")
   }
-
   let mut in_ok = false
   for dev in devices {
     println("trying input device: \{dev.name()}")
-    let cfg =
-      try dev.default_input_config() catch {
-        e => {
-          println("default input config failed: \{e}")
-          continue
-        }
-      } noraise {
-        supported => supported.config()
+    let cfg = try dev.default_input_config() catch {
+      e => {
+        println("default input config failed: \{e}")
+        continue
       }
+    } noraise {
+      supported => supported.config()
+    }
     let calls : Array[Int] = [0]
     let printed : Array[Bool] = [false]
     try
