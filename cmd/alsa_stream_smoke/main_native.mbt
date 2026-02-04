@@ -37,82 +37,128 @@ fn main {
     println("  - \{d.name()}")
   }
 
-  match devices.get(0) {
-    None => println("no output device")
-    Some(def_dev) => {
-      let dev = match devices.get(1) {
-        None => def_dev
-        Some(x) => {
-          println("using non-default output device")
-          x
+  let mut out_ok = false
+  for dev in devices {
+    println("trying output device: \{dev.name()}")
+    let calls : Array[Int] = [0]
+    let cfg =
+      try dev.default_output_config() catch {
+        e => {
+          println("default output config failed: \{e}")
+          continue
         }
+      } noraise {
+        supported => supported.config()
       }
-      println("output device: \{dev.name()}")
-      let supported = try! dev.default_output_config()
-      let cfg = supported.config()
-      println("building output stream: \{supported}")
-      let calls : Array[Int] = [0]
-      let stream = try!
-        dev.build_output_stream(
-          cfg,
-          fn(data, _info) {
-            calls[0] = calls[0] + 1
-            fill_silence(data)
-          },
-          fn(err) { println("stream error: \{err}") },
-          None,
-        )
-      try! stream.play()
-      sleep_ms(1000)
-      try! stream.pause()
-      stream.close()
-      println("output stream ok (callbacks=\{calls[0]})")
+    try
+      dev.build_output_stream(
+        cfg,
+        fn(data, _info) {
+          calls[0] = calls[0] + 1
+          fill_silence(data)
+        },
+        fn(err) { println("stream error: \{err}") },
+        None,
+      )
+    catch {
+      e => {
+        println("output stream build failed: \{e}")
+        continue
+      }
+    } noraise {
+      stream => {
+        try stream.play() catch {
+          e => {
+            println("output stream play failed: \{e}")
+            stream.close()
+            continue
+          }
+        } noraise {
+          _ => ()
+        }
+        sleep_ms(1000)
+        try stream.pause() catch {
+          e => println("output stream pause failed: \{e}")
+        } noraise {
+          _ => ()
+        }
+        stream.close()
+        println("output stream ok (callbacks=\{calls[0]})")
+        out_ok = true
+        break
+      }
     }
   }
+  if !out_ok {
+    println("no usable output device")
+  }
 
-  match devices.get(0) {
-    None => println("no input device")
-    Some(def_dev) => {
-      let dev = match devices.get(1) {
-        None => def_dev
-        Some(x) => {
-          println("using non-default input device")
-          x
+  let mut in_ok = false
+  for dev in devices {
+    println("trying input device: \{dev.name()}")
+    let calls : Array[Int] = [0]
+    let printed : Array[Bool] = [false]
+    let cfg =
+      try dev.default_input_config() catch {
+        e => {
+          println("default input config failed: \{e}")
+          continue
         }
+      } noraise {
+        supported => supported.config()
       }
-      println("input device: \{dev.name()}")
-      let supported = try! dev.default_input_config()
-      let cfg = supported.config()
-      println("building input stream: \{supported}")
-      let calls : Array[Int] = [0]
-      let printed : Array[Bool] = [false]
-      let stream = try!
-        dev.build_input_stream(
-          cfg,
-          fn(data, info) {
-            calls[0] = calls[0] + 1
-            if !printed[0] {
-              printed[0] = true
-              println("input ts: \{info.timestamp()}")
-              match data.try_as_f32() {
-                None => println("input first buffer: (not f32)")
-                Some(xs) =>
-                  if xs.is_empty() {
-                    println("input first buffer: empty")
-                  } else {
-                    println("input first sample: \{xs[0]}")
-                  }
-              }
+    try
+      dev.build_input_stream(
+        cfg,
+        fn(data, info) {
+          calls[0] = calls[0] + 1
+          if !printed[0] {
+            printed[0] = true
+            println("input ts: \{info.timestamp()}")
+            match data.try_as_f32() {
+              None => println("input first buffer: (not f32)")
+              Some(xs) =>
+                if xs.is_empty() {
+                  println("input first buffer: empty")
+                } else {
+                  println("input first sample: \{xs[0]}")
+                }
             }
-          },
-          fn(err) { println("stream error: \{err}") },
-          None,
-        )
-      try! stream.play()
-      sleep_ms(1000)
-      try! stream.pause()
-      stream.close()
-      println("input stream ok (callbacks=\{calls[0]})")
+          }
+        },
+        fn(err) { println("stream error: \{err}") },
+        None,
+      )
+    catch {
+      e => {
+        println("input stream build failed: \{e}")
+        continue
+      }
+    } noraise {
+      stream => {
+        try stream.play() catch {
+          e => {
+            println("input stream play failed: \{e}")
+            stream.close()
+            continue
+          }
+        } noraise {
+          _ => ()
+        }
+        sleep_ms(1000)
+        try stream.pause() catch {
+          e => println("input stream pause failed: \{e}")
+        } noraise {
+          _ => ()
+        }
+        stream.close()
+        println("input stream ok (callbacks=\{calls[0]})")
+        in_ok = true
+        break
+      }
     }
+  }
+  if !in_ok {
+    println("no usable input device")
   }
 }

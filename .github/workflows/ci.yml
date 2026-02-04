@@ -6,8 +6,8 @@ on:
   pull_request:
 
 jobs:
-  test-wasm:
-    name: moon test (wasm)
+  test-ubuntu-native:
+    name: native (ubuntu, ALSA loopback)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,11 +17,33 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
-      - name: Run tests
-        run: moon test --target wasm
+      - name: Install ALSA deps + loopback
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends alsa-utils libasound2-dev
+          sudo modprobe snd-aloop
+          # Route "default" PCM to the loopback device so our smoke test doesn't depend on real hardware.
+          cat > "$HOME/.asoundrc" <<'EOF'
+          pcm.!default {
+            type asym
+            playback.pcm "plughw:Loopback,0,0"
+            capture.pcm  "plughw:Loopback,1,0"
+          }
+          ctl.!default {
+            type hw
+            card Loopback
+          }
+          EOF
+          aplay -l || true
+          arecord -l || true
+      - name: Run unit tests
+        run: moon test --target native
+      - name: Run ALSA smoke (real I/O)
+        run: moon run --target native cmd/alsa_stream_smoke -q
 
   test-macos-native:
-    name: moon test (macos native)
+    name: native (macos, CoreAudio)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,5 +53,29 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
-      - name: Run tests
+      - name: Run unit tests
         run: moon test --target native
+      - name: Run CoreAudio smoke (real I/O)
+        run: moon run --target native cmd/macos_stream_smoke -q
+
+  test-windows-native:
+    name: native (windows, WASAPI)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MoonBit
+        shell: pwsh
+        run: |
+          iwr -useb https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          "$env:USERPROFILE\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          moon version
+      - name: Install virtual audio device (VB-CABLE)
+        shell: pwsh
+        run: |
+          choco install vbcable -y --no-progress
+      - name: Run unit tests
+        shell: pwsh
+        run: moon test --target native
+      - name: Run WASAPI smoke (real I/O)
+        shell: pwsh
+        run: moon run --target native cmd/wasapi_stream_smoke -q
