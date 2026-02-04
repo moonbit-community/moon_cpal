@@ -37,6 +37,13 @@ jobs:
           EOF
           aplay -l || true
           arecord -l || true
+      - name: Build cc wrapper (Windows-safe)
+        shell: bash
+        run: |
+          # On Windows runners, `moon` can't reliably execute `.sh` wrappers directly.
+          # We compile `scripts/moon_cc.c` into `scripts/moon_cc.sh` so the path stays stable.
+          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
+          chmod +x scripts/moon_cc.sh
       - name: Run unit tests
         run: moon test --target native
       - name: Run ALSA smoke (real I/O)
@@ -54,6 +61,11 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
+      - name: Build cc wrapper (Windows-safe)
+        shell: bash
+        run: |
+          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
+          chmod +x scripts/moon_cc.sh
       - name: Run unit tests
         run: moon test --target native
       - name: Run CoreAudio smoke (real I/O)
@@ -73,6 +85,12 @@ jobs:
           $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           $env:PATH = "$mb;$env:PATH"
           moon version
+      - name: Build cc wrapper (Windows-safe)
+        shell: pwsh
+        run: |
+          $cc = "C:\mingw64\bin\cc.exe"
+          if (-not (Test-Path $cc)) { $cc = "cc.exe" }
+          & $cc -O2 scripts\moon_cc.c -o scripts\moon_cc.sh
       - name: Install virtual audio device (VB-CABLE)
         continue-on-error: true
         shell: pwsh
