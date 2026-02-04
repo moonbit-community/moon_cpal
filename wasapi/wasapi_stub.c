@@ -900,9 +900,6 @@ static int wasapi_open_property_store(const char *id_utf8,
   if (id_utf8 == NULL || id_len == 0 || out_props == NULL) {
     return -1;
   }
-  if (utf8_is_default(id_utf8, id_len)) {
-    return -1;
-  }
 
   wchar_t *idw = utf8_to_wide_alloc(id_utf8, id_len);
   if (idw == NULL) {
