@@ -78,7 +78,6 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 #include <mmreg.h>
-#include <ksmedia.h>
 #include <propidl.h>
 #include <propvarutil.h>
 #include <functiondiscoverykeys_devpkey.h>
@@ -159,6 +158,19 @@ static uint32_t channel_mask_from_channels(uint32_t channels) {
   }
 }
 
+// MinGW doesn't always provide linkable definitions for KSDATAFORMAT_SUBTYPE_* GUIDs.
+// Define the two subformats we need locally:
+// - PCM:        {00000001-0000-0010-8000-00AA00389B71}
+// - IEEE_FLOAT: {00000003-0000-0010-8000-00AA00389B71}
+static const GUID moon_cpal_ks_subtype_pcm = {0x00000001,
+                                             0x0000,
+                                             0x0010,
+                                             {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+static const GUID moon_cpal_ks_subtype_ieee_float = {0x00000003,
+                                                     0x0000,
+                                                     0x0010,
+                                                     {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+
 static int wasapi_build_wfx_ext(uint32_t channels,
                                 uint32_t sample_rate,
                                 uint32_t sample_format_tag,
@@ -169,13 +181,13 @@ static int wasapi_build_wfx_ext(uint32_t channels,
   memset(out, 0, sizeof(*out));
 
   uint16_t bits = 0;
-  GUID sub = KSDATAFORMAT_SUBTYPE_PCM;
+  GUID sub = moon_cpal_ks_subtype_pcm;
   if (sample_format_tag == 1) {
     bits = 32;
-    sub = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+    sub = moon_cpal_ks_subtype_ieee_float;
   } else if (sample_format_tag == 2) {
     bits = 16;
-    sub = KSDATAFORMAT_SUBTYPE_PCM;
+    sub = moon_cpal_ks_subtype_pcm;
   } else {
     return 0;
   }
