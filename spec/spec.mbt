@@ -51,6 +51,28 @@ pub fn Host::devices(
 
 ///|
 #declaration_only
+pub fn Host::device_by_id(self : Host, id : @moon_cpal.DeviceId) -> Device? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::input_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::output_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Host::default_output_device(
   self : Host,
 ) -> Device? {
@@ -73,9 +95,29 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 
 ///|
 #declaration_only
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Device::description(
   self : Device,
 ) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::supports_input(self : Device) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::supports_output(self : Device) -> Bool {
   ...
 }
 

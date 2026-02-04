@@ -44,3 +44,25 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
     _ => inspect(false, content="true")
   }
 }
+
+///|
+test "spec device id + supports + device_by_id (best-effort)" {
+  for host_id in @moon_cpal.available_hosts() {
+    let host = try! host_from_id(host_id)
+    let ds = try host.devices() catch { _ => [] } noraise { xs => xs }
+    for d in ds {
+      let did = d.id()
+      match host.device_by_id(did) {
+        None => inspect(true, content="true")
+        Some(found) => {
+          let fid = found.id()
+          inspect(fid == did, content="true")
+        }
+      }
+      let in_len = try d.supported_input_configs().length() catch { _ => 0 } noraise { x => x }
+      let out_len = try d.supported_output_configs().length() catch { _ => 0 } noraise { x => x }
+      inspect(d.supports_input() == (in_len > 0), content="true")
+      inspect(d.supports_output() == (out_len > 0), content="true")
+    }
+  }
+}

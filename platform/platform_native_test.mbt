@@ -35,3 +35,54 @@ test "platform available_hosts + host_from_id (native)" {
     }
   }
 }
+
+///|
+test "platform device_by_id + supports + in/out device filters" {
+  for host_id in available_hosts() {
+    let host = try host_from_id(host_id) catch {
+      _ => continue
+    } noraise {
+      h => h
+    }
+
+    let ds = try host.devices() catch {
+      _ => []
+    } noraise {
+      xs => xs
+    }
+
+    // device_by_id roundtrip (best-effort)
+    for d in ds {
+      let did = d.id()
+      match host.device_by_id(did) {
+        None => inspect(true, content="true")
+        Some(found) => {
+          let found_id = found.id()
+          inspect(found_id == did, content="true")
+        }
+      }
+
+      // supports_* should match "supported_*_configs non-empty" (errors => false)
+      let in_len = try d.supported_input_configs().length() catch { _ => 0 } noraise { x => x }
+      let out_len = try d.supported_output_configs().length() catch { _ => 0 } noraise { x => x }
+      inspect(d.supports_input() == (in_len > 0), content="true")
+      inspect(d.supports_output() == (out_len > 0), content="true")
+    }
+
+    // input_devices/output_devices == devices().filter(supports_*)
+    let expected_in : Array[Device] = []
+    let expected_out : Array[Device] = []
+    for d in ds {
+      if d.supports_input() {
+        expected_in.push(d)
+      }
+      if d.supports_output() {
+        expected_out.push(d)
+      }
+    }
+    let got_in = try host.input_devices() catch { _ => [] } noraise { x => x }
+    let got_out = try host.output_devices() catch { _ => [] } noraise { x => x }
+    inspect(got_in.length() == expected_in.length(), content="true")
+    inspect(got_out.length() == expected_out.length(), content="true")
+  }
+}

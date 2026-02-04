@@ -345,3 +345,200 @@ pub fn DeviceDescription::to_string(self : DeviceDescription) -> String {
   }
   sb.to_string()
 }
+
+///|
+/// Builder for constructing a `DeviceDescription`.
+///
+/// This is primarily intended for backend implementations to gradually build up
+/// descriptions with whatever metadata is available.
+pub struct DeviceDescriptionBuilder {
+  name : String
+  manufacturer : String?
+  driver : String?
+  device_type : DeviceType
+  interface_type : InterfaceType
+  direction : DeviceDirection
+  address : String?
+  extended : Array[String]
+} derive(Show, Eq)
+
+///|
+pub fn DeviceDescriptionBuilder::new(name : String) -> DeviceDescriptionBuilder {
+  {
+    name,
+    manufacturer: None,
+    driver: None,
+    device_type: DeviceType::Unknown,
+    interface_type: InterfaceType::Unknown,
+    direction: DeviceDirection::Unknown,
+    address: None,
+    extended: [],
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::manufacturer(
+  self : DeviceDescriptionBuilder,
+  manufacturer : String,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: Some(manufacturer),
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::driver(
+  self : DeviceDescriptionBuilder,
+  driver : String,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: Some(driver),
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::device_type(
+  self : DeviceDescriptionBuilder,
+  device_type : DeviceType,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::interface_type(
+  self : DeviceDescriptionBuilder,
+  interface_type : InterfaceType,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::direction(
+  self : DeviceDescriptionBuilder,
+  direction : DeviceDirection,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction,
+    address: self.address,
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::address(
+  self : DeviceDescriptionBuilder,
+  address : String,
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: Some(address),
+    extended: self.extended,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::extended(
+  self : DeviceDescriptionBuilder,
+  lines : Array[String],
+) -> DeviceDescriptionBuilder {
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: lines,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::add_extended_line(
+  self : DeviceDescriptionBuilder,
+  line : String,
+) -> DeviceDescriptionBuilder {
+  let xs = self.extended.copy()
+  xs.push(line)
+  {
+    name: self.name,
+    manufacturer: self.manufacturer,
+    driver: self.driver,
+    device_type: self.device_type,
+    interface_type: self.interface_type,
+    direction: self.direction,
+    address: self.address,
+    extended: xs,
+  }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::build(
+  self : DeviceDescriptionBuilder,
+) -> DeviceDescription {
+  DeviceDescription::new(
+    self.name,
+    manufacturer=self.manufacturer,
+    driver=self.driver,
+    device_type=self.device_type,
+    interface_type=self.interface_type,
+    direction=self.direction,
+    address=self.address,
+    extended=self.extended,
+  )
+}
+
+///|
+pub fn direction_from_caps(
+  has_input : Bool,
+  has_output : Bool,
+) -> DeviceDirection {
+  match (has_input, has_output) {
+    (true, true) => DeviceDirection::Duplex
+    (true, false) => DeviceDirection::Input
+    (false, true) => DeviceDirection::Output
+    (false, false) => DeviceDirection::Unknown
+  }
+}

@@ -12,5 +12,11 @@
     "platform_stub.mbt": ["not", "native"],
     "platform_native_test.mbt": ["native"],
     "platform_stub_test.mbt": ["not", "native"]
+  },
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -lasound -ljack -framework CoreAudio -framework CoreFoundation -framework AudioToolbox -lole32 -luuid -lmmdevapi -lavrt"
+    }
   }
 }

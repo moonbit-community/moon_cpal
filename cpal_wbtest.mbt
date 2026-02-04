@@ -183,6 +183,30 @@ test "device description formatting" {
 }
 
 ///|
+test "device description builder + direction_from_caps" {
+  inspect(direction_from_caps(true, true), content="Duplex")
+  inspect(direction_from_caps(true, false), content="Input")
+  inspect(direction_from_caps(false, true), content="Output")
+  inspect(direction_from_caps(false, false), content="Unknown")
+
+  let built = DeviceDescriptionBuilder::new("X")
+    .manufacturer("ACME")
+    .driver("drv")
+    .device_type(DeviceType::speaker())
+    .interface_type(InterfaceType::usb())
+    .direction(DeviceDirection::output())
+    .address("addr")
+    .add_extended_line("line1")
+    .add_extended_line("line2")
+    .build()
+
+  inspect(built.to_string(), content="X (ACME) [Speaker] via USB")
+  inspect(built.driver(), content="Some(\"drv\")")
+  inspect(built.address(), content="Some(\"addr\")")
+  inspect(built.extended().length(), content="2")
+}
+
+///|
 test "callback timestamp types" {
   let callback = StreamInstant::new(1L, 2)
   let capture = StreamInstant::new(3L, 4)

@@ -41,13 +41,18 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 }
 
 ///|
-pub fn Device::id(self : Device) -> DeviceId {
-  self.id
+pub fn Device::name(self : Device) -> String raise CoreAudioError {
+  device_name(self.id)
 }
 
 ///|
-pub fn Device::name(self : Device) -> String raise CoreAudioError {
-  device_name(self.id)
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId {
+  @moon_cpal.DeviceId::new(
+    @moon_cpal.HostId::CoreAudio,
+    self.id.to_string(),
+  )
 }
 
 ///|

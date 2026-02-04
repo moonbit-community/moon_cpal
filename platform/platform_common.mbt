@@ -178,6 +178,52 @@ pub fn Host::devices(
 }
 
 ///|
+pub fn Host::device_by_id(
+  self : Host,
+  id : @moon_cpal.DeviceId,
+) -> Device? {
+  let ds = try Host::devices(self) catch {
+    _ => []
+  } noraise {
+    xs => xs
+  }
+  for d in ds {
+    if d.id() == id {
+      return Some(d)
+    }
+  }
+  None
+}
+
+///|
+pub fn Host::input_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  let ds = Host::devices(self)
+  let out : Array[Device] = []
+  for d in ds {
+    if d.supports_input() {
+      out.push(d)
+    }
+  }
+  out
+}
+
+///|
+pub fn Host::output_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  let ds = Host::devices(self)
+  let out : Array[Device] = []
+  for d in ds {
+    if d.supports_output() {
+      out.push(d)
+    }
+  }
+  out
+}
+
+///|
 pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
   match self {
     Null(d) => d.name()
@@ -197,6 +243,19 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
     Alsa(d) => d.name()
     Jack(d) => d.name()
     Wasapi(d) => d.name()
+  }
+}
+
+///|
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId {
+  match self {
+    Null(d) => d.id()
+    CoreAudio(d) => d.id()
+    Alsa(d) => d.id()
+    Jack(d) => d.id()
+    Wasapi(d) => d.id()
   }
 }
 
@@ -222,6 +281,24 @@ pub fn Device::description(
     Alsa(d) => d.description()
     Jack(d) => d.description()
     Wasapi(d) => d.description()
+  }
+}
+
+///|
+pub fn Device::supports_input(self : Device) -> Bool {
+  try {
+    Device::supported_input_configs(self).length() > 0
+  } catch {
+    _ => false
+  }
+}
+
+///|
+pub fn Device::supports_output(self : Device) -> Bool {
+  try {
+    Device::supported_output_configs(self).length() > 0
+  } catch {
+    _ => false
   }
 }
 

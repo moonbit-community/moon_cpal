@@ -50,6 +50,8 @@ fn main {
     match out_dev {
       None => println("  default output device: None")
       Some(d) => {
+        let did = d.id()
+        println("  output device id: \{did.to_string()}")
         let name = try d.name() catch {
           e => {
             println("  output device name error: \{e}")
@@ -88,6 +90,8 @@ fn main {
     match in_dev {
       None => println("  default input device: None")
       Some(d) => {
+        let did = d.id()
+        println("  input device id: \{did.to_string()}")
         let name = try d.name() catch {
           e => {
             println("  input device name error: \{e}")

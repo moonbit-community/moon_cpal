@@ -147,6 +147,13 @@ pub fn Device::description(
 }
 
 ///|
+pub fn Device::id(
+  _self : Device,
+) -> @moon_cpal.DeviceId {
+  @moon_cpal.DeviceId::new(@moon_cpal.HostId::Alsa, _self.id)
+}
+
+///|
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {

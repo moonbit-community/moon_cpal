@@ -49,6 +49,31 @@ pub fn Host::devices(
 }
 
 ///|
+pub fn Host::device_by_id(
+  self : Host,
+  id : @moon_cpal.DeviceId,
+) -> Device? {
+  match @platform.Host::device_by_id(self.inner, id) {
+    None => None
+    Some(d) => Some({ inner: d })
+  }
+}
+
+///|
+pub fn Host::input_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  @platform.Host::input_devices(self.inner).map(fn(d) { { inner: d } })
+}
+
+///|
+pub fn Host::output_devices(
+  self : Host,
+) -> Array[Device] raise @moon_cpal.DevicesError {
+  @platform.Host::output_devices(self.inner).map(fn(d) { { inner: d } })
+}
+
+///|
 pub fn Host::default_output_device(
   self : Host,
 ) -> Device? {
@@ -74,10 +99,27 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId {
+  @platform.Device::id(self.inner)
+}
+
+///|
 pub fn Device::description(
   self : Device,
 ) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
   @platform.Device::description(self.inner)
+}
+
+///|
+pub fn Device::supports_input(self : Device) -> Bool {
+  @platform.Device::supports_input(self.inner)
+}
+
+///|
+pub fn Device::supports_output(self : Device) -> Bool {
+  @platform.Device::supports_output(self.inner)
 }
 
 ///|
