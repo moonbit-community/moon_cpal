@@ -9,4 +9,16 @@ test "alsa errno mapping (unit)" {
     content="DeviceNotAvailable",
   )
   inspect(alsa_stream_error_from_errno(-32, "xrun"), content="BufferUnderrun")
+  inspect(
+    alsa_build_error_from_errno(-19, "snd_pcm_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    alsa_build_error_from_errno(-16, "snd_pcm_open"),
+    content="DeviceBusy",
+  )
+  inspect(
+    alsa_build_error_from_errno(-22, "snd_pcm_hw_params"),
+    content="InvalidArgument",
+  )
 }

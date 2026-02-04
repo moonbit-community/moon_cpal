@@ -215,6 +215,7 @@ int32_t moon_cpal_ca_stream_owner_close(void *owner) {
 #include <CoreAudio/CoreAudio.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <AudioToolbox/AudioToolbox.h>
+#include <AudioToolbox/AudioQueue.h>
 #include <mach/mach_time.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -607,6 +608,9 @@ int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
 // - 0: other/unknown
 // - 1: device not available
 // - 2: stream type not supported
+// - 3: stream invalidated
+// - 4: invalid argument
+// - 5: buffer underrun
 int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
   if (status == 0) {
     return 0;
@@ -618,12 +622,30 @@ int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
 #define MATCH(x) (a == (x) || b == (x))
 
   if (MATCH(kAudioHardwareBadDeviceError) || MATCH(kAudioHardwareNotRunningError) ||
-      MATCH(kAudioHardwareBadObjectError)) {
+      MATCH(kAudioHardwareBadObjectError) || MATCH(kAudioQueueErr_InvalidDevice) ||
+      MATCH(kAudioQueueErr_Permissions)) {
     return 1;
   }
 
   if (MATCH(kAudioDeviceUnsupportedFormatError)) {
     return 2;
+  }
+
+  // AudioQueue state is invalidated (queue disposed, bad run state, etc.).
+  if (MATCH(kAudioQueueErr_InvalidRunState) || MATCH(kAudioQueueErr_QueueInvalidated) ||
+      MATCH(kAudioQueueErr_DisposalPending) || MATCH(kAudioQueueErr_EnqueueDuringReset)) {
+    return 3;
+  }
+
+  // Invalid argument / parameter errors.
+  if (MATCH(kAudio_ParamError) || MATCH(kAudioQueueErr_InvalidParameter) ||
+      MATCH(kAudioQueueErr_InvalidProperty) || MATCH(kAudioQueueErr_InvalidPropertySize) ||
+      MATCH(kAudioQueueErr_InvalidPropertyValue)) {
+    return 4;
+  }
+
+  if (MATCH(kAudioQueueErr_RecordUnderrun)) {
+    return 5;
   }
 
   return 0;

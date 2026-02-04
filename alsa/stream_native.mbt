@@ -86,9 +86,7 @@ fn[A] raise_build_errno(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
-    "\{op} (errno \{status})",
-  )
+  raise alsa_build_error_from_errno(status, op)
 }
 
 ///|
@@ -96,7 +94,7 @@ fn[A] raise_play_errno(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.PlayStreamError {
-  raise @moon_cpal.play_stream_error_backend_specific("\{op} (errno \{status})")
+  raise alsa_play_error_from_errno(status, op)
 }
 
 ///|
@@ -104,9 +102,51 @@ fn[A] raise_pause_errno(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.PauseStreamError {
-  raise @moon_cpal.pause_stream_error_backend_specific(
-    "\{op} (errno \{status})",
-  )
+  raise alsa_pause_error_from_errno(status, op)
+}
+
+///|
+fn alsa_build_error_from_errno(
+  status : Int,
+  op : String,
+) -> @moon_cpal.BuildStreamError {
+  // Best-effort errno mapping (Linux).
+  if status == -19 {
+    // ENODEV
+    @moon_cpal.build_stream_error_device_not_available()
+  } else if status == -16 {
+    // EBUSY
+    @moon_cpal.build_stream_error_device_busy()
+  } else if status == -22 {
+    // EINVAL
+    @moon_cpal.build_stream_error_invalid_argument()
+  } else {
+    @moon_cpal.build_stream_error_backend_specific("\{op} (errno \{status})")
+  }
+}
+
+///|
+fn alsa_play_error_from_errno(
+  status : Int,
+  op : String,
+) -> @moon_cpal.PlayStreamError {
+  if status == -19 {
+    @moon_cpal.play_stream_error_device_not_available()
+  } else {
+    @moon_cpal.play_stream_error_backend_specific("\{op} (errno \{status})")
+  }
+}
+
+///|
+fn alsa_pause_error_from_errno(
+  status : Int,
+  op : String,
+) -> @moon_cpal.PauseStreamError {
+  if status == -19 {
+    @moon_cpal.pause_stream_error_device_not_available()
+  } else {
+    @moon_cpal.pause_stream_error_backend_specific("\{op} (errno \{status})")
+  }
 }
 
 ///|

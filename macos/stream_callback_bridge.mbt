@@ -116,9 +116,17 @@ fn call_stream_error_callback(
     4 => "AudioQueuePause"
     _ => "CoreAudioStream"
   }
-  error_callback(
-    @moon_cpal.stream_error_backend_specific("\{op} (OSStatus \{status})"),
-  )
+  let kind = osstatus_kind(status)
+  let err = if kind == 1 {
+    @moon_cpal.stream_error_device_not_available()
+  } else if kind == 3 {
+    @moon_cpal.stream_error_stream_invalidated()
+  } else if kind == 5 {
+    @moon_cpal.stream_error_buffer_underrun()
+  } else {
+    @moon_cpal.stream_error_backend_specific("\{op} (OSStatus \{status})")
+  }
+  error_callback(err)
 }
 
 ///|

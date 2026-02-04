@@ -85,9 +85,7 @@ fn[A] raise_build_hresult(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
-    "\{op} (HRESULT \{status})",
-  )
+  raise wasapi_build_error_from_hresult(status, op)
 }
 
 ///|
@@ -95,9 +93,7 @@ fn[A] raise_play_hresult(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.PlayStreamError {
-  raise @moon_cpal.play_stream_error_backend_specific(
-    "\{op} (HRESULT \{status})",
-  )
+  raise wasapi_play_error_from_hresult(status, op)
 }
 
 ///|
@@ -105,9 +101,55 @@ fn[A] raise_pause_hresult(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.PauseStreamError {
-  raise @moon_cpal.pause_stream_error_backend_specific(
-    "\{op} (HRESULT \{status})",
-  )
+  raise wasapi_pause_error_from_hresult(status, op)
+}
+
+///|
+fn wasapi_build_error_from_hresult(
+  status : Int,
+  op : String,
+) -> @moon_cpal.BuildStreamError {
+  // Best-effort mapping. The WASAPI C layer passes HRESULT as signed 32-bit int.
+  //
+  // Known values:
+  // - AUDCLNT_E_DEVICE_INVALIDATED = 0x88890004 (-2004287484)
+  // - AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A (-2004287478)
+  // - AUDCLNT_E_UNSUPPORTED_FORMAT= 0x88890008 (-2004287480)
+  // - AUDCLNT_E_BUFFER_SIZE_ERROR = 0x88890019 (-2004287463)
+  // - E_INVALIDARG                = 0x80070057 (-2147024809)
+  if status == -2004287484 || status == -2004287478 {
+    @moon_cpal.build_stream_error_device_not_available()
+  } else if status == -2004287480 || status == -2004287463 {
+    @moon_cpal.build_stream_error_stream_config_not_supported()
+  } else if status == -2147024809 {
+    @moon_cpal.build_stream_error_invalid_argument()
+  } else {
+    @moon_cpal.build_stream_error_backend_specific("\{op} (HRESULT \{status})")
+  }
+}
+
+///|
+fn wasapi_play_error_from_hresult(
+  status : Int,
+  op : String,
+) -> @moon_cpal.PlayStreamError {
+  if status == -2004287484 || status == -2004287478 {
+    @moon_cpal.play_stream_error_device_not_available()
+  } else {
+    @moon_cpal.play_stream_error_backend_specific("\{op} (HRESULT \{status})")
+  }
+}
+
+///|
+fn wasapi_pause_error_from_hresult(
+  status : Int,
+  op : String,
+) -> @moon_cpal.PauseStreamError {
+  if status == -2004287484 || status == -2004287478 {
+    @moon_cpal.pause_stream_error_device_not_available()
+  } else {
+    @moon_cpal.pause_stream_error_backend_specific("\{op} (HRESULT \{status})")
+  }
 }
 
 ///|

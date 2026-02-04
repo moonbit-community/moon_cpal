@@ -99,6 +99,7 @@ fn[A] raise_build_osstatus(
   match osstatus_kind(status) {
     1 => raise @moon_cpal.build_stream_error_device_not_available()
     2 => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    4 => raise @moon_cpal.build_stream_error_invalid_argument()
     _ =>
       raise @moon_cpal.build_stream_error_backend_specific(
         "\{op} (OSStatus \{status})",
