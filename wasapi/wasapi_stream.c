@@ -20,6 +20,8 @@ typedef struct moon_cpal_wasapi_stream_t {
   uint32_t channels;
   double sample_rate;
   uint32_t requested_frames;
+  // Optional endpoint id to open (UTF-16). If NULL, use the default endpoint per flow.
+  wchar_t *endpoint_id_w;
 
   uint32_t frames_per_cb;
   uint32_t bytes_per_frame;
@@ -54,6 +56,44 @@ typedef struct moon_cpal_wasapi_stream_t {
   // Capture accumulation for fixed-size callbacks.
   uint32_t cap_accum_frames;
 } moon_cpal_wasapi_stream_t;
+
+static int wasapi_utf8_is_default(const char *s) {
+  if (s == NULL) {
+    return 0;
+  }
+  return strcmp(s, "default") == 0;
+}
+
+static wchar_t *wasapi_endpoint_id_from_utf8_bytes(uint8_t *bytes, int32_t len) {
+  if (bytes == NULL || len <= 0) {
+    return NULL;
+  }
+  // Ensure NUL-terminated for MultiByteToWideChar.
+  char tmp[512];
+  size_t n = (size_t)len;
+  if (n >= sizeof(tmp)) {
+    n = sizeof(tmp) - 1;
+  }
+  memcpy(tmp, bytes, n);
+  tmp[n] = '\0';
+  if (tmp[0] == '\0' || wasapi_utf8_is_default(tmp)) {
+    return NULL;
+  }
+
+  int wlen = MultiByteToWideChar(CP_UTF8, 0, tmp, -1, NULL, 0);
+  if (wlen <= 0) {
+    return NULL;
+  }
+  wchar_t *ws = (wchar_t *)calloc((size_t)wlen, sizeof(wchar_t));
+  if (ws == NULL) {
+    return NULL;
+  }
+  if (MultiByteToWideChar(CP_UTF8, 0, tmp, -1, ws, wlen) <= 0) {
+    free(ws);
+    return NULL;
+  }
+  return ws;
+}
 
 static void wasapi_now(int64_t *out_secs, int32_t *out_nanos) {
   if (out_secs == NULL || out_nanos == NULL) {
@@ -184,8 +224,18 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     return 0;
   }
 
-  EDataFlow flow = s->is_input ? eCapture : eRender;
-  hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(s->enumerator, flow, eConsole, &s->device);
+  if (s->endpoint_id_w != NULL) {
+    hr = IMMDeviceEnumerator_GetDevice(s->enumerator, s->endpoint_id_w, &s->device);
+    if (FAILED(hr) || s->device == NULL) {
+      // Fall back to default endpoint if the id is stale/unavailable.
+      wasapi_invoke_error(s, 6 /* DeviceInit */, (int32_t)hr);
+      EDataFlow flow = s->is_input ? eCapture : eRender;
+      hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(s->enumerator, flow, eConsole, &s->device);
+    }
+  } else {
+    EDataFlow flow = s->is_input ? eCapture : eRender;
+    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(s->enumerator, flow, eConsole, &s->device);
+  }
   if (FAILED(hr)) {
     wasapi_invoke_error(s, 6 /* DeviceInit */, (int32_t)hr);
     s->init_hr = hr;
@@ -483,6 +533,10 @@ static void wasapi_stream_destroy(moon_cpal_wasapi_stream_t *s) {
     moonbit_decref(s->mb_buffer);
     s->mb_buffer = NULL;
   }
+  if (s->endpoint_id_w != NULL) {
+    free(s->endpoint_id_w);
+    s->endpoint_id_w = NULL;
+  }
   free(s);
 }
 
@@ -491,6 +545,7 @@ static int wasapi_stream_new(int is_input,
                              uint32_t channels,
                              uint32_t sample_format_tag,
                              uint32_t buffer_frames,
+                             wchar_t *endpoint_id_w,
                              void (*call_data_callback)(void *, uint32_t, moonbit_bytes_t, int64_t, int32_t, int64_t, int32_t),
                              void *data_callback,
                              void (*call_error_callback)(void *, int32_t, int32_t),
@@ -512,6 +567,7 @@ static int wasapi_stream_new(int is_input,
   s->channels = channels;
   s->sample_rate = sample_rate;
   s->requested_frames = buffer_frames == 0 ? 0 : buffer_frames;
+  s->endpoint_id_w = endpoint_id_w;
   s->call_data_callback = call_data_callback;
   s->mb_data_callback = data_callback;
   s->call_error_callback = call_error_callback;
@@ -567,19 +623,22 @@ int32_t moon_cpal_wasapi_stream_build_output(uint8_t *device_id_utf8,
                                             void *error_callback,
                                             uint64_t *out_handles,
                                             int32_t out_len) {
-  (void)device_id_len;
-  // Currently ignore device_id and always use default endpoint.
+  wchar_t *endpoint_id_w = wasapi_endpoint_id_from_utf8_bytes(device_id_utf8, device_id_len);
+  // `device_id_utf8` is owned by this function from MoonBit.
   moonbit_decref(device_id_utf8);
 
   if (out_handles == NULL || out_len <= 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
+    if (endpoint_id_w != NULL) {
+      free(endpoint_id_w);
+    }
     return -1;
   }
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = wasapi_stream_new(0, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback, data_callback,
+  int st = wasapi_stream_new(0, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
                              call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;
@@ -601,18 +660,21 @@ int32_t moon_cpal_wasapi_stream_build_input(uint8_t *device_id_utf8,
                                            void *error_callback,
                                            uint64_t *out_handles,
                                            int32_t out_len) {
-  (void)device_id_len;
+  wchar_t *endpoint_id_w = wasapi_endpoint_id_from_utf8_bytes(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
 
   if (out_handles == NULL || out_len <= 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
+    if (endpoint_id_w != NULL) {
+      free(endpoint_id_w);
+    }
     return -1;
   }
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = wasapi_stream_new(1, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback, data_callback,
+  int st = wasapi_stream_new(1, sample_rate, channels, sample_format_tag, buffer_frames, endpoint_id_w, call_data_callback, data_callback,
                              call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;
@@ -809,4 +871,3 @@ int32_t moon_cpal_wasapi_stream_owner_close(void *owner) {
 }
 
 #endif
-

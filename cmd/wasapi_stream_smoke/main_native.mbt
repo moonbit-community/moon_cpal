@@ -31,10 +31,22 @@ fn main {
   }
 
   let host = @wasapi.default_host()
+  let devices = host.devices()
+  println("devices: \{devices.length()}")
+  for d in devices {
+    println("  - \{d.name()}")
+  }
 
-  match host.default_output_device() {
-    None => println("no default output device")
-    Some(dev) => {
+  match devices.get(0) {
+    None => println("no output device")
+    Some(def_dev) => {
+      let dev = match devices.get(1) {
+        None => def_dev
+        Some(x) => {
+          println("using non-default output device")
+          x
+        }
+      }
       println("output device: \{dev.name()}")
       let supported = try! dev.default_output_config()
       let cfg = supported.config()
@@ -58,9 +70,16 @@ fn main {
     }
   }
 
-  match host.default_input_device() {
-    None => println("no default input device")
-    Some(dev) => {
+  match devices.get(0) {
+    None => println("no input device")
+    Some(def_dev) => {
+      let dev = match devices.get(1) {
+        None => def_dev
+        Some(x) => {
+          println("using non-default input device")
+          x
+        }
+      }
       println("input device: \{dev.name()}")
       let supported = try! dev.default_input_config()
       let cfg = supported.config()
@@ -97,4 +116,3 @@ fn main {
     }
   }
 }
-

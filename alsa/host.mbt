@@ -73,7 +73,13 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  _self.id
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    return _self.id
+  }
+  match device_name_utf8(_self.id) {
+    None => _self.id
+    Some(s) => s
+  }
 }
 
 ///|
