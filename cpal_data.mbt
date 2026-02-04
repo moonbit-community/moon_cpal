@@ -75,6 +75,30 @@ fn read_u32_le(bytes : FixedArray[Byte], offset : Int) -> UInt? {
 }
 
 ///|
+fn write_u16_le(bytes : FixedArray[Byte], offset : Int, v : UInt16) -> Bool {
+  if offset < 0 || offset + 1 >= bytes.length() {
+    return false
+  }
+  let w = v.to_uint().reinterpret_as_int()
+  bytes[offset] = (w & 0xff).to_byte()
+  bytes[offset + 1] = ((w >> 8) & 0xff).to_byte()
+  true
+}
+
+///|
+fn write_u32_le(bytes : FixedArray[Byte], offset : Int, v : UInt) -> Bool {
+  if offset < 0 || offset + 3 >= bytes.length() {
+    return false
+  }
+  let w = v.reinterpret_as_int()
+  bytes[offset] = (w & 0xff).to_byte()
+  bytes[offset + 1] = ((w >> 8) & 0xff).to_byte()
+  bytes[offset + 2] = ((w >> 16) & 0xff).to_byte()
+  bytes[offset + 3] = ((w >> 24) & 0xff).to_byte()
+  true
+}
+
+///|
 pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
   if self.sample_format != SampleFormat::U8 {
     return None
@@ -146,4 +170,88 @@ pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
     i = i + 1
   }
   Some(out)
+}
+
+///|
+/// Fill the underlying buffer with zeros (silence for the supported formats).
+pub fn Data::clear(self : Data) -> Unit {
+  let mut i = 0
+  while i < self.bytes.length() {
+    self.bytes[i] = (0 : Int).to_byte()
+    i = i + 1
+  }
+}
+
+///|
+/// Best-effort encoder for U8 output buffers.
+pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
+  if self.sample_format != SampleFormat::U8 {
+    return false
+  }
+  if self.bytes.length() != samples.length() {
+    return false
+  }
+  let mut i = 0
+  while i < samples.length() {
+    self.bytes[i] = samples[i]
+    i = i + 1
+  }
+  true
+}
+
+///|
+/// Best-effort encoder for U16 (little-endian) output buffers.
+pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
+  if self.sample_format != SampleFormat::U16 {
+    return false
+  }
+  if self.bytes.length() != samples.length() * 2 {
+    return false
+  }
+  let mut i = 0
+  while i < samples.length() {
+    if !write_u16_le(self.bytes, i * 2, samples[i]) {
+      return false
+    }
+    i = i + 1
+  }
+  true
+}
+
+///|
+/// Best-effort encoder for I16 (little-endian) output buffers.
+pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
+  if self.sample_format != SampleFormat::I16 {
+    return false
+  }
+  if self.bytes.length() != samples.length() * 2 {
+    return false
+  }
+  let mut i = 0
+  while i < samples.length() {
+    if !write_u16_le(self.bytes, i * 2, samples[i].reinterpret_as_uint16()) {
+      return false
+    }
+    i = i + 1
+  }
+  true
+}
+
+///|
+/// Best-effort encoder for F32 (IEEE-754, little-endian) output buffers.
+pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
+  if self.sample_format != SampleFormat::F32 {
+    return false
+  }
+  if self.bytes.length() != samples.length() * 4 {
+    return false
+  }
+  let mut i = 0
+  while i < samples.length() {
+    if !write_u32_le(self.bytes, i * 4, samples[i].reinterpret_as_uint()) {
+      return false
+    }
+    i = i + 1
+  }
+  true
 }

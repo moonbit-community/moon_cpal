@@ -47,7 +47,10 @@ test "macos supported_input_configs basic invariants (if any)" {
             let first = configs[0]
             inspect(first.sample_format(), content="F32")
             inspect(first.channels() > 0, content="true")
-            inspect(first.min_sample_rate() <= first.max_sample_rate(), content="true")
+            inspect(
+              first.min_sample_rate() <= first.max_sample_rate(),
+              content="true",
+            )
           }
       }
   }

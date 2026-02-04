@@ -49,7 +49,11 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
 test "spec device id + supports + device_by_id (best-effort)" {
   for host_id in @moon_cpal.available_hosts() {
     let host = try! host_from_id(host_id)
-    let ds = try host.devices() catch { _ => [] } noraise { xs => xs }
+    let ds = try host.devices() catch {
+      _ => []
+    } noraise {
+      xs => xs
+    }
     for d in ds {
       let did = d.id()
       match host.device_by_id(did) {
@@ -59,10 +63,90 @@ test "spec device id + supports + device_by_id (best-effort)" {
           inspect(fid == did, content="true")
         }
       }
-      let in_len = try d.supported_input_configs().length() catch { _ => 0 } noraise { x => x }
-      let out_len = try d.supported_output_configs().length() catch { _ => 0 } noraise { x => x }
+      let in_len = try d.supported_input_configs().length() catch {
+        _ => 0
+      } noraise {
+        x => x
+      }
+      let out_len = try d.supported_output_configs().length() catch {
+        _ => 0
+      } noraise {
+        x => x
+      }
       inspect(d.supports_input() == (in_len > 0), content="true")
       inspect(d.supports_output() == (out_len > 0), content="true")
     }
   }
+}
+
+///|
+test "spec: raw + typed stream builders (null host)" {
+  let host = try! host_from_id(@moon_cpal.HostId::Null)
+  let out = match host.default_output_device() {
+    None => {
+      inspect(false, content="true")
+      return
+    }
+    Some(d) => d
+  }
+  let inp = match host.default_input_device() {
+    None => {
+      inspect(false, content="true")
+      return
+    }
+    Some(d) => d
+  }
+  let cfg = @moon_cpal.StreamConfig::new(
+    2,
+    48000,
+    @moon_cpal.BufferSize::fixed(64),
+  )
+  let st0 = try! out.build_output_stream_raw(
+    cfg,
+    @moon_cpal.SampleFormat::F32,
+    fn(_d, _info) {  },
+    fn(_e) {  },
+    None,
+  )
+  try! st0.play()
+  try! st0.pause()
+  st0.close()
+  let st1 = try! out.build_output_stream_f32(
+    cfg,
+    fn(_xs, _info) {  },
+    fn(_e) {  },
+    None,
+  )
+  try! st1.play()
+  try! st1.pause()
+  st1.close()
+  let st2 = try! out.build_output_stream_i16(
+    cfg,
+    fn(_xs, _info) {  },
+    fn(_e) {  },
+    None,
+  )
+  try! st2.play()
+  try! st2.pause()
+  st2.close()
+  let st3 = try! inp.build_input_stream_raw(
+    cfg,
+    @moon_cpal.SampleFormat::F32,
+    fn(_d, _info) {  },
+    fn(_e) {  },
+    None,
+  )
+  try! st3.play()
+  try! st3.pause()
+  st3.close()
+  let st4 = try! inp.build_input_stream_f32(
+    cfg,
+    fn(_xs, _info) {  },
+    fn(_e) {  },
+    None,
+  )
+  try! st4.play()
+  try! st4.pause()
+  st4.close()
+  inspect(true, content="true")
 }

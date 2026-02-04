@@ -87,9 +87,7 @@ pub fn try_host_from_id(id : @moon_cpal.HostId) -> Host? {
 }
 
 ///|
-pub fn Host::default_output_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_output_device(self : Host) -> Device? {
   match self {
     Null(h) =>
       match h.default_output_device() {
@@ -120,9 +118,7 @@ pub fn Host::default_output_device(
 }
 
 ///|
-pub fn Host::default_input_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_input_device(self : Host) -> Device? {
   match self {
     Null(h) =>
       match h.default_input_device() {
@@ -178,10 +174,7 @@ pub fn Host::devices(
 }
 
 ///|
-pub fn Host::device_by_id(
-  self : Host,
-  id : @moon_cpal.DeviceId,
-) -> Device? {
+pub fn Host::device_by_id(self : Host, id : @moon_cpal.DeviceId) -> Device? {
   let ds = try Host::devices(self) catch {
     _ => []
   } noraise {
@@ -247,9 +240,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
-pub fn Device::id(
-  self : Device,
-) -> @moon_cpal.DeviceId {
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
   match self {
     Null(d) => d.id()
     CoreAudio(d) => d.id()
@@ -286,18 +277,14 @@ pub fn Device::description(
 
 ///|
 pub fn Device::supports_input(self : Device) -> Bool {
-  try {
-    Device::supported_input_configs(self).length() > 0
-  } catch {
+  try Device::supported_input_configs(self).length() > 0 catch {
     _ => false
   }
 }
 
 ///|
 pub fn Device::supports_output(self : Device) -> Bool {
-  try {
-    Device::supported_output_configs(self).length() > 0
-  } catch {
+  try Device::supported_output_configs(self).length() > 0 catch {
     _ => false
   }
 }
@@ -353,12 +340,7 @@ pub fn Device::try_default_output_config(
   self : Device,
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
-    Null(d) =>
-      try d.default_output_config() catch {
-        _ => None
-      } noraise {
-        cfg => Some(cfg)
-      }
+    Null(d) => Some(d.default_output_config())
     CoreAudio(d) =>
       try d.default_output_config() catch {
         _ => None
@@ -391,12 +373,7 @@ pub fn Device::try_default_input_config(
   self : Device,
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
-    Null(d) =>
-      try d.default_input_config() catch {
-        _ => None
-      } noraise {
-        cfg => Some(cfg)
-      }
+    Null(d) => Some(d.default_input_config())
     CoreAudio(d) =>
       try d.default_input_config() catch {
         _ => None
@@ -483,6 +460,49 @@ pub fn Device::build_output_stream(
 }
 
 ///|
+pub fn Device::build_output_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  match self {
+    Null(d) =>
+      Stream::Null(
+        d.build_output_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    CoreAudio(d) =>
+      Stream::CoreAudio(
+        d.build_output_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Alsa(d) =>
+      Stream::Alsa(
+        d.build_output_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Jack(d) =>
+      Stream::Jack(
+        d.build_output_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Wasapi(d) =>
+      Stream::Wasapi(
+        d.build_output_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+  }
+}
+
+///|
 pub fn Device::build_input_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
@@ -510,6 +530,49 @@ pub fn Device::build_input_stream(
     Wasapi(d) =>
       Stream::Wasapi(
         d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
+  }
+}
+
+///|
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  match self {
+    Null(d) =>
+      Stream::Null(
+        d.build_input_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    CoreAudio(d) =>
+      Stream::CoreAudio(
+        d.build_input_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Alsa(d) =>
+      Stream::Alsa(
+        d.build_input_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Jack(d) =>
+      Stream::Jack(
+        d.build_input_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
+      )
+    Wasapi(d) =>
+      Stream::Wasapi(
+        d.build_input_stream_raw(
+          config, sample_format, data_callback, error_callback, timeout,
+        ),
       )
   }
 }

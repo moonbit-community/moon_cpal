@@ -49,10 +49,7 @@ pub fn Host::devices(
 }
 
 ///|
-pub fn Host::device_by_id(
-  self : Host,
-  id : @moon_cpal.DeviceId,
-) -> Device? {
+pub fn Host::device_by_id(self : Host, id : @moon_cpal.DeviceId) -> Device? {
   match @platform.Host::device_by_id(self.inner, id) {
     None => None
     Some(d) => Some({ inner: d })
@@ -74,9 +71,7 @@ pub fn Host::output_devices(
 }
 
 ///|
-pub fn Host::default_output_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_output_device(self : Host) -> Device? {
   match @platform.Host::default_output_device(self.inner) {
     None => None
     Some(d) => Some({ inner: d })
@@ -84,9 +79,7 @@ pub fn Host::default_output_device(
 }
 
 ///|
-pub fn Host::default_input_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_input_device(self : Host) -> Device? {
   match @platform.Host::default_input_device(self.inner) {
     None => None
     Some(d) => Some({ inner: d })
@@ -99,9 +92,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
-pub fn Device::id(
-  self : Device,
-) -> @moon_cpal.DeviceId {
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
   @platform.Device::id(self.inner)
 }
 
@@ -169,6 +160,230 @@ pub fn Device::build_output_stream(
 }
 
 ///|
+pub fn Device::build_output_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_output_stream_raw(
+    self.inner,
+    config,
+    sample_format,
+    fn(d, info) { data_callback({ inner: d }, info) },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+fn make_f32_zeros(n : Int) -> Array[Float] {
+  let out : Array[Float] = []
+  let mut i = 0
+  while i < n {
+    out.push(0.0)
+    i = i + 1
+  }
+  out
+}
+
+///|
+fn fill_f32_zeros(xs : Array[Float]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = 0.0
+    i = i + 1
+  }
+}
+
+///|
+fn make_i16_zeros(n : Int) -> Array[Int16] {
+  let out : Array[Int16] = []
+  let mut i = 0
+  while i < n {
+    out.push(Int16::from_int(0))
+    i = i + 1
+  }
+  out
+}
+
+///|
+fn fill_i16_zeros(xs : Array[Int16]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = Int16::from_int(0)
+    i = i + 1
+  }
+}
+
+///|
+fn make_u16_zeros(n : Int) -> Array[UInt16] {
+  let out : Array[UInt16] = []
+  let mut i = 0
+  while i < n {
+    out.push(Int::to_uint16(0))
+    i = i + 1
+  }
+  out
+}
+
+///|
+fn fill_u16_zeros(xs : Array[UInt16]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = Int::to_uint16(0)
+    i = i + 1
+  }
+}
+
+///|
+fn make_u8_zeros(n : Int) -> Array[Byte] {
+  let out : Array[Byte] = []
+  let mut i = 0
+  while i < n {
+    out.push(Int::to_byte(0))
+    i = i + 1
+  }
+  out
+}
+
+///|
+fn fill_u8_zeros(xs : Array[Byte]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = Int::to_byte(0)
+    i = i + 1
+  }
+}
+
+///|
+pub fn Device::build_output_stream_f32(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Float], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let mut scratch : Array[Float] = []
+  let inner_stream = @platform.Device::build_output_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::F32,
+    fn(d, info) {
+      let n = @moon_cpal.Data::len(d)
+      if scratch.length() != n {
+        scratch = make_f32_zeros(n)
+      } else {
+        fill_f32_zeros(scratch)
+      }
+      data_callback(scratch, info)
+      if !@moon_cpal.Data::write_f32(d, scratch) {
+        @moon_cpal.Data::clear(d)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_output_stream_i16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Int16], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let mut scratch : Array[Int16] = []
+  let inner_stream = @platform.Device::build_output_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::I16,
+    fn(d, info) {
+      let n = @moon_cpal.Data::len(d)
+      if scratch.length() != n {
+        scratch = make_i16_zeros(n)
+      } else {
+        fill_i16_zeros(scratch)
+      }
+      data_callback(scratch, info)
+      if !@moon_cpal.Data::write_i16(d, scratch) {
+        @moon_cpal.Data::clear(d)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_output_stream_u16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[UInt16], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let mut scratch : Array[UInt16] = []
+  let inner_stream = @platform.Device::build_output_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::U16,
+    fn(d, info) {
+      let n = @moon_cpal.Data::len(d)
+      if scratch.length() != n {
+        scratch = make_u16_zeros(n)
+      } else {
+        fill_u16_zeros(scratch)
+      }
+      data_callback(scratch, info)
+      if !@moon_cpal.Data::write_u16(d, scratch) {
+        @moon_cpal.Data::clear(d)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_output_stream_u8(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Byte], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let mut scratch : Array[Byte] = []
+  let inner_stream = @platform.Device::build_output_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::U8,
+    fn(d, info) {
+      let n = @moon_cpal.Data::len(d)
+      if scratch.length() != n {
+        scratch = make_u8_zeros(n)
+      } else {
+        fill_u8_zeros(scratch)
+      }
+      data_callback(scratch, info)
+      if !@moon_cpal.Data::write_u8(d, scratch) {
+        @moon_cpal.Data::clear(d)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
 pub fn Device::build_input_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
@@ -180,6 +395,122 @@ pub fn Device::build_input_stream(
     self.inner,
     config,
     fn(d, info) { data_callback({ inner: d }, info) },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_input_stream_raw(
+    self.inner,
+    config,
+    sample_format,
+    fn(d, info) { data_callback({ inner: d }, info) },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_input_stream_f32(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Float], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_input_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::F32,
+    fn(d, info) {
+      match @moon_cpal.Data::try_as_f32(d) {
+        None => data_callback([], info)
+        Some(xs) => data_callback(xs, info)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_input_stream_i16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Int16], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_input_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::I16,
+    fn(d, info) {
+      match @moon_cpal.Data::try_as_i16(d) {
+        None => data_callback([], info)
+        Some(xs) => data_callback(xs, info)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_input_stream_u16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[UInt16], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_input_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::U16,
+    fn(d, info) {
+      match @moon_cpal.Data::try_as_u16(d) {
+        None => data_callback([], info)
+        Some(xs) => data_callback(xs, info)
+      }
+    },
+    error_callback,
+    timeout,
+  )
+  { inner: inner_stream }
+}
+
+///|
+pub fn Device::build_input_stream_u8(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Byte], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let inner_stream = @platform.Device::build_input_stream_raw(
+    self.inner,
+    config,
+    @moon_cpal.SampleFormat::U8,
+    fn(d, info) {
+      match @moon_cpal.Data::try_as_u8(d) {
+        None => data_callback([], info)
+        Some(xs) => data_callback(xs, info)
+      }
+    },
     error_callback,
     timeout,
   )
@@ -214,4 +545,49 @@ pub fn Data::len(self : Data) -> Int {
 ///|
 pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
   @moon_cpal.Data::bytes(self.inner)
+}
+
+///|
+pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
+  @moon_cpal.Data::try_as_u8(self.inner)
+}
+
+///|
+pub fn Data::try_as_u16(self : Data) -> Array[UInt16]? {
+  @moon_cpal.Data::try_as_u16(self.inner)
+}
+
+///|
+pub fn Data::try_as_i16(self : Data) -> Array[Int16]? {
+  @moon_cpal.Data::try_as_i16(self.inner)
+}
+
+///|
+pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
+  @moon_cpal.Data::try_as_f32(self.inner)
+}
+
+///|
+pub fn Data::clear(self : Data) -> Unit {
+  @moon_cpal.Data::clear(self.inner)
+}
+
+///|
+pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
+  @moon_cpal.Data::write_u8(self.inner, samples)
+}
+
+///|
+pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
+  @moon_cpal.Data::write_u16(self.inner, samples)
+}
+
+///|
+pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
+  @moon_cpal.Data::write_i16(self.inner, samples)
+}
+
+///|
+pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
+  @moon_cpal.Data::write_f32(self.inner, samples)
 }

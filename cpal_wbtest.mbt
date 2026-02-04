@@ -169,7 +169,6 @@ test "device description formatting" {
   inspect(d0.to_string(), content="My Device")
   inspect(d0.supports_input(), content="false")
   inspect(d0.supports_output(), content="false")
-
   let d1 = DeviceDescription::new(
     "My Device",
     manufacturer=Some("ACME"),
@@ -188,7 +187,6 @@ test "device description builder + direction_from_caps" {
   inspect(direction_from_caps(true, false), content="Input")
   inspect(direction_from_caps(false, true), content="Output")
   inspect(direction_from_caps(false, false), content="Unknown")
-
   let built = DeviceDescriptionBuilder::new("X")
     .manufacturer("ACME")
     .driver("drv")
@@ -199,7 +197,6 @@ test "device description builder + direction_from_caps" {
     .add_extended_line("line1")
     .add_extended_line("line2")
     .build()
-
   inspect(built.to_string(), content="X (ACME) [Speaker] via USB")
   inspect(built.driver(), content="Some(\"drv\")")
   inspect(built.address(), content="Some(\"addr\")")

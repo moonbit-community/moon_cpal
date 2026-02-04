@@ -112,9 +112,22 @@ fn call_stream_error_callback(
     4 => "jack_set_process_callback"
     _ => "JackStream"
   }
-  error_callback(
-    @moon_cpal.stream_error_backend_specific("\{op} (status \{status})"),
-  )
+  let err = if op_tag == 1 && status != 0 {
+    // Opening a JACK client failed; most commonly the server is not running or unreachable.
+    @moon_cpal.stream_error_device_not_available()
+  } else if op_tag == 0 && (status == 2 || status == 19 || status == 111) {
+    // ENOENT / ENODEV / ECONNREFUSED
+    @moon_cpal.stream_error_device_not_available()
+  } else if op_tag == 0 && status == 32 {
+    // EPIPE (broken pipe): treat as invalidated.
+    @moon_cpal.stream_error_stream_invalidated()
+  } else if op_tag == 2 || op_tag == 3 || op_tag == 4 {
+    // Activation/registration failures invalidate the stream graph.
+    @moon_cpal.stream_error_stream_invalidated()
+  } else {
+    @moon_cpal.stream_error_backend_specific("\{op} (status \{status})")
+  }
+  error_callback(err)
 }
 
 ///|

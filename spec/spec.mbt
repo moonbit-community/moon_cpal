@@ -73,17 +73,13 @@ pub fn Host::output_devices(
 
 ///|
 #declaration_only
-pub fn Host::default_output_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_output_device(self : Host) -> Device? {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Host::default_input_device(
-  self : Host,
-) -> Device? {
+pub fn Host::default_input_device(self : Host) -> Device? {
   ...
 }
 
@@ -95,9 +91,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 
 ///|
 #declaration_only
-pub fn Device::id(
-  self : Device,
-) -> @moon_cpal.DeviceId {
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
   ...
 }
 
@@ -167,10 +161,132 @@ pub fn Device::build_output_stream(
 
 ///|
 #declaration_only
+pub fn Device::build_output_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_f32(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Float], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_i16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Int16], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_u16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[UInt16], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_u8(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Byte], @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Device::build_input_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
   data_callback : (Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+  data_callback : (Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_f32(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Float], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_i16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Int16], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_u16(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[UInt16], @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_u8(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (Array[Byte], @moon_cpal.InputCallbackInfo) -> Unit,
   error_callback : (@moon_cpal.StreamError) -> Unit,
   timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
@@ -191,6 +307,12 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
 
 ///|
 #declaration_only
+pub fn Stream::close(self : Stream) -> Unit {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Data::sample_format(self : Data) -> @moon_cpal.SampleFormat {
   ...
 }
@@ -204,5 +326,59 @@ pub fn Data::len(self : Data) -> Int {
 ///|
 #declaration_only
 pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_u16(self : Data) -> Array[UInt16]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_i16(self : Data) -> Array[Int16]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::clear(self : Data) -> Unit {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
   ...
 }

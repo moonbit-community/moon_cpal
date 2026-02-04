@@ -174,6 +174,40 @@ fn choose_format_tag(
 }
 
 ///|
+fn format_tag_from_sample_format(fmt : @moon_cpal.SampleFormat) -> UInt? {
+  match fmt {
+    @moon_cpal.SampleFormat::F32 => Some((1 : UInt))
+    @moon_cpal.SampleFormat::I16 => Some((2 : UInt))
+    _ => None
+  }
+}
+
+///|
+fn choose_default_sample_format(
+  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
+  config : @moon_cpal.StreamConfig,
+) -> @moon_cpal.SampleFormat? {
+  let sr = config.sample_rate
+  let ch = config.channels
+  let mut best : @moon_cpal.SupportedStreamConfigRange? = None
+  for r in ranges {
+    if r.channels() == ch &&
+      r.min_sample_rate() <= sr &&
+      sr <= r.max_sample_rate() &&
+      format_tag_from_sample_format(r.sample_format()) != None {
+      match best {
+        None => best = Some(r)
+        Some(b) => if r.cmp_default_heuristics(b) > 0 { best = Some(r) }
+      }
+    }
+  }
+  match best {
+    None => None
+    Some(r) => Some(r.sample_format())
+  }
+}
+
+///|
 fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
   match config.buffer_size {
     Default => 0
@@ -195,18 +229,18 @@ fn validate_buffer_size_or_raise(
 }
 
 ///|
-pub fn Device::build_output_stream(
+pub fn Device::build_output_stream_raw(
   self : Device,
   config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
   data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
-    raise_build_hresult("wasapi build_output_stream", -1)
+    raise_build_hresult("wasapi build_output_stream_raw", -1)
   }
-  let ranges = self.supported_output_configs()
-  let fmt_tag = match choose_format_tag(ranges, config) {
+  let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
@@ -238,18 +272,36 @@ pub fn Device::build_output_stream(
 }
 
 ///|
-pub fn Device::build_input_stream(
+pub fn Device::build_output_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  _timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let ranges = self.supported_output_configs()
+  let fmt = match choose_default_sample_format(ranges, config) {
+    Some(f) => f
+    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+  Device::build_output_stream_raw(
+    self, config, fmt, data_callback, error_callback, _timeout,
+  )
+}
+
+///|
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
   data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
-    raise_build_hresult("wasapi build_input_stream", -1)
+    raise_build_hresult("wasapi build_input_stream_raw", -1)
   }
-  let ranges = self.supported_input_configs()
-  let fmt_tag = match choose_format_tag(ranges, config) {
+  let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
@@ -278,6 +330,24 @@ pub fn Device::build_input_stream(
     handle: out[0],
     owner: wasapi_stream_owner_new(out[0]),
   }
+}
+
+///|
+pub fn Device::build_input_stream(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  _timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  let ranges = self.supported_input_configs()
+  let fmt = match choose_default_sample_format(ranges, config) {
+    Some(f) => f
+    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+  Device::build_input_stream_raw(
+    self, config, fmt, data_callback, error_callback, _timeout,
+  )
 }
 
 ///|

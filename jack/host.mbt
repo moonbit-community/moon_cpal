@@ -77,15 +77,16 @@ pub fn Device::description(
   @moon_cpal.DeviceDescription::new(
     name,
     driver=Some("JACK"),
+    device_type=@moon_cpal.DeviceType::virtual_(),
+    interface_type=@moon_cpal.InterfaceType::virtual_(),
     direction=@moon_cpal.DeviceDirection::duplex(),
     address=Some(_self.id),
+    extended=["jack_client=moon_cpal"],
   )
 }
 
 ///|
-pub fn Device::id(
-  _self : Device,
-) -> @moon_cpal.DeviceId {
+pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
   @moon_cpal.DeviceId::new(@moon_cpal.HostId::Jack, _self.id)
 }
 

@@ -23,9 +23,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] raise CoreAudioError {
 }
 
 ///|
-pub fn Host::default_output_device(
-  _self : Host,
-) -> Device? {
+pub fn Host::default_output_device(_self : Host) -> Device? {
   match default_output_device_id() {
     Some(id) => Some({ id, })
     None => None
@@ -46,13 +44,8 @@ pub fn Device::name(self : Device) -> String raise CoreAudioError {
 }
 
 ///|
-pub fn Device::id(
-  self : Device,
-) -> @moon_cpal.DeviceId {
-  @moon_cpal.DeviceId::new(
-    @moon_cpal.HostId::CoreAudio,
-    self.id.to_string(),
-  )
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
+  @moon_cpal.DeviceId::new(@moon_cpal.HostId::CoreAudio, self.id.to_string())
 }
 
 ///|
@@ -73,10 +66,18 @@ pub fn Device::description(
   } else {
     @moon_cpal.DeviceDirection::unknown()
   }
+  let device_type = match direction {
+    @moon_cpal.DeviceDirection::Input => @moon_cpal.DeviceType::microphone()
+    @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
+    _ => @moon_cpal.DeviceType::unknown()
+  }
   @moon_cpal.DeviceDescription::new(
     name,
     driver=Some("CoreAudio"),
-    direction=direction,
+    device_type~,
+    interface_type=@moon_cpal.InterfaceType::unknown(),
+    direction~,
+    address=Some(self.id.to_string()),
     extended=["AudioDeviceID=\{self.id}"],
   )
 }

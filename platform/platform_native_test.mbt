@@ -44,7 +44,6 @@ test "platform device_by_id + supports + in/out device filters" {
     } noraise {
       h => h
     }
-
     let ds = try host.devices() catch {
       _ => []
     } noraise {
@@ -63,8 +62,16 @@ test "platform device_by_id + supports + in/out device filters" {
       }
 
       // supports_* should match "supported_*_configs non-empty" (errors => false)
-      let in_len = try d.supported_input_configs().length() catch { _ => 0 } noraise { x => x }
-      let out_len = try d.supported_output_configs().length() catch { _ => 0 } noraise { x => x }
+      let in_len = try d.supported_input_configs().length() catch {
+        _ => 0
+      } noraise {
+        x => x
+      }
+      let out_len = try d.supported_output_configs().length() catch {
+        _ => 0
+      } noraise {
+        x => x
+      }
       inspect(d.supports_input() == (in_len > 0), content="true")
       inspect(d.supports_output() == (out_len > 0), content="true")
     }
@@ -80,8 +87,16 @@ test "platform device_by_id + supports + in/out device filters" {
         expected_out.push(d)
       }
     }
-    let got_in = try host.input_devices() catch { _ => [] } noraise { x => x }
-    let got_out = try host.output_devices() catch { _ => [] } noraise { x => x }
+    let got_in = try host.input_devices() catch {
+      _ => []
+    } noraise {
+      x => x
+    }
+    let got_out = try host.output_devices() catch {
+      _ => []
+    } noraise {
+      x => x
+    }
     inspect(got_in.length() == expected_in.length(), content="true")
     inspect(got_out.length() == expected_out.length(), content="true")
   }

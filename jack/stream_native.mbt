@@ -130,18 +130,28 @@ fn validate_buffer_size_or_raise(
 }
 
 ///|
-pub fn Device::build_output_stream(
+fn validate_sample_format_or_raise(
+  sample_format : @moon_cpal.SampleFormat,
+) -> Unit raise @moon_cpal.BuildStreamError {
+  if sample_format != @moon_cpal.SampleFormat::F32 {
+    raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+}
+
+///|
+pub fn Device::build_output_stream_raw(
   self : Device,
   config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
   data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
-    raise_build_error("jack build_output_stream", -1)
+    raise_build_error("jack build_output_stream_raw", -1)
   }
   validate_buffer_size_or_raise(config)
-  // Force F32 for now.
+  validate_sample_format_or_raise(sample_format)
   let fmt_tag = (1 : UInt)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
@@ -170,17 +180,37 @@ pub fn Device::build_output_stream(
 }
 
 ///|
-pub fn Device::build_input_stream(
+pub fn Device::build_output_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  _timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  Device::build_output_stream_raw(
+    self,
+    config,
+    @moon_cpal.SampleFormat::F32,
+    data_callback,
+    error_callback,
+    _timeout,
+  )
+}
+
+///|
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
   data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
-    raise_build_error("jack build_input_stream", -1)
+    raise_build_error("jack build_input_stream_raw", -1)
   }
   validate_buffer_size_or_raise(config)
+  validate_sample_format_or_raise(sample_format)
   let fmt_tag = (1 : UInt)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
@@ -206,6 +236,24 @@ pub fn Device::build_input_stream(
     handle: out[0],
     owner: jack_stream_owner_new(out[0]),
   }
+}
+
+///|
+pub fn Device::build_input_stream(
+  self : Device,
+  config : @moon_cpal.StreamConfig,
+  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+  error_callback : (@moon_cpal.StreamError) -> Unit,
+  _timeout : @moon_cpal.Duration?,
+) -> Stream raise @moon_cpal.BuildStreamError {
+  Device::build_input_stream_raw(
+    self,
+    config,
+    @moon_cpal.SampleFormat::F32,
+    data_callback,
+    error_callback,
+    _timeout,
+  )
 }
 
 ///|

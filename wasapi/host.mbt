@@ -96,18 +96,24 @@ pub fn Device::description(
   } else {
     @moon_cpal.DeviceDirection::unknown()
   }
+  let device_type = match direction {
+    @moon_cpal.DeviceDirection::Input => @moon_cpal.DeviceType::microphone()
+    @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
+    _ => @moon_cpal.DeviceType::unknown()
+  }
   @moon_cpal.DeviceDescription::new(
     name,
     driver=Some("WASAPI"),
-    direction=direction,
+    device_type~,
+    interface_type=@moon_cpal.InterfaceType::unknown(),
+    direction~,
     address=Some(_self.id),
+    extended=["endpoint_id=\{_self.id}"],
   )
 }
 
 ///|
-pub fn Device::id(
-  _self : Device,
-) -> @moon_cpal.DeviceId {
+pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
   @moon_cpal.DeviceId::new(@moon_cpal.HostId::Wasapi, _self.id)
 }
 

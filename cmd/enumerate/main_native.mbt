@@ -8,7 +8,7 @@ fn print_supported_ranges(
   for i in 0..<n {
     let r = ranges[i]
     println(
-      "    - ch=\{r.channels()} sr=\{r.min_sample_rate()}..\{r.max_sample_rate()} fmt=\{r.sample_format().to_debug_string()}",
+      "    - ch=\{r.channels()} sr=\{r.min_sample_rate()}..\{r.max_sample_rate()} buf=\{r.buffer_size().to_string()} fmt=\{r.sample_format().to_debug_string()}",
     )
   }
 }
@@ -23,7 +23,7 @@ fn print_default_config(
   } noraise {
     cfg =>
       println(
-        "  \{kind} default config: ch=\{cfg.channels()} sr=\{cfg.sample_rate()} fmt=\{cfg.sample_format().to_debug_string()}",
+        "  \{kind} default config: ch=\{cfg.channels()} sr=\{cfg.sample_rate()} buf=\{cfg.buffer_size().to_string()} fmt=\{cfg.sample_format().to_debug_string()}",
       )
   }
 }
@@ -42,6 +42,28 @@ fn main {
       }
     } noraise {
       h => h
+    }
+
+    // All devices (best-effort).
+    let devs = try host.devices() catch {
+      e => {
+        println("  devices() error: \{e}")
+        []
+      }
+    } noraise {
+      xs => xs
+    }
+    println("  devices: \{devs.length()}")
+    let m = if devs.length() > 5 { 5 } else { devs.length() }
+    for i in 0..<m {
+      let d = devs[i]
+      let did = d.id()
+      let name = try d.name() catch {
+        _ => "<error>".to_string()
+      } noraise {
+        s => s
+      }
+      println("  - device: \{name} (\{did.to_string()})")
     }
 
     // Default devices.
