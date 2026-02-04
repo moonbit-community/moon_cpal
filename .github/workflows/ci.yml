@@ -1,14 +1,19 @@
 name: CI
 
 on:
+  # Run on every branch push so feature branches get CI without requiring a PR.
   push:
-    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-ubuntu-native:
     name: native (ubuntu, ALSA loopback)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
@@ -45,6 +50,7 @@ jobs:
   test-macos-native:
     name: native (macos, CoreAudio)
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
@@ -61,6 +67,7 @@ jobs:
   test-windows-native:
     name: native (windows, WASAPI)
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
