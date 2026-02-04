@@ -1,4 +1,3 @@
 {
-  "import": ["zhengyu/moon_cpal"]
+  "import": ["zhengyu/moon_cpal", "zhengyu/moon_cpal/platform"]
 }
-

@@ -3,6 +3,7 @@ package "zhengyu/moon_cpal/spec"
 
 import {
   "zhengyu/moon_cpal",
+  "zhengyu/moon_cpal/platform",
 }
 
 // Values
@@ -14,7 +15,7 @@ pub fn host_from_id(@moon_cpal.HostId) -> Host raise @moon_cpal.HostUnavailable
 
 // Types and methods
 pub struct Data {
-  _unit : Unit
+  inner : @moon_cpal.Data
 }
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::len(Self) -> Int
@@ -23,7 +24,7 @@ pub impl Eq for Data
 pub impl Show for Data
 
 pub struct Device {
-  _unit : Unit
+  inner : @platform.Device
 }
 pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
 pub fn Device::build_output_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.OutputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
@@ -36,7 +37,7 @@ pub impl Eq for Device
 pub impl Show for Device
 
 pub struct Host {
-  _unit : Unit
+  inner : @platform.Host
 }
 pub fn Host::default_input_device(Self) -> Device? raise @moon_cpal.DevicesError
 pub fn Host::default_output_device(Self) -> Device? raise @moon_cpal.DevicesError
@@ -46,8 +47,9 @@ pub impl Eq for Host
 pub impl Show for Host
 
 pub struct Stream {
-  _unit : Unit
+  inner : @platform.Stream
 }
+pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
 pub impl Eq for Stream
