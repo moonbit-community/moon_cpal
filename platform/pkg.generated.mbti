@@ -4,6 +4,7 @@ package "zhengyu/moon_cpal/platform"
 import {
   "zhengyu/moon_cpal",
   "zhengyu/moon_cpal/alsa",
+  "zhengyu/moon_cpal/jack",
   "zhengyu/moon_cpal/macos",
   "zhengyu/moon_cpal/null",
   "zhengyu/moon_cpal/wasapi",
@@ -25,6 +26,7 @@ pub enum Device {
   Null(@null.Device)
   CoreAudio(@macos.Device)
   Alsa(@alsa.Device)
+  Jack(@jack.Device)
   Wasapi(@wasapi.Device)
 }
 pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
@@ -43,6 +45,7 @@ pub enum Host {
   Null(@null.Host)
   CoreAudio(@macos.Host)
   Alsa(@alsa.Host)
+  Jack(@jack.Host)
   Wasapi(@wasapi.Host)
 }
 pub fn Host::default_input_device(Self) -> Device? raise @moon_cpal.DevicesError
@@ -56,6 +59,7 @@ pub enum Stream {
   Null(@null.Stream)
   CoreAudio(@macos.Stream)
   Alsa(@alsa.Stream)
+  Jack(@jack.Stream)
   Wasapi(@wasapi.Stream)
 }
 pub fn Stream::close(Self) -> Unit

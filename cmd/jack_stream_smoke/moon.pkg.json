@@ -1,0 +1,15 @@
+{
+  "is_main": true,
+  "import": ["zhengyu/moon_cpal/jack", "zhengyu/moon_cpal"],
+  "targets": {
+    "main_native.mbt": ["native"],
+    "main_stub.mbt": ["not", "native"]
+  },
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -ljack"
+    }
+  }
+}
+

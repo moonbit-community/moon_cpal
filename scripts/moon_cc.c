@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
   //
   // Keep the behavior aligned with `scripts/moon_cc.sh`:
   // - strip `-framework <name>` on non-Darwin
-  // - strip `-lasound` on non-Linux
+  // - strip `-lasound`/`-ljack` on non-Linux
   // - strip `-lole32/-luuid/-lmmdevapi/-lavrt` on non-Windows
   // - strip `-pthread/-lpthread` on Windows
   char **outv = (char **)calloc((size_t)argc + 1, sizeof(char *));
@@ -104,6 +104,10 @@ int main(int argc, char **argv) {
 
     // Linux-only libs (ALSA)
     if (!is_linux && str_eq(a, "-lasound")) {
+      continue;
+    }
+    // Linux-only libs (JACK)
+    if (!is_linux && str_eq(a, "-ljack")) {
       continue;
     }
 

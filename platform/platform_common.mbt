@@ -13,6 +13,7 @@ pub enum Host {
   Null(@null.Host)
   CoreAudio(@macos.Host)
   Alsa(@alsa.Host)
+  Jack(@jack.Host)
   Wasapi(@wasapi.Host)
 } derive(Show, Eq)
 
@@ -21,6 +22,7 @@ pub enum Device {
   Null(@null.Device)
   CoreAudio(@macos.Device)
   Alsa(@alsa.Device)
+  Jack(@jack.Device)
   Wasapi(@wasapi.Device)
 } derive(Show, Eq)
 
@@ -29,6 +31,7 @@ pub enum Stream {
   Null(@null.Stream)
   CoreAudio(@macos.Stream)
   Alsa(@alsa.Stream)
+  Jack(@jack.Stream)
   Wasapi(@wasapi.Stream)
 } derive(Show, Eq)
 
@@ -38,6 +41,7 @@ pub fn Host::id(self : Host) -> @moon_cpal.HostId {
     Null(_) => @moon_cpal.HostId::Null
     CoreAudio(_) => @moon_cpal.HostId::CoreAudio
     Alsa(_) => @moon_cpal.HostId::Alsa
+    Jack(_) => @moon_cpal.HostId::Jack
     Wasapi(_) => @moon_cpal.HostId::Wasapi
   }
 }
@@ -65,6 +69,7 @@ pub fn host_from_id(
   match id {
     CoreAudio => Host::CoreAudio(@macos.default_host())
     Alsa => Host::Alsa(@alsa.default_host())
+    Jack => Host::Jack(@jack.default_host())
     Null => Host::Null(@null.default_host())
     Wasapi => Host::Wasapi(@wasapi.default_host())
     _ => raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
@@ -109,6 +114,11 @@ pub fn Host::default_output_device(
         None => None
         Some(d) => Some(Device::Alsa(d))
       }
+    Jack(h) =>
+      match h.default_output_device() {
+        None => None
+        Some(d) => Some(Device::Jack(d))
+      }
     Wasapi(h) =>
       match h.default_output_device() {
         None => None
@@ -146,6 +156,11 @@ pub fn Host::default_input_device(
         None => None
         Some(d) => Some(Device::Alsa(d))
       }
+    Jack(h) =>
+      match h.default_input_device() {
+        None => None
+        Some(d) => Some(Device::Jack(d))
+      }
     Wasapi(h) =>
       match h.default_input_device() {
         None => None
@@ -174,6 +189,7 @@ pub fn Host::devices(
         ds => ds.map(fn(d) { Device::CoreAudio(d) })
       }
     Alsa(h) => h.devices().map(fn(d) { Device::Alsa(d) })
+    Jack(h) => h.devices().map(fn(d) { Device::Jack(d) })
     Wasapi(h) => h.devices().map(fn(d) { Device::Wasapi(d) })
   }
 }
@@ -196,6 +212,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
         s => s
       }
     Alsa(d) => d.name()
+    Jack(d) => d.name()
     Wasapi(d) => d.name()
   }
 }
@@ -218,6 +235,7 @@ pub fn Device::supported_output_configs(
         xs => xs
       }
     Alsa(d) => d.supported_output_configs()
+    Jack(d) => d.supported_output_configs()
     Wasapi(d) => d.supported_output_configs()
   }
 }
@@ -240,6 +258,7 @@ pub fn Device::supported_input_configs(
         xs => xs
       }
     Alsa(d) => d.supported_input_configs()
+    Jack(d) => d.supported_input_configs()
     Wasapi(d) => d.supported_input_configs()
   }
 }
@@ -262,6 +281,12 @@ pub fn Device::try_default_output_config(
         cfg => Some(cfg)
       }
     Alsa(d) =>
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
+    Jack(d) =>
       try d.default_output_config() catch {
         _ => None
       } noraise {
@@ -299,6 +324,12 @@ pub fn Device::try_default_input_config(
       } noraise {
         cfg => Some(cfg)
       }
+    Jack(d) =>
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
     Wasapi(d) =>
       try d.default_input_config() catch {
         _ => None
@@ -316,6 +347,7 @@ pub fn Device::default_output_config(
     Null(d) => d.default_output_config()
     CoreAudio(d) => d.default_output_config()
     Alsa(d) => d.default_output_config()
+    Jack(d) => d.default_output_config()
     Wasapi(d) => d.default_output_config()
   }
 }
@@ -328,6 +360,7 @@ pub fn Device::default_input_config(
     Null(d) => d.default_input_config()
     CoreAudio(d) => d.default_input_config()
     Alsa(d) => d.default_input_config()
+    Jack(d) => d.default_input_config()
     Wasapi(d) => d.default_input_config()
   }
 }
@@ -351,6 +384,10 @@ pub fn Device::build_output_stream(
       )
     Alsa(d) =>
       Stream::Alsa(
+        d.build_output_stream(config, data_callback, error_callback, timeout),
+      )
+    Jack(d) =>
+      Stream::Jack(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
     Wasapi(d) =>
@@ -381,6 +418,10 @@ pub fn Device::build_input_stream(
       Stream::Alsa(
         d.build_input_stream(config, data_callback, error_callback, timeout),
       )
+    Jack(d) =>
+      Stream::Jack(
+        d.build_input_stream(config, data_callback, error_callback, timeout),
+      )
     Wasapi(d) =>
       Stream::Wasapi(
         d.build_input_stream(config, data_callback, error_callback, timeout),
@@ -394,6 +435,7 @@ pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
     Null(s) => s.play()
     CoreAudio(s) => s.play()
     Alsa(s) => s.play()
+    Jack(s) => s.play()
     Wasapi(s) => s.play()
   }
 }
@@ -404,6 +446,7 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
     Null(s) => s.pause()
     CoreAudio(s) => s.pause()
     Alsa(s) => s.pause()
+    Jack(s) => s.pause()
     Wasapi(s) => s.pause()
   }
 }
@@ -414,6 +457,7 @@ pub fn Stream::close(self : Stream) -> Unit {
     Null(s) => s.close()
     CoreAudio(s) => s.close()
     Alsa(s) => s.close()
+    Jack(s) => s.close()
     Wasapi(s) => s.close()
   }
 }

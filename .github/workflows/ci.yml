@@ -26,7 +26,7 @@ jobs:
         shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends alsa-utils libasound2-dev
+          sudo apt-get install -y --no-install-recommends alsa-utils libasound2-dev jackd2 libjack-jackd2-dev
           # GitHub's Ubuntu runner kernel may not ship with the snd-aloop module.
           # Instead, route "default" PCM to the libasound "null" plugin so our smoke test
           # does not depend on real hardware or kernel modules.
@@ -48,6 +48,13 @@ jobs:
         run: moon test --target native
       - name: Run ALSA smoke (real I/O)
         run: moon run --target native cmd/alsa_stream_smoke -q
+      - name: Run JACK smoke (dummy server)
+        shell: bash
+        run: |
+          # Start a dummy JACK server so we can validate the JACK backend on CI without hardware.
+          jackd -d dummy -r 48000 -p 256 &
+          sleep 2
+          moon run --target native cmd/jack_stream_smoke -q
 
   test-macos-native:
     name: native (macos, CoreAudio)

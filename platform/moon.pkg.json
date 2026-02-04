@@ -2,6 +2,7 @@
   "import": [
     "zhengyu/moon_cpal",
     "zhengyu/moon_cpal/alsa",
+    "zhengyu/moon_cpal/jack",
     "zhengyu/moon_cpal/macos",
     "zhengyu/moon_cpal/null",
     "zhengyu/moon_cpal/wasapi"

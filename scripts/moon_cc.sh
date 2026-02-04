@@ -50,6 +50,10 @@ for arg in "$@"; do
   if [[ $is_linux -eq 0 && "$arg" == "-lasound" ]]; then
     continue
   fi
+  # Linux-only libs (JACK)
+  if [[ $is_linux -eq 0 && "$arg" == "-ljack" ]]; then
+    continue
+  fi
   # Some toolchains pass `-Wl,-lxxx` sometimes; keep it simple and handle common direct flags only.
 
   # Windows-only libs (WASAPI/COM)
