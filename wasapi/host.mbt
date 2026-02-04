@@ -88,23 +88,44 @@ pub fn Device::supported_input_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::I16,
-    ),
-  ]
+  match default_config_u32(_self.id, true) {
+    None => {
+      // Fallback to conservative stub ranges if query fails.
+      let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
+      [
+        @moon_cpal.SupportedStreamConfigRange::new(
+          2,
+          8000,
+          192000,
+          buf,
+          @moon_cpal.SampleFormat::F32,
+        ),
+        @moon_cpal.SupportedStreamConfigRange::new(
+          2,
+          8000,
+          192000,
+          buf,
+          @moon_cpal.SampleFormat::I16,
+        ),
+      ]
+    }
+    Some((ch, sr, fmt_tag)) => {
+      let fmt = match fmt_tag {
+        1 => @moon_cpal.SampleFormat::F32
+        2 => @moon_cpal.SampleFormat::I16
+        _ => @moon_cpal.SampleFormat::F32
+      }
+      [
+        @moon_cpal.SupportedStreamConfigRange::new(
+          ch.reinterpret_as_int(),
+          sr.reinterpret_as_int(),
+          sr.reinterpret_as_int(),
+          @moon_cpal.SupportedBufferSize::Unknown,
+          fmt,
+        ),
+      ]
+    }
+  }
 }
 
 ///|
@@ -114,23 +135,43 @@ pub fn Device::supported_output_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     return []
   }
-  let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
-  [
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::F32,
-    ),
-    @moon_cpal.SupportedStreamConfigRange::new(
-      2,
-      8000,
-      192000,
-      buf,
-      @moon_cpal.SampleFormat::I16,
-    ),
-  ]
+  match default_config_u32(_self.id, false) {
+    None => {
+      let buf = @moon_cpal.SupportedBufferSize::Range(min=64, max=2048)
+      [
+        @moon_cpal.SupportedStreamConfigRange::new(
+          2,
+          8000,
+          192000,
+          buf,
+          @moon_cpal.SampleFormat::F32,
+        ),
+        @moon_cpal.SupportedStreamConfigRange::new(
+          2,
+          8000,
+          192000,
+          buf,
+          @moon_cpal.SampleFormat::I16,
+        ),
+      ]
+    }
+    Some((ch, sr, fmt_tag)) => {
+      let fmt = match fmt_tag {
+        1 => @moon_cpal.SampleFormat::F32
+        2 => @moon_cpal.SampleFormat::I16
+        _ => @moon_cpal.SampleFormat::F32
+      }
+      [
+        @moon_cpal.SupportedStreamConfigRange::new(
+          ch.reinterpret_as_int(),
+          sr.reinterpret_as_int(),
+          sr.reinterpret_as_int(),
+          @moon_cpal.SupportedBufferSize::Unknown,
+          fmt,
+        ),
+      ]
+    }
+  }
 }
 
 ///|
@@ -142,12 +183,25 @@ pub fn Device::default_input_config(
       "wasapi default_input_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
-    @moon_cpal.SampleFormat::F32,
-  )
+  match default_config_u32(_self.id, true) {
+    None =>
+      raise @moon_cpal.default_stream_config_error_backend_specific(
+        "wasapi default_input_config: query failed",
+      )
+    Some((ch, sr, fmt_tag)) => {
+      let fmt = match fmt_tag {
+        1 => @moon_cpal.SampleFormat::F32
+        2 => @moon_cpal.SampleFormat::I16
+        _ => @moon_cpal.SampleFormat::F32
+      }
+      @moon_cpal.SupportedStreamConfig::new(
+        ch.reinterpret_as_int(),
+        sr.reinterpret_as_int(),
+        @moon_cpal.SupportedBufferSize::Unknown,
+        fmt,
+      )
+    }
+  }
 }
 
 ///|
@@ -159,10 +213,23 @@ pub fn Device::default_output_config(
       "wasapi default_output_config: not available on this OS",
     )
   }
-  @moon_cpal.SupportedStreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.SupportedBufferSize::Range(min=64, max=2048),
-    @moon_cpal.SampleFormat::F32,
-  )
+  match default_config_u32(_self.id, false) {
+    None =>
+      raise @moon_cpal.default_stream_config_error_backend_specific(
+        "wasapi default_output_config: query failed",
+      )
+    Some((ch, sr, fmt_tag)) => {
+      let fmt = match fmt_tag {
+        1 => @moon_cpal.SampleFormat::F32
+        2 => @moon_cpal.SampleFormat::I16
+        _ => @moon_cpal.SampleFormat::F32
+      }
+      @moon_cpal.SupportedStreamConfig::new(
+        ch.reinterpret_as_int(),
+        sr.reinterpret_as_int(),
+        @moon_cpal.SupportedBufferSize::Unknown,
+        fmt,
+      )
+    }
+  }
 }

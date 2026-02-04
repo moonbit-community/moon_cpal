@@ -80,6 +80,156 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 #include <propvarutil.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+// -----------------------------------------------------------------------------
+// Default config query (Windows)
+// -----------------------------------------------------------------------------
+//
+// Returns (channels, sample_rate, sample_format_tag) via a u32 out array.
+// - sample_format_tag: 1 = f32, 2 = i16
+
+static wchar_t *utf8_bytes_to_wide(uint8_t *bytes, int32_t len) {
+  if (bytes == NULL || len <= 0) {
+    return NULL;
+  }
+  // NUL-terminate for MultiByteToWideChar.
+  char *tmp = (char *)calloc((size_t)len + 1, 1);
+  if (tmp == NULL) {
+    return NULL;
+  }
+  memcpy(tmp, bytes, (size_t)len);
+  tmp[len] = '\0';
+  if (tmp[0] == '\0' || strcmp(tmp, "default") == 0) {
+    free(tmp);
+    return NULL;
+  }
+
+  int wlen = MultiByteToWideChar(CP_UTF8, 0, tmp, -1, NULL, 0);
+  if (wlen <= 0) {
+    free(tmp);
+    return NULL;
+  }
+  wchar_t *ws = (wchar_t *)calloc((size_t)wlen, sizeof(wchar_t));
+  if (ws == NULL) {
+    free(tmp);
+    return NULL;
+  }
+  if (MultiByteToWideChar(CP_UTF8, 0, tmp, -1, ws, wlen) <= 0) {
+    free(tmp);
+    free(ws);
+    return NULL;
+  }
+  free(tmp);
+  return ws;
+}
+
+static uint32_t sample_format_tag_from_mix(const WAVEFORMATEX *wfx) {
+  if (wfx == NULL) {
+    return 0;
+  }
+  if (wfx->wBitsPerSample == 32) {
+    return 1;
+  }
+  if (wfx->wBitsPerSample == 16) {
+    return 2;
+  }
+  return 0;
+}
+
+int32_t moon_cpal_wasapi_default_config_u32(uint8_t *device_id_utf8,
+                                           int32_t device_id_len,
+                                           int32_t is_input,
+                                           uint32_t *out,
+                                           int32_t out_len) {
+  if (out == NULL || out_len < 3) {
+    moonbit_decref(device_id_utf8);
+    return -1;
+  }
+  out[0] = 0;
+  out[1] = 0;
+  out[2] = 0;
+
+  wchar_t *endpoint_id_w = utf8_bytes_to_wide(device_id_utf8, device_id_len);
+  moonbit_decref(device_id_utf8);
+
+  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  if (FAILED(hr)) {
+    if (endpoint_id_w != NULL) {
+      free(endpoint_id_w);
+    }
+    return (int32_t)hr;
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *device = NULL;
+  IAudioClient *client = NULL;
+  WAVEFORMATEX *wfx = NULL;
+
+  hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+                        (void **)&enumerator);
+  if (FAILED(hr) || enumerator == NULL) {
+    goto done;
+  }
+
+  EDataFlow flow = is_input ? eCapture : eRender;
+  if (endpoint_id_w != NULL) {
+    hr = IMMDeviceEnumerator_GetDevice(enumerator, endpoint_id_w, &device);
+    if (FAILED(hr) || device == NULL) {
+      hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, flow, eConsole, &device);
+    }
+  } else {
+    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, flow, eConsole, &device);
+  }
+  if (FAILED(hr) || device == NULL) {
+    goto done;
+  }
+
+  hr = IMMDevice_Activate(device, &IID_IAudioClient, CLSCTX_ALL, NULL, (void **)&client);
+  if (FAILED(hr) || client == NULL) {
+    goto done;
+  }
+
+  hr = IAudioClient_GetMixFormat(client, &wfx);
+  if (FAILED(hr) || wfx == NULL) {
+    goto done;
+  }
+
+  uint32_t tag = sample_format_tag_from_mix(wfx);
+  if (tag == 0) {
+    hr = E_FAIL;
+    goto done;
+  }
+
+  out[0] = (uint32_t)wfx->nChannels;
+  out[1] = (uint32_t)wfx->nSamplesPerSec;
+  out[2] = tag;
+  hr = S_OK;
+
+done:
+  if (wfx != NULL) {
+    CoTaskMemFree(wfx);
+    wfx = NULL;
+  }
+  if (client != NULL) {
+    IAudioClient_Release(client);
+    client = NULL;
+  }
+  if (device != NULL) {
+    IMMDevice_Release(device);
+    device = NULL;
+  }
+  if (enumerator != NULL) {
+    IMMDeviceEnumerator_Release(enumerator);
+    enumerator = NULL;
+  }
+  if (endpoint_id_w != NULL) {
+    free(endpoint_id_w);
+    endpoint_id_w = NULL;
+  }
+  CoUninitialize();
+
+  return FAILED(hr) ? (int32_t)hr : 0;
+}
+
 static int wstr_is_default(const wchar_t *s) {
   if (s == NULL) {
     return 0;
@@ -407,3 +557,23 @@ int32_t moon_cpal_wasapi_device_name_utf8(uint8_t *device_id_utf8,
   return -1;
 #endif
 }
+
+#if !defined(_WIN32)
+// Non-Windows native builds: provide stubs so the module links when the WASAPI package is
+// pulled in via platform dispatch.
+int32_t moon_cpal_wasapi_default_config_u32(uint8_t *device_id_utf8,
+                                           int32_t device_id_len,
+                                           int32_t is_input,
+                                           uint32_t *out,
+                                           int32_t out_len) {
+  (void)device_id_len;
+  (void)is_input;
+  if (out != NULL && out_len >= 3) {
+    out[0] = 0;
+    out[1] = 0;
+    out[2] = 0;
+  }
+  moonbit_decref(device_id_utf8);
+  return -1;
+}
+#endif

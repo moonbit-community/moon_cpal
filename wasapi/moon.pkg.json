@@ -2,6 +2,7 @@
   "import": ["zhengyu/moon_cpal"],
   "targets": {
     "ffi_native.mbt": ["native"],
+    "wasapi_config_test.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],
     "stream_native.mbt": ["native"]
   },

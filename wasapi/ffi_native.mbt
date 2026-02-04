@@ -22,6 +22,17 @@ extern "C" fn wasapi_device_name_utf8(
 ) -> Int = "moon_cpal_wasapi_device_name_utf8"
 
 ///|
+#borrow(out)
+#owned(device_id_utf8)
+extern "C" fn wasapi_default_config_u32(
+  device_id_utf8 : Bytes,
+  device_id_len : Int,
+  is_input : Int,
+  out : FixedArray[UInt],
+  out_len : Int,
+) -> Int = "moon_cpal_wasapi_default_config_u32"
+
+///|
 pub fn devices_utf8() -> Bytes {
   wasapi_devices_utf8()
 }
@@ -45,4 +56,26 @@ pub fn device_name_utf8(id : String) -> String? {
   }
   let need = if used > out.length() { out.length() } else { used }
   Some(@moon_cpal.utf8_bytes_to_string(out, need))
+}
+
+///|
+pub fn default_config_u32(id : String, is_input : Bool) -> (UInt, UInt, UInt)? {
+  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let out = FixedArray::make(3, (0 : UInt))
+  let st = wasapi_default_config_u32(
+    b,
+    b.length(),
+    if is_input {
+      1
+    } else {
+      0
+    },
+    out,
+    3,
+  )
+  if st < 0 {
+    None
+  } else {
+    Some((out[0], out[1], out[2]))
+  }
 }

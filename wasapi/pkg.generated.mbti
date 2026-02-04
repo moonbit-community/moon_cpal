@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn default_config_u32(String, Bool) -> (UInt, UInt, UInt)?
+
 pub fn default_host() -> Host
 
 pub fn device_name_utf8(String) -> String?
