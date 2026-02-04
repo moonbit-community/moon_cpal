@@ -659,6 +659,7 @@ int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
 typedef struct {
   AudioQueueRef queue;
   int is_input;
+  volatile int running;
   uint32_t buffer_bytes;
   uint32_t sample_format_tag;
   uint32_t channels;
@@ -736,6 +737,11 @@ static void ca_fill_output_buffer(moon_cpal_ca_stream_t *s,
       s->call_data_callback == NULL || s->mb_data_callback == NULL) {
     return;
   }
+  if (s->running == 0) {
+    memset(in_buffer->mAudioData, 0, s->buffer_bytes);
+    in_buffer->mAudioDataByteSize = s->buffer_bytes;
+    return;
+  }
   if (s->mb_buffer_pool_len == 0 || s->mb_buffer_pool[0] == NULL) {
     return;
   }
@@ -802,6 +808,9 @@ static void ca_input_callback(void *in_user_data,
   moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)in_user_data;
   if (s == NULL || in_buffer == NULL) {
     return;
+  }
+  if (s->running == 0) {
+    goto input_reenqueue;
   }
   if (s->call_data_callback != NULL && s->mb_data_callback != NULL &&
       in_buffer->mAudioData != NULL && in_buffer->mAudioDataByteSize > 0) {
@@ -992,6 +1001,7 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 0;
+  s->running = 0;
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = sample_rate;
@@ -1104,6 +1114,7 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 1;
+  s->running = 0;
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = sample_rate;
@@ -1188,6 +1199,7 @@ int32_t moon_cpal_ca_stream_play(uint64_t handle) {
   if (s == NULL || s->queue == NULL) {
     return -1;
   }
+  s->running = 1;
   OSStatus st = AudioQueueStart(s->queue, NULL);
   return ca_err(st);
 }
@@ -1197,6 +1209,7 @@ int32_t moon_cpal_ca_stream_pause(uint64_t handle) {
   if (s == NULL || s->queue == NULL) {
     return -1;
   }
+  s->running = 0;
   OSStatus st = AudioQueuePause(s->queue);
   return ca_err(st);
 }

@@ -422,10 +422,10 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   // Supported formats: keep in sync with the MoonBit stream builder.
   uint32_t fmt_tags[2];
   size_t fmt_count = 0;
-  if (snd_pcm_hw_params_test_format(hw, SND_PCM_FORMAT_FLOAT_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT_LE) == 0) {
     fmt_tags[fmt_count++] = 1u;
   }
-  if (snd_pcm_hw_params_test_format(hw, SND_PCM_FORMAT_S16_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S16_LE) == 0) {
     fmt_tags[fmt_count++] = 2u;
   }
   if (fmt_count == 0) {
@@ -451,7 +451,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   struct rate_pair rates[64];
   size_t rate_count = 0;
 
-  if (min_rate == max_rate || snd_pcm_hw_params_test_rate(hw, min_rate + 1, 0) == 0) {
+  if (min_rate == max_rate || snd_pcm_hw_params_test_rate(pcm, hw, min_rate + 1, 0) == 0) {
     rates[rate_count++] = (struct rate_pair){(uint32_t)min_rate, (uint32_t)max_rate};
   } else {
     static const uint32_t COMMON_RATES[] = {
@@ -461,7 +461,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
     };
     for (size_t i = 0; i < sizeof(COMMON_RATES) / sizeof(COMMON_RATES[0]); i++) {
       uint32_t r = COMMON_RATES[i];
-      if (snd_pcm_hw_params_test_rate(hw, r, 0) == 0) {
+      if (snd_pcm_hw_params_test_rate(pcm, hw, r, 0) == 0) {
         rates[rate_count++] = (struct rate_pair){r, r};
       }
     }
@@ -484,7 +484,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   uint32_t channels[64];
   size_t ch_count = 0;
   for (unsigned int ch = min_ch; ch <= max_ch; ch++) {
-    if (snd_pcm_hw_params_test_channels(hw, ch) == 0) {
+    if (snd_pcm_hw_params_test_channels(pcm, hw, ch) == 0) {
       channels[ch_count++] = (uint32_t)ch;
     }
   }
