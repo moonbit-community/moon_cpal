@@ -87,4 +87,21 @@ test "error display strings (cpal-reference parity)" {
     host_unavailable().to_string(),
     content="the requested host is unavailable",
   )
+
+  let s1 = try DeviceId::from_string("unknown:abc") catch {
+    e => e.to_string()
+  } noraise {
+    _ => "OK"
+  }
+  inspect(s1, content="Device IDs are unsupported for this OS")
+
+  let s2 = try DeviceId::from_string("coreaudio") catch {
+    e => e.to_string()
+  } noraise {
+    _ => "OK"
+  }
+  inspect(
+    s2,
+    content="A backend-specific error has occurred: Failed to parse device ID from: coreaudio\nCheck if format matches \"host:device_id\"",
+  )
 }

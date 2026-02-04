@@ -93,8 +93,9 @@ pub impl Show for DefaultStreamConfigError
 
 pub suberror DeviceIdError {
   UnsupportedPlatform
-  BackendSpecific(String)
+  BackendSpecific(BackendSpecificError)
 }
+pub fn DeviceIdError::to_string(Self) -> String
 pub impl Eq for DeviceIdError
 pub impl Show for DeviceIdError
 

@@ -6,8 +6,16 @@
 ///|
 pub suberror DeviceIdError {
   UnsupportedPlatform
-  BackendSpecific(String)
+  BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
+
+///|
+pub fn DeviceIdError::to_string(self : DeviceIdError) -> String {
+  match self {
+    DeviceIdError::BackendSpecific(err) => err.to_string()
+    DeviceIdError::UnsupportedPlatform => "Device IDs are unsupported for this OS"
+  }
+}
 
 ///|
 pub struct DeviceId {
@@ -43,7 +51,9 @@ pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
   }
   if parts.length() < 2 || parts[0].is_empty() {
     raise DeviceIdError::BackendSpecific(
-      "Failed to parse device ID (expected \"host:device_id\")",
+      BackendSpecificError::new(
+        "Failed to parse device ID from: \{s}\nCheck if format matches \"host:device_id\"",
+      ),
     )
   }
   let host_id = match HostId::from_view(parts[0]) {
@@ -59,7 +69,9 @@ pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
   }
   if dev.is_empty() {
     raise DeviceIdError::BackendSpecific(
-      "Failed to parse device ID (expected \"host:device_id\")",
+      BackendSpecificError::new(
+        "Failed to parse device ID from: \{s}\nCheck if format matches \"host:device_id\"",
+      ),
     )
   }
   DeviceId::new(host_id, dev.to_string())
