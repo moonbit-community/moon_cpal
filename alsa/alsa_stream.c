@@ -386,6 +386,13 @@ static int alsa_stream_new(const char *device_id,
   if (period_frames == 0) {
     period_frames = requested_frames == 0 ? 512u : requested_frames;
   }
+  // Enforce BufferSize::Fixed semantics: if a fixed period was requested and ALSA chose a different
+  // period size, treat the config as unsupported rather than silently clamping.
+  if (requested_frames != 0 && period_frames != 0 && period_frames != requested_frames) {
+    alsa_invoke_error(s, 4 /* snd_pcm_hw_params */, -EINVAL);
+    alsa_stream_destroy(s);
+    return -EINVAL;
+  }
   uint32_t buffer_bytes = period_frames * channels * bps;
   if (buffer_bytes == 0) {
     alsa_invoke_error(s, 4 /* snd_pcm_hw_params */, -EINVAL);

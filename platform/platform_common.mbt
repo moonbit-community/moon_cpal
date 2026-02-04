@@ -2,11 +2,12 @@
 /// Platform-level dynamic host/device wrappers.
 ///
 /// This is a small MoonBit analogue of upstream `cpal::platform` dynamic dispatch types.
-/// For now, this only wraps:
-/// - Null backend (always available)
-/// - macOS CoreAudio backend (native only; uses stub on non-native)
-/// - ALSA backend stubs
-/// - WASAPI backend stubs
+///
+/// Native backends:
+/// - Null (always available)
+/// - macOS CoreAudio (native; stubbed on non-Apple native builds for linking)
+/// - Linux ALSA + JACK
+/// - Windows WASAPI
 
 ///|
 pub enum Host {

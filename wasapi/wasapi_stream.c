@@ -336,6 +336,17 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     return 0;
   }
 
+  // Enforce BufferSize::Fixed semantics: if the caller requested a fixed callback size larger than
+  // the WASAPI buffer, fail initialization rather than silently clamping.
+  if (s->requested_frames > 0 && s->requested_frames > s->buffer_frame_count) {
+    s->init_hr = AUDCLNT_E_BUFFER_SIZE_ERROR;
+    InterlockedExchange(&s->initialized, 1);
+    SetEvent(s->wake_event);
+    wasapi_release_objects(s);
+    CoUninitialize();
+    return 0;
+  }
+
   s->frames_per_cb = s->requested_frames > 0 ? s->requested_frames : (s->buffer_frame_count / 2);
   if (s->frames_per_cb == 0) {
     s->frames_per_cb = 1;

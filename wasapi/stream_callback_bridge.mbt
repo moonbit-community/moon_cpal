@@ -128,7 +128,9 @@ fn wasapi_stream_error_from_hresult(
   // Note: we pass HRESULT as a signed 32-bit int from C.
   // AUDCLNT_E_DEVICE_INVALIDATED = 0x88890004
   // AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A
-  if status == -2004287484 || status == -2004287478 {
+  if status == -2004287484 {
+    @moon_cpal.stream_error_stream_invalidated()
+  } else if status == -2004287478 {
     @moon_cpal.stream_error_device_not_available()
   } else {
     @moon_cpal.stream_error_backend_specific("\{op} (HRESULT \{status})")

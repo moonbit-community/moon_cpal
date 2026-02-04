@@ -7,7 +7,7 @@ test "wasapi HRESULT mapping (unit)" {
   // AUDCLNT_E_DEVICE_INVALIDATED (0x88890004)
   inspect(
     wasapi_stream_error_from_hresult(-2004287484, "DeviceInit"),
-    content="DeviceNotAvailable",
+    content="StreamInvalidated",
   )
   // AUDCLNT_E_DEVICE_IN_USE (0x8889000A)
   inspect(

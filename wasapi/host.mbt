@@ -1,8 +1,8 @@
 ///|
 /// WASAPI backend (Windows).
 ///
-/// This package is currently a stub: it exists so the cross-platform platform wrapper can
-/// typecheck on all targets. A real implementation will be added later.
+/// This backend provides device enumeration, default/supported configs (best-effort), and
+/// real stream I/O via a native C implementation (callback-thread model).
 
 ///|
 pub struct Host {

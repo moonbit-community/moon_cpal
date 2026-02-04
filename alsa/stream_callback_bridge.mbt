@@ -129,6 +129,9 @@ fn alsa_stream_error_from_errno(
   if status == -19 {
     // ENODEV
     @moon_cpal.stream_error_device_not_available()
+  } else if status == -5 || status == -77 || status == -86 {
+    // EIO / EBADFD / ESTRPIPE
+    @moon_cpal.stream_error_stream_invalidated()
   } else if status == -32 {
     // EPIPE (XRUN)
     @moon_cpal.stream_error_buffer_underrun()

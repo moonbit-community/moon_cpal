@@ -1,34 +1,53 @@
 # moon_cpal
 
-MoonBit port (initially a pure-core subset) of RustAudio `cpal`.
+MoonBit port of RustAudio `cpal` (native-only).
 
 Pinned upstream reference: see `UPSTREAM.md`.
 
 ## Status
 
-- `zhengyu/moon_cpal`: portable "pure core" slice (format heuristics, timestamps, sample-format helpers).
-- `zhengyu/moon_cpal/macos`: macOS CoreAudio device discovery (native backend only; uses a C stub).
-  - device listing + names
-  - supported input/output config ranges (`SupportedStreamConfigRange`) for a device
-  - default input/output config (`SupportedStreamConfig`) for a device
-  - AudioQueue-backed input/output streams with MoonBit callback bridging (native)
+- `zhengyu/moon_cpal`: core CPAL-like types (configs, heuristics, timestamps, sample helpers).
+- `zhengyu/moon_cpal/spec`: CPAL-like host/device/stream API backed by `platform` dynamic dispatch.
+- Native backends (real I/O, callback-thread model):
+  - macOS: CoreAudio (AudioQueue)
+  - Linux: ALSA + JACK
+  - Windows: WASAPI
 
-## macOS smoke test (native)
+Note: `moon.mod.json` sets `preferred-target: native`. Non-native targets are not supported.
+
+## Run unit tests (native)
+
+```
+moon test --target native
+```
+
+## Enumerate hosts/devices (native)
+
+```
+moon run --target native cmd/enumerate
+```
+
+## Stream smoke tests (native)
+
+macOS:
 
 ```
 moon run --target native cmd/macos_smoke
 ```
 
-## macOS stream smoke test (native)
-
 ```
 moon run --target native cmd/macos_stream_smoke
 ```
 
-Note: framework link flags currently live in the *main* package (see `cmd/macos_smoke/moon.pkg.json`).
-
-## macOS native tests
+Linux:
 
 ```
-moon test --target native
+moon run --target native cmd/alsa_stream_smoke
+moon run --target native cmd/jack_stream_smoke
+```
+
+Windows:
+
+```
+moon run --target native cmd/wasapi_stream_smoke
 ```

@@ -1,8 +1,8 @@
 ///|
-/// Minimal cpal-like host/device surface for macOS.
+/// CPAL-like host/device surface for macOS (CoreAudio).
 ///
-/// The goal is to make it easy to build higher-level APIs later while keeping the
-/// current implementation limited to deterministic device discovery.
+/// Includes device enumeration, config queries and native stream I/O (AudioQueue) with
+/// MoonBit callback bridging.
 pub struct Host {
   _unit : Unit
 } derive(Show, Eq)

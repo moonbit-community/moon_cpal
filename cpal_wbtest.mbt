@@ -152,6 +152,18 @@ test "supported_config_range sample-rate helpers" {
 }
 
 ///|
+test "supported_buffer_size contains" {
+  inspect(Range(min=128, max=256).contains(0), content="false")
+  inspect(Range(min=128, max=256).contains(127), content="false")
+  inspect(Range(min=128, max=256).contains(128), content="true")
+  inspect(Range(min=128, max=256).contains(200), content="true")
+  inspect(Range(min=128, max=256).contains(256), content="true")
+  inspect(Range(min=128, max=256).contains(257), content="false")
+  inspect(SupportedBufferSize::Unknown.contains(1), content="true")
+  inspect(SupportedBufferSize::Unknown.contains(-1), content="false")
+}
+
+///|
 test "callback timestamp types" {
   let callback = StreamInstant::new(1L, 2)
   let capture = StreamInstant::new(3L, 4)

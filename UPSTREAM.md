@@ -6,7 +6,6 @@ This repository tracks the RustAudio `cpal` crate as the reference behavior/sour
 - Pinned commit (local checkout in `cpal-reference/`): `6627959add25299a4e6077f45eb69721cfaaa14f`
 
 Notes:
-- The initial MoonBit port focuses on the "pure core" parts that are deterministic and testable
-  (e.g. config heuristics and timestamp arithmetic).
-- Platform audio backends (ALSA/CoreAudio/WASAPI/...) are out of scope for the first slice.
-
+- The MoonBit port started with a deterministic, testable “pure core” slice (config heuristics,
+  timestamps, sample helpers) and has since grown to include native audio backends.
+- `cpal-reference/` is kept as a read-only upstream checkout used as the behavior/source reference.

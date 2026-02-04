@@ -52,6 +52,20 @@ pub(all) enum SupportedBufferSize {
 } derive(Show, Eq)
 
 ///|
+pub fn SupportedBufferSize::contains(
+  self : SupportedBufferSize,
+  frames : FrameCount,
+) -> Bool {
+  if frames <= 0 {
+    return false
+  }
+  match self {
+    Unknown => true
+    Range(min=mn, max=mx) => mn <= frames && frames <= mx
+  }
+}
+
+///|
 pub(all) enum SampleFormat {
   I8
   I16

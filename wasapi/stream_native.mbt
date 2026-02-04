@@ -182,6 +182,19 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 }
 
 ///|
+fn validate_buffer_size_or_raise(
+  config : @moon_cpal.StreamConfig,
+) -> Unit raise @moon_cpal.BuildStreamError {
+  match config.buffer_size {
+    Default => ()
+    Fixed(n) =>
+      if n <= 0 {
+        raise @moon_cpal.build_stream_error_invalid_argument()
+      }
+  }
+}
+
+///|
 pub fn Device::build_output_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
@@ -197,6 +210,7 @@ pub fn Device::build_output_stream(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
+  validate_buffer_size_or_raise(config)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_output(
@@ -239,6 +253,7 @@ pub fn Device::build_input_stream(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
+  validate_buffer_size_or_raise(config)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(

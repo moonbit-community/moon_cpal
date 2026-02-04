@@ -116,7 +116,7 @@ fn validate_buffer_size_or_raise(
     Default => ()
     Fixed(n) => {
       if n <= 0 {
-        raise @moon_cpal.build_stream_error_stream_config_not_supported()
+        raise @moon_cpal.build_stream_error_invalid_argument()
       }
       match default_server_config() {
         None => ()
