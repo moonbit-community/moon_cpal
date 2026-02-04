@@ -92,7 +92,6 @@ jobs:
           if (-not (Test-Path $cc)) { $cc = "cc.exe" }
           & $cc -O2 scripts\moon_cc.c -o scripts\moon_cc.sh
       - name: Install virtual audio device (VB-CABLE)
-        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -108,7 +107,7 @@ jobs:
             }
           }
           if (-not $ok) {
-            throw "Failed to install a virtual audio device via chocolatey."
+            Write-Host "Warning: couldn't install a virtual audio device via chocolatey; continuing with host devices."
           }
       - name: Run unit tests
         shell: pwsh
