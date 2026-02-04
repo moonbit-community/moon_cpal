@@ -98,3 +98,77 @@ test "data: write_i16/write_u16/write_u8 roundtrip" {
     content="Some([b'\\x05', b'\\x06', b'\\x07', b'\\x08'])",
   )
 }
+
+///|
+test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
+  let i8 = Data::new(SampleFormat::I8, FixedArray::make(3, Int::to_byte(0)))
+  inspect(i8.write_i8([-128, 0, 127]), content="true")
+  inspect(i8.try_as_i8(), content="Some([-128, 0, 127])")
+
+  let i24 = Data::new(SampleFormat::I24, FixedArray::make(8, Int::to_byte(0)))
+  inspect(
+    i24.write_i24([I24::new(-1), I24::new(8_388_607)]),
+    content="true",
+  )
+  match i24.try_as_i24() {
+    None => inspect(false, content="true")
+    Some(xs) => inspect([xs[0].to_int(), xs[1].to_int()], content="[-1, 8388607]")
+  }
+
+  let u24 = Data::new(SampleFormat::U24, FixedArray::make(8, Int::to_byte(0)))
+  inspect(
+    u24.write_u24([U24::new(0), U24::new(16_777_215)]),
+    content="true",
+  )
+  match u24.try_as_u24() {
+    None => inspect(false, content="true")
+    Some(xs) => inspect([xs[0].to_int(), xs[1].to_int()], content="[0, 16777215]")
+  }
+
+  let i32 = Data::new(SampleFormat::I32, FixedArray::make(8, Int::to_byte(0)))
+  inspect(i32.write_i32([-2_147_483_648, 2_147_483_647]), content="true")
+  inspect(i32.try_as_i32(), content="Some([-2147483648, 2147483647])")
+
+  let u32 = Data::new(SampleFormat::U32, FixedArray::make(8, Int::to_byte(0)))
+  inspect(u32.write_u32([(0 : UInt), (0xffff_ffff : UInt)]), content="true")
+  match u32.try_as_u32() {
+    None => inspect(false, content="true")
+    Some(xs) => {
+      inspect(xs.length(), content="2")
+      inspect(xs[0] == (0 : UInt), content="true")
+      inspect(xs[1] == (0xffff_ffff : UInt), content="true")
+    }
+  }
+
+  let i64 = Data::new(SampleFormat::I64, FixedArray::make(16, Int::to_byte(0)))
+  inspect(
+    i64.write_i64([(-1 : Int).to_int64(), (123456789 : Int).to_int64()]),
+    content="true",
+  )
+  inspect(i64.try_as_i64(), content="Some([-1, 123456789])")
+
+  let u64 = Data::new(SampleFormat::U64, FixedArray::make(16, Int::to_byte(0)))
+  inspect(
+    u64.write_u64([(0 : UInt64), (0xffff_ffff_ffff_ffff : UInt64)]),
+    content="true",
+  )
+  match u64.try_as_u64() {
+    None => inspect(false, content="true")
+    Some(xs) => {
+      inspect(xs.length(), content="2")
+      inspect(xs[0] == (0 : UInt64), content="true")
+      inspect(xs[1] == (0xffff_ffff_ffff_ffff : UInt64), content="true")
+    }
+  }
+
+  let f64 = Data::new(SampleFormat::F64, FixedArray::make(16, Int::to_byte(0)))
+  inspect(f64.write_f64([(0.5 : Double), (-1.0 : Double)]), content="true")
+  match f64.try_as_f64() {
+    None => inspect(false, content="true")
+    Some(xs) => {
+      inspect(xs.length(), content="2")
+      inspect(Float::from_double(xs[0]).is_close(0.5), content="true")
+      inspect(Float::from_double(xs[1]).is_close(-1.0), content="true")
+    }
+  }
+}
