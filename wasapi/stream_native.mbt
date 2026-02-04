@@ -117,8 +117,10 @@ fn wasapi_build_error_from_hresult(
   // - AUDCLNT_E_UNSUPPORTED_FORMAT= 0x88890008 (-2004287480)
   // - AUDCLNT_E_BUFFER_SIZE_ERROR = 0x88890019 (-2004287463)
   // - E_INVALIDARG                = 0x80070057 (-2147024809)
-  if status == -2004287484 || status == -2004287478 {
+  if status == -2004287484 {
     @moon_cpal.build_stream_error_device_not_available()
+  } else if status == -2004287478 {
+    @moon_cpal.build_stream_error_device_busy()
   } else if status == -2004287480 || status == -2004287463 {
     @moon_cpal.build_stream_error_stream_config_not_supported()
   } else if status == -2147024809 {
@@ -183,6 +185,25 @@ fn format_tag_from_sample_format(fmt : @moon_cpal.SampleFormat) -> UInt? {
 }
 
 ///|
+fn find_matching_range_for_format(
+  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
+  config : @moon_cpal.StreamConfig,
+  fmt : @moon_cpal.SampleFormat,
+) -> @moon_cpal.SupportedStreamConfigRange? {
+  let sr = config.sample_rate
+  let ch = config.channels
+  for r in ranges {
+    if r.channels() == ch &&
+      r.sample_format() == fmt &&
+      r.min_sample_rate() <= sr &&
+      sr <= r.max_sample_rate() {
+      return Some(r)
+    }
+  }
+  None
+}
+
+///|
 fn choose_default_sample_format(
   ranges : Array[@moon_cpal.SupportedStreamConfigRange],
   config : @moon_cpal.StreamConfig,
@@ -217,14 +238,19 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 
 ///|
 fn validate_buffer_size_or_raise(
+  r : @moon_cpal.SupportedStreamConfigRange,
   config : @moon_cpal.StreamConfig,
 ) -> Unit raise @moon_cpal.BuildStreamError {
   match config.buffer_size {
     Default => ()
-    Fixed(n) =>
+    Fixed(n) => {
       if n <= 0 {
         raise @moon_cpal.build_stream_error_invalid_argument()
       }
+      if !r.buffer_size().contains(n) {
+        raise @moon_cpal.build_stream_error_stream_config_not_supported()
+      }
+    }
   }
 }
 
@@ -240,11 +266,19 @@ pub fn Device::build_output_stream_raw(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     raise_build_hresult("wasapi build_output_stream_raw", -1)
   }
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(config)
+  let ranges = self.supported_output_configs()
+  let r = match find_matching_range_for_format(ranges, config, sample_format) {
+    Some(r) => r
+    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+  validate_buffer_size_or_raise(r, config)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_output(
@@ -279,6 +313,9 @@ pub fn Device::build_output_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = self.supported_output_configs()
   let fmt = match choose_default_sample_format(ranges, config) {
     Some(f) => f
@@ -301,11 +338,19 @@ pub fn Device::build_input_stream_raw(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     raise_build_hresult("wasapi build_input_stream_raw", -1)
   }
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(config)
+  let ranges = self.supported_input_configs()
+  let r = match find_matching_range_for_format(ranges, config, sample_format) {
+    Some(r) => r
+    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
+  validate_buffer_size_or_raise(r, config)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(
@@ -340,6 +385,9 @@ pub fn Device::build_input_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = self.supported_input_configs()
   let fmt = match choose_default_sample_format(ranges, config) {
     Some(f) => f

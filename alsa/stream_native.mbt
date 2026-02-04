@@ -246,6 +246,9 @@ pub fn Device::build_output_stream_raw(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_errno("alsa build_output_stream_raw", -1)
   }
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -290,6 +293,9 @@ pub fn Device::build_output_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = self.supported_output_configs()
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
@@ -316,6 +322,9 @@ pub fn Device::build_input_stream_raw(
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_errno("alsa build_input_stream_raw", -1)
+  }
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
   }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
@@ -361,6 +370,9 @@ pub fn Device::build_input_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = self.supported_input_configs()
   let r = match choose_default_range(ranges, config) {
     Some(r) => r

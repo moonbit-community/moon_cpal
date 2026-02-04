@@ -45,7 +45,15 @@ pub fn Device::name(self : Device) -> String raise CoreAudioError {
 
 ///|
 pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
-  @moon_cpal.DeviceId::new(@moon_cpal.HostId::CoreAudio, self.id.to_string())
+  match device_uid(self.id) {
+    Some(uid) if uid.trim().length() > 0 =>
+      @moon_cpal.DeviceId::new(@moon_cpal.HostId::CoreAudio, uid)
+    _ =>
+      @moon_cpal.DeviceId::new(
+        @moon_cpal.HostId::CoreAudio,
+        self.id.to_string(),
+      )
+  }
 }
 
 ///|

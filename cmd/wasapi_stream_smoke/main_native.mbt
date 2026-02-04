@@ -48,11 +48,19 @@ fn main {
     }
     let calls : Array[Int] = [0]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
+    let first_frames : Array[Int] = [0]
     try
       dev.build_output_stream(
         cfg,
         fn(data, info) {
           calls[0] = calls[0] + 1
+          if first_frames[0] == 0 {
+            let n = data.len()
+            let ch = cfg.channels
+            if ch > 0 {
+              first_frames[0] = n / ch
+            }
+          }
           let now = info.timestamp().callback()
           match last_cb[0] {
             None => last_cb[0] = Some(now)
@@ -102,6 +110,52 @@ fn main {
         }
         stream.close()
         println("output stream ok (callbacks=\{calls[0]})")
+
+        // Validate BufferSize::Fixed semantics using the observed callback size.
+        if first_frames[0] > 0 && cfg.channels > 0 {
+          let fixed_cfg = @moon_cpal.StreamConfig::new(
+            cfg.channels,
+            cfg.sample_rate,
+            @moon_cpal.BufferSize::fixed(first_frames[0]),
+          )
+          let fixed_calls : Array[Int] = [0]
+          let fixed_stream = try
+            dev.build_output_stream(
+              fixed_cfg,
+              fn(data, _info) {
+                fixed_calls[0] = fixed_calls[0] + 1
+                if data.len() != first_frames[0] * cfg.channels {
+                  println(
+                    "fixed output callback len mismatch: got=\{data.len()} expected=\{first_frames[0] * cfg.channels}",
+                  )
+                  panic()
+                }
+                fill_silence(data)
+              },
+              fn(err) { println("stream error: \{err}") },
+              None,
+            )
+          catch {
+            e => {
+              println("fixed output stream build failed: \{e}")
+              panic()
+            }
+          } noraise {
+            s => s
+          }
+          try fixed_stream.play() catch {
+            e => {
+              println("fixed output stream play failed: \{e}")
+              fixed_stream.close()
+              panic()
+            }
+          } noraise {
+            _ => ()
+          }
+          sleep_ms(200)
+          fixed_stream.close()
+          println("fixed output stream ok (callbacks=\{fixed_calls[0]})")
+        }
         out_ok = true
         break
       }
@@ -124,11 +178,19 @@ fn main {
     let calls : Array[Int] = [0]
     let printed : Array[Bool] = [false]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
+    let first_frames : Array[Int] = [0]
     try
       dev.build_input_stream(
         cfg,
         fn(data, info) {
           calls[0] = calls[0] + 1
+          if first_frames[0] == 0 {
+            let n = data.len()
+            let ch = cfg.channels
+            if ch > 0 {
+              first_frames[0] = n / ch
+            }
+          }
           let now = info.timestamp().callback()
           match last_cb[0] {
             None => last_cb[0] = Some(now)
@@ -190,6 +252,51 @@ fn main {
         }
         stream.close()
         println("input stream ok (callbacks=\{calls[0]})")
+
+        // Validate BufferSize::Fixed semantics using the observed callback size.
+        if first_frames[0] > 0 && cfg.channels > 0 {
+          let fixed_cfg = @moon_cpal.StreamConfig::new(
+            cfg.channels,
+            cfg.sample_rate,
+            @moon_cpal.BufferSize::fixed(first_frames[0]),
+          )
+          let fixed_calls : Array[Int] = [0]
+          let fixed_stream = try
+            dev.build_input_stream(
+              fixed_cfg,
+              fn(data, _info) {
+                fixed_calls[0] = fixed_calls[0] + 1
+                if data.len() != first_frames[0] * cfg.channels {
+                  println(
+                    "fixed input callback len mismatch: got=\{data.len()} expected=\{first_frames[0] * cfg.channels}",
+                  )
+                  panic()
+                }
+              },
+              fn(err) { println("stream error: \{err}") },
+              None,
+            )
+          catch {
+            e => {
+              println("fixed input stream build failed: \{e}")
+              panic()
+            }
+          } noraise {
+            s => s
+          }
+          try fixed_stream.play() catch {
+            e => {
+              println("fixed input stream play failed: \{e}")
+              fixed_stream.close()
+              panic()
+            }
+          } noraise {
+            _ => ()
+          }
+          sleep_ms(200)
+          fixed_stream.close()
+          println("fixed input stream ok (callbacks=\{fixed_calls[0]})")
+        }
         in_ok = true
         break
       }
@@ -213,11 +320,19 @@ fn main {
         }
         let calls : Array[Int] = [0]
         let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
+        let first_frames : Array[Int] = [0]
         try
           dev.build_loopback_input_stream(
             cfg,
             fn(data, info) {
               calls[0] = calls[0] + 1
+              if first_frames[0] == 0 {
+                let n = data.len()
+                let ch = cfg.channels
+                if ch > 0 {
+                  first_frames[0] = n / ch
+                }
+              }
               let now = info.timestamp().callback()
               match last_cb[0] {
                 None => last_cb[0] = Some(now)
@@ -278,6 +393,51 @@ fn main {
             }
             stream.close()
             println("loopback stream ok (callbacks=\{calls[0]})")
+
+            // Validate fixed sizing using the observed loopback callback size.
+            if first_frames[0] > 0 && cfg.channels > 0 {
+              let fixed_cfg = @moon_cpal.StreamConfig::new(
+                cfg.channels,
+                cfg.sample_rate,
+                @moon_cpal.BufferSize::fixed(first_frames[0]),
+              )
+              let fixed_calls : Array[Int] = [0]
+              let fixed_stream = try
+                dev.build_loopback_input_stream(
+                  fixed_cfg,
+                  fn(data, _info) {
+                    fixed_calls[0] = fixed_calls[0] + 1
+                    if data.len() != first_frames[0] * cfg.channels {
+                      println(
+                        "fixed loopback len mismatch: got=\{data.len()} expected=\{first_frames[0] * cfg.channels}",
+                      )
+                      panic()
+                    }
+                  },
+                  fn(err) { println("stream error: \{err}") },
+                  None,
+                )
+              catch {
+                e => {
+                  println("fixed loopback stream build failed: \{e}")
+                  panic()
+                }
+              } noraise {
+                s => s
+              }
+              try fixed_stream.play() catch {
+                e => {
+                  println("fixed loopback stream play failed: \{e}")
+                  fixed_stream.close()
+                  panic()
+                }
+              } noraise {
+                _ => ()
+              }
+              sleep_ms(200)
+              fixed_stream.close()
+              println("fixed loopback stream ok (callbacks=\{fixed_calls[0]})")
+            }
           }
         }
       }

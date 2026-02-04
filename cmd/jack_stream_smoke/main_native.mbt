@@ -67,7 +67,15 @@ fn main {
       let s_ok = try
         dev.build_output_stream(
           fixed_ok,
-          fn(data, _info) { fill_silence_f32(data) },
+          fn(data, _info) {
+            if data.len() != mn * cfg.channels {
+              println(
+                "fixed output callback len mismatch: got=\{data.len()} expected=\{mn * cfg.channels}",
+              )
+              panic()
+            }
+            fill_silence_f32(data)
+          },
           fn(_err) {  },
           None,
         )

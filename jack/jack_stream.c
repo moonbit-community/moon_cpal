@@ -362,7 +362,7 @@ static int jack_stream_new(int is_input,
   if (out_handle == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -1;
+    return -EINVAL;
   }
   *out_handle = 0;
 
@@ -370,7 +370,7 @@ static int jack_stream_new(int is_input,
   if (s == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -1;
+    return -ENOMEM;
   }
 
   s->is_input = is_input ? 1 : 0;
@@ -392,7 +392,7 @@ static int jack_stream_new(int is_input,
   if (s->client == NULL) {
     jack_invoke_error(s, 1, (int32_t)status);
     jack_stream_destroy(s);
-    return -1;
+    return -ENODEV;
   }
 
   s->sample_rate = (double)jack_get_sample_rate(s->client);
@@ -410,46 +410,47 @@ static int jack_stream_new(int is_input,
   s->mb_buffer = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)s->buffer_bytes, 1);
   if (s->mb_buffer == NULL) {
     jack_stream_destroy(s);
-    return -1;
+    return -ENOMEM;
   }
 
   if (jack_set_process_callback(s->client, jack_process, s) != 0) {
     jack_invoke_error(s, 4, -1);
     jack_stream_destroy(s);
-    return -1;
+    return -EIO;
   }
 
   if (jack_register_ports(s) != 0) {
     jack_invoke_error(s, 3, -1);
     jack_stream_destroy(s);
-    return -1;
+    return -EIO;
   }
 
   s->rb_per_chan = (jack_ringbuffer_t **)calloc((size_t)s->channels, sizeof(jack_ringbuffer_t *));
   if (s->rb_per_chan == NULL) {
     jack_stream_destroy(s);
-    return -1;
+    return -ENOMEM;
   }
   for (uint32_t ch = 0; ch < s->channels; ch++) {
     s->rb_per_chan[ch] = jack_ringbuffer_create(jack_rb_size_bytes(s->frames_per_cb));
     if (s->rb_per_chan[ch] == NULL) {
       jack_stream_destroy(s);
-      return -1;
+      return -ENOMEM;
     }
   }
 
   if (jack_activate(s->client) != 0) {
     jack_invoke_error(s, 2, -1);
     jack_stream_destroy(s);
-    return -1;
+    return -EIO;
   }
 
   jack_try_autoconnect(s);
 
-  if (pthread_create(&s->thread, NULL, jack_thread_main, s) != 0) {
-    jack_invoke_error(s, 0, errno);
+  int perr = pthread_create(&s->thread, NULL, jack_thread_main, s);
+  if (perr != 0) {
+    jack_invoke_error(s, 0, -perr);
     jack_stream_destroy(s);
-    return -1;
+    return -perr;
   }
 
   *out_handle = (uint64_t)(uintptr_t)s;

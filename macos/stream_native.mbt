@@ -224,6 +224,9 @@ pub fn Device::build_output_stream_raw(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -271,6 +274,9 @@ pub fn Device::build_output_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = try self.supported_output_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
     DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
@@ -300,6 +306,9 @@ pub fn Device::build_input_stream_raw(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -347,6 +356,9 @@ pub fn Device::build_input_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   let ranges = try self.supported_input_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
     DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)

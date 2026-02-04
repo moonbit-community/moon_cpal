@@ -81,7 +81,16 @@ fn[A] raise_build_error(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific("\{op}: \{status}")
+  // Best-effort errno-like mapping (Linux).
+  if status == -19 {
+    // ENODEV
+    raise @moon_cpal.build_stream_error_device_not_available()
+  } else if status == -22 {
+    // EINVAL
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  } else {
+    raise @moon_cpal.build_stream_error_backend_specific("\{op}: \{status}")
+  }
 }
 
 ///|
@@ -112,6 +121,9 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 fn validate_buffer_size_or_raise(
   config : @moon_cpal.StreamConfig,
 ) -> Unit raise @moon_cpal.BuildStreamError {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @moon_cpal.build_stream_error_invalid_argument()
+  }
   match config.buffer_size {
     Default => ()
     Fixed(n) => {

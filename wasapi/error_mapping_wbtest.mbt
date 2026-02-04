@@ -19,6 +19,10 @@ test "wasapi HRESULT mapping (unit)" {
     content="DeviceNotAvailable",
   )
   inspect(
+    wasapi_build_error_from_hresult(-2004287478, "DeviceInit"),
+    content="DeviceBusy",
+  )
+  inspect(
     wasapi_build_error_from_hresult(-2004287480, "IAudioClientInitialize"),
     content="StreamConfigNotSupported",
   )
