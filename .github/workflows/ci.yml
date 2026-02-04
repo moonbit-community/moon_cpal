@@ -27,17 +27,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends alsa-utils libasound2-dev
-          sudo modprobe snd-aloop
-          # Route "default" PCM to the loopback device so our smoke test doesn't depend on real hardware.
+          # GitHub's Ubuntu runner kernel may not ship with the snd-aloop module.
+          # Instead, route "default" PCM to the libasound "null" plugin so our smoke test
+          # does not depend on real hardware or kernel modules.
           cat > "$HOME/.asoundrc" <<'EOF'
           pcm.!default {
-            type asym
-            playback.pcm "plughw:Loopback,0,0"
-            capture.pcm  "plughw:Loopback,1,0"
-          }
-          ctl.!default {
-            type hw
-            card Loopback
+            type null
           }
           EOF
           aplay -l || true
@@ -74,9 +69,12 @@ jobs:
         shell: pwsh
         run: |
           iwr -useb https://cli.moonbitlang.com/install/powershell.ps1 | iex
-          "$env:USERPROFILE\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $mb = "$env:USERPROFILE\.moon\bin"
+          $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $env:PATH = "$mb;$env:PATH"
           moon version
       - name: Install virtual audio device (VB-CABLE)
+        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
