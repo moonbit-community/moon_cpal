@@ -46,9 +46,6 @@ test "wasapi data_flow gating (best-effort)" {
   }
   let host = default_host()
   for dev in host.devices() {
-    if dev.id == "default" {
-      continue
-    }
     match data_flow_tag(dev.id) {
       None => ()
       Some(tag) =>

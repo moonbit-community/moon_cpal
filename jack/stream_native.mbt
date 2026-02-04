@@ -162,6 +162,9 @@ pub fn Device::build_output_stream_raw(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_error("jack build_output_stream_raw", -1)
   }
+  if self.direction != @moon_cpal.DeviceDirection::output() {
+    raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)
   let fmt_tag = (1 : UInt)
@@ -220,6 +223,9 @@ pub fn Device::build_input_stream_raw(
 ) -> Stream raise @moon_cpal.BuildStreamError {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_error("jack build_input_stream_raw", -1)
+  }
+  if self.direction != @moon_cpal.DeviceDirection::input() {
+    raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)

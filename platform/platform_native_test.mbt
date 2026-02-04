@@ -101,3 +101,61 @@ test "platform device_by_id + supports + in/out device filters" {
     inspect(got_out.length() == expected_out.length(), content="true")
   }
 }
+
+///|
+test "platform default devices are present in devices() (best-effort)" {
+  for host_id in available_hosts() {
+    let host = try host_from_id(host_id) catch {
+      _ => continue
+    } noraise {
+      h => h
+    }
+    let ds = try host.devices() catch {
+      _ => []
+    } noraise {
+      xs => xs
+    }
+    let out = host.default_output_device()
+    match out {
+      None => ()
+      Some(d) => {
+        // device_by_id roundtrip should work if devices() worked.
+        match host.device_by_id(d.id()) {
+          None => inspect(true, content="true")
+          Some(found) => inspect(found.id() == d.id(), content="true")
+        }
+        if ds.length() > 0 {
+          let mut ok = false
+          for x in ds {
+            if x.id() == d.id() {
+              ok = true
+              break
+            }
+          }
+          inspect(ok, content="true")
+        }
+      }
+    }
+    let inp = host.default_input_device()
+    match inp {
+      None => ()
+      Some(d) => {
+        match host.device_by_id(d.id()) {
+          None => inspect(true, content="true")
+          Some(found) => inspect(found.id() == d.id(), content="true")
+        }
+        if ds.length() > 0 {
+          let mut ok = false
+          for x in ds {
+            if x.id() == d.id() {
+              ok = true
+              break
+            }
+          }
+          inspect(ok, content="true")
+        }
+      }
+    }
+  }
+  inspect(true, content="true")
+}

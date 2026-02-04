@@ -20,11 +20,6 @@ pub fn default_host() -> Host {
 }
 
 ///|
-fn default_device() -> Device {
-  { id: "default" }
-}
-
-///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
     let bytes = devices_utf8()
@@ -36,10 +31,13 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
         out.push({ id, })
       }
     }
-    if out.length() == 0 {
-      [default_device()]
-    } else {
-      out
+    if out.length() > 0 {
+      return out
+    }
+    // Best-effort fallback: include the default endpoint id if enumeration yielded nothing.
+    match default_device_id_utf8(false) {
+      None => []
+      Some(id) => [{ id, }]
     }
   } else {
     []
@@ -49,7 +47,10 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
-    Some(default_device())
+    match default_device_id_utf8(false) {
+      None => None
+      Some(id) => Some({ id, })
+    }
   } else {
     None
   }
@@ -58,7 +59,10 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
-    Some(default_device())
+    match default_device_id_utf8(true) {
+      None => None
+      Some(id) => Some({ id, })
+    }
   } else {
     None
   }
@@ -174,26 +178,10 @@ pub fn Device::description(
       "wasapi device description: empty name",
     )
   }
-  let direction = if !is_default_placeholder(_self.id) {
-    match data_flow_tag(_self.id) {
-      Some(1) => @moon_cpal.DeviceDirection::input()
-      Some(2) => @moon_cpal.DeviceDirection::output()
-      _ => @moon_cpal.DeviceDirection::unknown()
-    }
-  } else {
-    // For the synthetic "default" placeholder we don't have a stable endpoint id. Derive direction
-    // from capabilities.
-    let has_in = _self.supported_input_configs().length() > 0
-    let has_out = _self.supported_output_configs().length() > 0
-    if has_in && has_out {
-      @moon_cpal.DeviceDirection::duplex()
-    } else if has_in {
-      @moon_cpal.DeviceDirection::input()
-    } else if has_out {
-      @moon_cpal.DeviceDirection::output()
-    } else {
-      @moon_cpal.DeviceDirection::unknown()
-    }
+  let direction = match data_flow_tag(_self.id) {
+    Some(1) => @moon_cpal.DeviceDirection::input()
+    Some(2) => @moon_cpal.DeviceDirection::output()
+    _ => @moon_cpal.DeviceDirection::unknown()
   }
   let manufacturer = device_property_utf8(_self.id, 1)
   let interface_name = device_property_utf8(_self.id, 3)
@@ -263,11 +251,6 @@ pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
 }
 
 ///|
-fn is_default_placeholder(id : String) -> Bool {
-  id == "default"
-}
-
-///|
 fn clamp_u32_to_frame_count(u : UInt) -> Int {
   let lim = (2147483647 : Int).reinterpret_as_uint()
   if u <= lim {
@@ -284,11 +267,9 @@ pub fn Device::supported_input_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     return []
   }
-  if !is_default_placeholder(_self.id) {
-    match data_flow_tag(_self.id) {
-      Some(2) => return []
-      _ => ()
-    }
+  match data_flow_tag(_self.id) {
+    Some(2) => return []
+    _ => ()
   }
   match supported_configs_u32(_self.id, true) {
     None =>
@@ -357,11 +338,9 @@ pub fn Device::supported_output_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
     return []
   }
-  if !is_default_placeholder(_self.id) {
-    match data_flow_tag(_self.id) {
-      Some(1) => return []
-      _ => ()
-    }
+  match data_flow_tag(_self.id) {
+    Some(1) => return []
+    _ => ()
   }
   match supported_configs_u32(_self.id, false) {
     None =>
@@ -432,12 +411,10 @@ pub fn Device::default_input_config(
       "wasapi default_input_config: not available on this OS",
     )
   }
-  if !is_default_placeholder(_self.id) {
-    match data_flow_tag(_self.id) {
-      Some(2) =>
-        raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
-      _ => ()
-    }
+  match data_flow_tag(_self.id) {
+    Some(2) =>
+      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+    _ => ()
   }
   match default_config_ex_u32(_self.id, true) {
     None =>
@@ -472,12 +449,10 @@ pub fn Device::default_output_config(
       "wasapi default_output_config: not available on this OS",
     )
   }
-  if !is_default_placeholder(_self.id) {
-    match data_flow_tag(_self.id) {
-      Some(1) =>
-        raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
-      _ => ()
-    }
+  match data_flow_tag(_self.id) {
+    Some(1) =>
+      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+    _ => ()
   }
   match default_config_ex_u32(_self.id, false) {
     None =>

@@ -23,14 +23,14 @@ fn main {
   for d in devices {
     println("  - \{d.name()}")
   }
-  let dev = match host.default_output_device() {
+  let out_dev = match host.default_output_device() {
     None => {
       println("no default device")
       panic()
     }
     Some(d) => d
   }
-  let supported_cfg = try dev.default_output_config() catch {
+  let supported_cfg = try out_dev.default_output_config() catch {
     e => {
       println("default output config failed: \{e}")
       panic()
@@ -65,7 +65,7 @@ fn main {
 
       // Should succeed.
       let s_ok = try
-        dev.build_output_stream(
+        out_dev.build_output_stream(
           fixed_ok,
           fn(data, _info) {
             if data.len() != mn * cfg.channels {
@@ -91,7 +91,7 @@ fn main {
 
       // Should fail.
       let _ = try
-        dev.build_output_stream(
+        out_dev.build_output_stream(
           fixed_bad,
           fn(data, _info) { fill_silence_f32(data) },
           fn(_err) {  },
@@ -115,7 +115,7 @@ fn main {
   let calls : Array[Int] = [0]
   let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
   let out = try
-    dev.build_output_stream(
+    out_dev.build_output_stream(
       cfg,
       fn(data, info) {
         calls[0] = calls[0] + 1
@@ -175,9 +175,16 @@ fn main {
   }
 
   // Input: best-effort. With the dummy driver this should still tick.
+  let in_dev = match host.default_input_device() {
+    None => {
+      println("no default input device")
+      return
+    }
+    Some(d) => d
+  }
   let in_calls : Array[Int] = [0]
   let in_stream = try
-    dev.build_input_stream(
+    in_dev.build_input_stream(
       cfg,
       fn(_data, _info) { in_calls[0] = in_calls[0] + 1 },
       fn(err) { println("stream error: \{err}") },

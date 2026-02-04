@@ -5,8 +5,7 @@
 /// in a JACK environment (using the dummy driver).
 ///
 /// Implementation notes:
-/// - For now we expose a single synthetic device with id="default".
-/// - Real JACK "devices" are more like port graphs; upstream CPAL models this differently.
+/// - Mirrors upstream CPAL: expose one input device and one output device (JACK client ports).
 
 ///|
 pub struct Host {
@@ -16,6 +15,7 @@ pub struct Host {
 ///|
 pub struct Device {
   id : String
+  direction : @moon_cpal.DeviceDirection
 } derive(Show, Eq)
 
 ///|
@@ -24,14 +24,19 @@ pub fn default_host() -> Host {
 }
 
 ///|
-fn default_device() -> Device {
-  { id: "default" }
+fn default_output_device() -> Device {
+  { id: "moon_cpal_out", direction: @moon_cpal.DeviceDirection::output() }
+}
+
+///|
+fn default_input_device() -> Device {
+  { id: "moon_cpal_in", direction: @moon_cpal.DeviceDirection::input() }
 }
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    [default_device()]
+    [default_input_device(), default_output_device()]
   } else {
     []
   }
@@ -40,7 +45,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_device())
+    Some(default_output_device())
   } else {
     None
   }
@@ -49,7 +54,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_device())
+    Some(default_input_device())
   } else {
     None
   }
@@ -58,7 +63,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 ///|
 pub fn Device::name(_self : Device) -> String {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    "JACK".to_string()
+    _self.id
   } else {
     _self.id
   }
@@ -79,9 +84,9 @@ pub fn Device::description(
     driver=Some("JACK"),
     device_type=@moon_cpal.DeviceType::virtual_(),
     interface_type=@moon_cpal.InterfaceType::virtual_(),
-    direction=@moon_cpal.DeviceDirection::duplex(),
+    direction=_self.direction,
     address=Some(_self.id),
-    extended=["jack_client=moon_cpal"],
+    extended=["jack_client=\{_self.id}"],
   )
 }
 
@@ -97,6 +102,9 @@ pub fn Device::supported_input_configs(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     return []
   }
+  if _self.direction != @moon_cpal.DeviceDirection::input() {
+    return []
+  }
   supported_configs(_self)
 }
 
@@ -105,6 +113,9 @@ pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@moon_cpal.SupportedStreamConfigRange] {
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    return []
+  }
+  if _self.direction != @moon_cpal.DeviceDirection::output() {
     return []
   }
   supported_configs(_self)
@@ -119,6 +130,9 @@ pub fn Device::default_input_config(
       "jack default_input_config: not available on this OS",
     )
   }
+  if _self.direction != @moon_cpal.DeviceDirection::input() {
+    raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+  }
   default_config(_self)
 }
 
@@ -130,6 +144,9 @@ pub fn Device::default_output_config(
     raise @moon_cpal.default_stream_config_error_backend_specific(
       "jack default_output_config: not available on this OS",
     )
+  }
+  if _self.direction != @moon_cpal.DeviceDirection::output() {
+    raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
   }
   default_config(_self)
 }

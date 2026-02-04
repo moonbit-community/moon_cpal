@@ -5,6 +5,11 @@
 extern "C" fn wasapi_devices_utf8() -> Bytes = "moon_cpal_wasapi_devices_utf8"
 
 ///|
+extern "C" fn wasapi_default_device_id_utf8(
+  is_input : Int,
+) -> Bytes = "moon_cpal_wasapi_default_device_id_utf8"
+
+///|
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_name_utf8_len(
   device_id_utf8 : Bytes,
@@ -90,6 +95,16 @@ extern "C" fn wasapi_supported_configs_u32(
 ///|
 pub fn devices_utf8() -> Bytes {
   wasapi_devices_utf8()
+}
+
+///|
+pub fn default_device_id_utf8(is_input : Bool) -> String? {
+  let b = wasapi_default_device_id_utf8(if is_input { 1 } else { 0 })
+  if b.length() <= 0 {
+    None
+  } else {
+    Some(@moon_cpal.utf8_bytes_to_string(b, b.length()))
+  }
 }
 
 ///|

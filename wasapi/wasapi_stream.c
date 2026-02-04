@@ -58,13 +58,6 @@ typedef struct moon_cpal_wasapi_stream_t {
   uint32_t cap_accum_frames;
 } moon_cpal_wasapi_stream_t;
 
-static int wasapi_utf8_is_default(const char *s) {
-  if (s == NULL) {
-    return 0;
-  }
-  return strcmp(s, "default") == 0;
-}
-
 static int wasapi_utf8_is_loopback(const char *s) {
   if (s == NULL) {
     return 0;
@@ -84,7 +77,7 @@ static wchar_t *wasapi_endpoint_id_from_utf8_bytes(uint8_t *bytes, int32_t len) 
   }
   memcpy(tmp, bytes, n);
   tmp[n] = '\0';
-  if (tmp[0] == '\0' || wasapi_utf8_is_default(tmp) || wasapi_utf8_is_loopback(tmp)) {
+  if (tmp[0] == '\0' || wasapi_utf8_is_loopback(tmp)) {
     return NULL;
   }
 

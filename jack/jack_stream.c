@@ -350,6 +350,7 @@ static void jack_stream_destroy(moon_cpal_jack_stream_t *s) {
 }
 
 static int jack_stream_new(int is_input,
+                           const char *client_name,
                            double sample_rate,
                            uint32_t channels,
                            uint32_t sample_format_tag,
@@ -388,7 +389,8 @@ static int jack_stream_new(int is_input,
   pthread_cond_init(&s->cv, NULL);
 
   jack_status_t status = 0;
-  s->client = jack_client_open("moon_cpal", JackNoStartServer, &status);
+  const char *name = (client_name != NULL && client_name[0] != '\0') ? client_name : "moon_cpal";
+  s->client = jack_client_open(name, JackNoStartServer, &status);
   if (s->client == NULL) {
     jack_invoke_error(s, 1, (int32_t)status);
     jack_stream_destroy(s);
@@ -470,7 +472,17 @@ int32_t moon_cpal_jack_stream_build_output(uint8_t *device_id_utf8,
                                           void *error_callback,
                                           uint64_t *out_handles,
                                           int32_t out_len) {
-  (void)device_id_len;
+  char name_buf[128];
+  const char *name = NULL;
+  size_t n = (size_t)(device_id_len < 0 ? 0 : device_id_len);
+  if (device_id_utf8 != NULL && n > 0) {
+    if (n >= sizeof(name_buf)) {
+      n = sizeof(name_buf) - 1;
+    }
+    memcpy(name_buf, device_id_utf8, n);
+    name_buf[n] = '\0';
+    name = name_buf;
+  }
   moonbit_decref(device_id_utf8);
 
   if (out_handles == NULL || out_len <= 0) {
@@ -481,7 +493,7 @@ int32_t moon_cpal_jack_stream_build_output(uint8_t *device_id_utf8,
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = jack_stream_new(0, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback,
+  int st = jack_stream_new(0, name, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback,
                            data_callback, call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;
@@ -503,7 +515,17 @@ int32_t moon_cpal_jack_stream_build_input(uint8_t *device_id_utf8,
                                          void *error_callback,
                                          uint64_t *out_handles,
                                          int32_t out_len) {
-  (void)device_id_len;
+  char name_buf[128];
+  const char *name = NULL;
+  size_t n = (size_t)(device_id_len < 0 ? 0 : device_id_len);
+  if (device_id_utf8 != NULL && n > 0) {
+    if (n >= sizeof(name_buf)) {
+      n = sizeof(name_buf) - 1;
+    }
+    memcpy(name_buf, device_id_utf8, n);
+    name_buf[n] = '\0';
+    name = name_buf;
+  }
   moonbit_decref(device_id_utf8);
 
   if (out_handles == NULL || out_len <= 0) {
@@ -514,7 +536,7 @@ int32_t moon_cpal_jack_stream_build_input(uint8_t *device_id_utf8,
   out_handles[0] = 0;
 
   uint64_t h = 0;
-  int st = jack_stream_new(1, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback,
+  int st = jack_stream_new(1, name, sample_rate, channels, sample_format_tag, buffer_frames, call_data_callback,
                            data_callback, call_error_callback, error_callback, &h);
   if (st < 0) {
     return st;

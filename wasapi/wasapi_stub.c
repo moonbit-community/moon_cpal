@@ -11,7 +11,7 @@
 // Exported device list format: UTF-8, newline-separated device IDs.
 //
 // Device IDs are endpoint IDs from `IMMDevice::GetId` (UTF-16 -> UTF-8).
-// We also include a synthetic "default" id at the top to match upstream-ish UX.
+// No synthetic placeholder devices are included.
 
 static void buf_reserve(char **buf, size_t *cap, size_t need) {
   if (*cap >= need) {
@@ -687,21 +687,6 @@ done:
   return FAILED(hr) ? (int32_t)hr : 0;
 }
 
-static int wstr_is_default(const wchar_t *s) {
-  if (s == NULL) {
-    return 0;
-  }
-  return wcscmp(s, L"default") == 0;
-}
-
-static int utf8_is_default(const char *s, size_t len) {
-  static const char *k = "default";
-  if (len != 7) {
-    return 0;
-  }
-  return cstr_eq_n(s, k, 7);
-}
-
 static int wide_to_utf8_len(const wchar_t *ws) {
   if (ws == NULL) {
     return 0;
@@ -795,7 +780,7 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
     }
     LPWSTR idw = NULL;
     hr = IMMDevice_GetId(dev, &idw);
-    if (SUCCEEDED(hr) && idw != NULL && !wstr_is_default(idw)) {
+    if (SUCCEEDED(hr) && idw != NULL) {
       int n = wide_to_utf8_len(idw);
       if (n > 0) {
         char *tmp = (char *)calloc((size_t)n + 1, 1);
@@ -828,18 +813,6 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   *out_name = NULL;
   if (id_utf8 == NULL || id_len == 0) {
     return -1;
-  }
-  if (utf8_is_default(id_utf8, id_len)) {
-    const char *k = "default";
-    size_t n = strlen(k);
-    char *p = (char *)calloc(n + 1, 1);
-    if (p == NULL) {
-      return -1;
-    }
-    memcpy(p, k, n);
-    p[n] = '\0';
-    *out_name = p;
-    return 0;
   }
 
   wchar_t *idw = utf8_to_wide_alloc(id_utf8, id_len);
@@ -1132,8 +1105,6 @@ moonbit_bytes_t moon_cpal_wasapi_devices_utf8(void) {
   size_t len = 0;
   size_t cap = 0;
 
-  // Always include a "default" device.
-  buf_append_cstr(&buf, &len, &cap, "default\n");
   (void)wasapi_enum_devices_utf8(&buf, &len, &cap);
 
   if (len == 0) {
@@ -1146,6 +1117,69 @@ moonbit_bytes_t moon_cpal_wasapi_devices_utf8(void) {
   free(buf);
   return out;
 #else
+  return moonbit_make_bytes_raw(0);
+#endif
+}
+
+moonbit_bytes_t moon_cpal_wasapi_default_device_id_utf8(int32_t is_input) {
+#if defined(_WIN32)
+  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  if (FAILED(hr)) {
+    return moonbit_make_bytes_raw(0);
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *dev = NULL;
+  LPWSTR idw = NULL;
+
+  hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+                        (void **)&enumerator);
+  if (FAILED(hr) || enumerator == NULL) {
+    goto done;
+  }
+
+  EDataFlow flow = is_input ? eCapture : eRender;
+  hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, flow, eConsole, &dev);
+  if (FAILED(hr) || dev == NULL) {
+    goto done;
+  }
+
+  hr = IMMDevice_GetId(dev, &idw);
+  if (FAILED(hr) || idw == NULL) {
+    goto done;
+  }
+
+  int n = wide_to_utf8_len(idw);
+  if (n <= 0) {
+    goto done;
+  }
+  moonbit_bytes_t out = moonbit_make_bytes_raw((int32_t)n);
+  if (out == NULL) {
+    goto done;
+  }
+  if (wide_to_utf8(idw, (char *)out, n + 1) <= 0) {
+    moonbit_decref(out);
+    out = NULL;
+    goto done;
+  }
+
+done:
+  if (idw != NULL) {
+    CoTaskMemFree(idw);
+    idw = NULL;
+  }
+  if (dev != NULL) {
+    IMMDevice_Release(dev);
+    dev = NULL;
+  }
+  if (enumerator != NULL) {
+    IMMDeviceEnumerator_Release(enumerator);
+    enumerator = NULL;
+  }
+  CoUninitialize();
+  return out != NULL ? out : moonbit_make_bytes_raw(0);
+#else
+  (void)is_input;
   return moonbit_make_bytes_raw(0);
 #endif
 }
