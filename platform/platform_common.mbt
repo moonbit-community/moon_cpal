@@ -65,7 +65,7 @@ pub fn host_from_id(
     }
   }
   if !ok {
-    raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
+    raise @moon_cpal.host_unavailable()
   }
   match id {
     CoreAudio => Host::CoreAudio(@macos.default_host())
@@ -73,7 +73,7 @@ pub fn host_from_id(
     Jack => Host::Jack(@jack.default_host())
     Null => Host::Null(@null.default_host())
     Wasapi => Host::Wasapi(@wasapi.default_host())
-    _ => raise @moon_cpal.host_unavailable(@moon_cpal.HostId::to_string(id))
+    _ => raise @moon_cpal.host_unavailable()
   }
 }
 

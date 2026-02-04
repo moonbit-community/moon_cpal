@@ -232,8 +232,7 @@ test "host_id parsing and available_hosts" {
   inspect(HostId::from_string("CoReAuDiO"), content="Some(CoreAudio)")
   inspect(HostId::from_string("unknown"), content="None")
   try HostId::parse("unknown") catch {
-    HostUnavailable("unknown") => inspect(true, content="true")
-    _ => inspect(false, content="true")
+    HostUnavailable => inspect(true, content="true")
   } noraise {
     _ => inspect(false, content="true")
   }

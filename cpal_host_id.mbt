@@ -6,13 +6,13 @@
 
 ///|
 pub suberror HostUnavailable {
-  HostUnavailable(String)
+  HostUnavailable
 } derive(Show, Eq)
 
 ///|
 pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
   match self {
-    HostUnavailable::HostUnavailable(_) => "the requested host is unavailable"
+    HostUnavailable::HostUnavailable => "the requested host is unavailable"
   }
 }
 
@@ -114,11 +114,11 @@ pub fn HostId::from_string(s : String) -> HostId? {
 pub fn HostId::parse(s : String) -> HostId raise HostUnavailable {
   match HostId::from_string(s) {
     Some(id) => id
-    None => raise HostUnavailable(s)
+    None => raise HostUnavailable::HostUnavailable
   }
 }
 
 ///|
-pub fn host_unavailable(s : String) -> HostUnavailable {
-  HostUnavailable(s)
+pub fn host_unavailable() -> HostUnavailable {
+  HostUnavailable::HostUnavailable
 }

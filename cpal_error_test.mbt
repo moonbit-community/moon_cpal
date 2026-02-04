@@ -84,7 +84,7 @@ test "error display strings (cpal-reference parity)" {
   )
 
   inspect(
-    host_unavailable("anything").to_string(),
+    host_unavailable().to_string(),
     content="the requested host is unavailable",
   )
 }

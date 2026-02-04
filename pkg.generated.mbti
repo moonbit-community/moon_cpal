@@ -32,7 +32,7 @@ pub fn devices_error_backend_specific(String) -> DevicesError
 
 pub fn direction_from_caps(Bool, Bool) -> DeviceDirection
 
-pub fn host_unavailable(String) -> HostUnavailable
+pub fn host_unavailable() -> HostUnavailable
 
 pub fn native_os() -> NativeOs
 
@@ -113,7 +113,7 @@ pub impl Eq for DevicesError
 pub impl Show for DevicesError
 
 pub suberror HostUnavailable {
-  HostUnavailable(String)
+  HostUnavailable
 }
 pub fn HostUnavailable::to_string(Self) -> String
 pub impl Eq for HostUnavailable
