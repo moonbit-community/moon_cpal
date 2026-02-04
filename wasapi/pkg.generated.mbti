@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn data_flow_tag(String) -> Int?
+
+pub fn default_config_ex_u32(String, Bool) -> (UInt, UInt, UInt, UInt, UInt)?
+
 pub fn default_config_u32(String, Bool) -> (UInt, UInt, UInt)?
 
 pub fn default_host() -> Host
@@ -13,6 +17,8 @@ pub fn default_host() -> Host
 pub fn device_name_utf8(String) -> String?
 
 pub fn devices_utf8() -> Bytes
+
+pub fn supported_configs_u32(String, Bool) -> (Int, FixedArray[UInt])?
 
 // Errors
 
