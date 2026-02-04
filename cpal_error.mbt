@@ -19,6 +19,11 @@ pub fn BackendSpecificError::description(self : BackendSpecificError) -> String 
 }
 
 ///|
+pub fn BackendSpecificError::to_string(self : BackendSpecificError) -> String {
+  "A backend-specific error has occurred: \{self.description}"
+}
+
+///|
 /// May occur when attempting to request the default input or output stream config from a device.
 pub suberror DefaultStreamConfigError {
   DeviceNotAvailable
@@ -26,6 +31,21 @@ pub suberror DefaultStreamConfigError {
   StreamTypeNotSupported
   BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
+
+///|
+pub fn DefaultStreamConfigError::to_string(
+  self : DefaultStreamConfigError,
+) -> String {
+  match self {
+    DefaultStreamConfigError::BackendSpecific(err) => err.to_string()
+    DefaultStreamConfigError::DeviceNotAvailable =>
+      "The requested device is no longer available. For example, it has been unplugged."
+    DefaultStreamConfigError::DeviceBusy =>
+      "The requested device is temporarily busy. Another application or stream may be using it."
+    DefaultStreamConfigError::StreamTypeNotSupported =>
+      "The requested stream type is not supported by the device."
+  }
+}
 
 ///|
 /// Error that can happen when enumerating the list of supported configs.
@@ -37,16 +57,45 @@ pub suberror SupportedStreamConfigsError {
 } derive(Show, Eq)
 
 ///|
+pub fn SupportedStreamConfigsError::to_string(
+  self : SupportedStreamConfigsError,
+) -> String {
+  match self {
+    SupportedStreamConfigsError::BackendSpecific(err) => err.to_string()
+    SupportedStreamConfigsError::DeviceNotAvailable =>
+      "The requested device is no longer available. For example, it has been unplugged."
+    SupportedStreamConfigsError::DeviceBusy =>
+      "The requested device is temporarily busy. Another application or stream may be using it."
+    SupportedStreamConfigsError::InvalidArgument =>
+      "Invalid argument passed to the backend. For example, this happens when trying to read capture capabilities when the device does not support it."
+  }
+}
+
+///|
 /// An error that might occur while attempting to enumerate devices.
 pub suberror DevicesError {
   BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
 
 ///|
+pub fn DevicesError::to_string(self : DevicesError) -> String {
+  match self {
+    DevicesError::BackendSpecific(err) => err.to_string()
+  }
+}
+
+///|
 /// An error that may occur while attempting to retrieve a device name.
 pub suberror DeviceNameError {
   BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
+
+///|
+pub fn DeviceNameError::to_string(self : DeviceNameError) -> String {
+  match self {
+    DeviceNameError::BackendSpecific(err) => err.to_string()
+  }
+}
 
 ///|
 /// Error that can happen when creating a stream.
@@ -60,10 +109,36 @@ pub suberror BuildStreamError {
 } derive(Show, Eq)
 
 ///|
+pub fn BuildStreamError::to_string(self : BuildStreamError) -> String {
+  match self {
+    BuildStreamError::BackendSpecific(err) => err.to_string()
+    BuildStreamError::DeviceNotAvailable =>
+      "The requested device is no longer available. For example, it has been unplugged."
+    BuildStreamError::DeviceBusy =>
+      "The requested device is temporarily busy. Another application or stream may be using it."
+    BuildStreamError::StreamConfigNotSupported =>
+      "The requested stream configuration is not supported by the device."
+    BuildStreamError::InvalidArgument =>
+      "The requested device does not support this capability (invalid argument)"
+    BuildStreamError::StreamIdOverflow =>
+      "Adding a new stream ID would cause an overflow"
+  }
+}
+
+///|
 pub suberror PlayStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
+
+///|
+pub fn PlayStreamError::to_string(self : PlayStreamError) -> String {
+  match self {
+    PlayStreamError::BackendSpecific(err) => err.to_string()
+    PlayStreamError::DeviceNotAvailable =>
+      "the device associated with the stream is no longer available"
+  }
+}
 
 ///|
 pub suberror PauseStreamError {
@@ -72,12 +147,33 @@ pub suberror PauseStreamError {
 } derive(Show, Eq)
 
 ///|
+pub fn PauseStreamError::to_string(self : PauseStreamError) -> String {
+  match self {
+    PauseStreamError::BackendSpecific(err) => err.to_string()
+    PauseStreamError::DeviceNotAvailable =>
+      "the device associated with the stream is no longer available"
+  }
+}
+
+///|
 pub suberror StreamError {
   DeviceNotAvailable
   StreamInvalidated
   BufferUnderrun
   BackendSpecific(BackendSpecificError)
 } derive(Show, Eq)
+
+///|
+pub fn StreamError::to_string(self : StreamError) -> String {
+  match self {
+    StreamError::BackendSpecific(err) => err.to_string()
+    StreamError::StreamInvalidated =>
+      "The stream configuration is no longer valid and must be rebuilt."
+    StreamError::BufferUnderrun => "Buffer underrun/overrun occurred."
+    StreamError::DeviceNotAvailable =>
+      "The requested device is no longer available. For example, it has been unplugged."
+  }
+}
 
 ///|
 pub fn default_stream_config_error_device_not_available() -> DefaultStreamConfigError {

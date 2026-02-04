@@ -10,6 +10,13 @@ pub suberror HostUnavailable {
 } derive(Show, Eq)
 
 ///|
+pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
+  match self {
+    HostUnavailable::HostUnavailable(_) => "the requested host is unavailable"
+  }
+}
+
+///|
 pub(all) enum HostId {
   AAudio
   Alsa

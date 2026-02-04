@@ -77,6 +77,7 @@ pub suberror BuildStreamError {
   StreamIdOverflow
   BackendSpecific(BackendSpecificError)
 }
+pub fn BuildStreamError::to_string(Self) -> String
 pub impl Eq for BuildStreamError
 pub impl Show for BuildStreamError
 
@@ -86,6 +87,7 @@ pub suberror DefaultStreamConfigError {
   StreamTypeNotSupported
   BackendSpecific(BackendSpecificError)
 }
+pub fn DefaultStreamConfigError::to_string(Self) -> String
 pub impl Eq for DefaultStreamConfigError
 pub impl Show for DefaultStreamConfigError
 
@@ -99,18 +101,21 @@ pub impl Show for DeviceIdError
 pub suberror DeviceNameError {
   BackendSpecific(BackendSpecificError)
 }
+pub fn DeviceNameError::to_string(Self) -> String
 pub impl Eq for DeviceNameError
 pub impl Show for DeviceNameError
 
 pub suberror DevicesError {
   BackendSpecific(BackendSpecificError)
 }
+pub fn DevicesError::to_string(Self) -> String
 pub impl Eq for DevicesError
 pub impl Show for DevicesError
 
 pub suberror HostUnavailable {
   HostUnavailable(String)
 }
+pub fn HostUnavailable::to_string(Self) -> String
 pub impl Eq for HostUnavailable
 pub impl Show for HostUnavailable
 
@@ -118,6 +123,7 @@ pub suberror PauseStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
 }
+pub fn PauseStreamError::to_string(Self) -> String
 pub impl Eq for PauseStreamError
 pub impl Show for PauseStreamError
 
@@ -125,6 +131,7 @@ pub suberror PlayStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
 }
+pub fn PlayStreamError::to_string(Self) -> String
 pub impl Eq for PlayStreamError
 pub impl Show for PlayStreamError
 
@@ -134,6 +141,7 @@ pub suberror StreamError {
   BufferUnderrun
   BackendSpecific(BackendSpecificError)
 }
+pub fn StreamError::to_string(Self) -> String
 pub impl Eq for StreamError
 pub impl Show for StreamError
 
@@ -143,6 +151,7 @@ pub suberror SupportedStreamConfigsError {
   InvalidArgument
   BackendSpecific(BackendSpecificError)
 }
+pub fn SupportedStreamConfigsError::to_string(Self) -> String
 pub impl Eq for SupportedStreamConfigsError
 pub impl Show for SupportedStreamConfigsError
 
@@ -152,6 +161,7 @@ pub struct BackendSpecificError {
 }
 pub fn BackendSpecificError::description(Self) -> String
 pub fn BackendSpecificError::new(String) -> Self
+pub fn BackendSpecificError::to_string(Self) -> String
 pub impl Eq for BackendSpecificError
 pub impl Show for BackendSpecificError
 
