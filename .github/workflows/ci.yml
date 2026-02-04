@@ -72,7 +72,21 @@ jobs:
       - name: Install virtual audio device (VB-CABLE)
         shell: pwsh
         run: |
-          choco install vbcable -y --no-progress
+          $ErrorActionPreference = "Stop"
+          $pkgs = @("vbcable", "vb-cable", "vb-audio-cable")
+          $ok = $false
+          foreach ($p in $pkgs) {
+            try {
+              choco install $p -y --no-progress
+              $ok = $true
+              break
+            } catch {
+              Write-Host "choco install $p failed; trying next..."
+            }
+          }
+          if (-not $ok) {
+            throw "Failed to install a virtual audio device via chocolatey."
+          }
       - name: Run unit tests
         shell: pwsh
         run: moon test --target native
