@@ -20,11 +20,30 @@ pub enum BufferSize {
 } derive(Show, Eq)
 
 ///|
+pub fn BufferSize::default() -> BufferSize {
+  Default
+}
+
+///|
+pub fn BufferSize::fixed(n : FrameCount) -> BufferSize {
+  Fixed(n)
+}
+
+///|
 pub struct StreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   buffer_size : BufferSize
 } derive(Show, Eq)
+
+///|
+pub fn StreamConfig::new(
+  channels : ChannelCount,
+  sample_rate : SampleRate,
+  buffer_size : BufferSize,
+) -> StreamConfig {
+  { channels, sample_rate, buffer_size }
+}
 
 ///|
 pub(all) enum SupportedBufferSize {

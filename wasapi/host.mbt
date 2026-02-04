@@ -49,10 +49,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
-    match Host::devices(_self).get(0) {
-      None => Some(default_device())
-      Some(d) => Some(d)
-    }
+    Some(default_device())
   } else {
     None
   }
@@ -61,10 +58,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
-    match Host::devices(_self).get(0) {
-      None => Some(default_device())
-      Some(d) => Some(d)
-    }
+    Some(default_device())
   } else {
     None
   }

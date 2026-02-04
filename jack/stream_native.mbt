@@ -109,6 +109,27 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 }
 
 ///|
+fn validate_buffer_size_or_raise(
+  config : @moon_cpal.StreamConfig,
+) -> Unit raise @moon_cpal.BuildStreamError {
+  match config.buffer_size {
+    Default => ()
+    Fixed(n) => {
+      if n <= 0 {
+        raise @moon_cpal.build_stream_error_stream_config_not_supported()
+      }
+      match default_server_config() {
+        None => ()
+        Some((_sr, buf)) =>
+          if n != buf {
+            raise @moon_cpal.build_stream_error_stream_config_not_supported()
+          }
+      }
+    }
+  }
+}
+
+///|
 pub fn Device::build_output_stream(
   self : Device,
   config : @moon_cpal.StreamConfig,
@@ -119,6 +140,7 @@ pub fn Device::build_output_stream(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_error("jack build_output_stream", -1)
   }
+  validate_buffer_size_or_raise(config)
   // Force F32 for now.
   let fmt_tag = (1 : UInt)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
@@ -158,6 +180,7 @@ pub fn Device::build_input_stream(
   if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
     raise_build_error("jack build_input_stream", -1)
   }
+  validate_buffer_size_or_raise(config)
   let fmt_tag = (1 : UInt)
   let dev = @moon_cpal.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))

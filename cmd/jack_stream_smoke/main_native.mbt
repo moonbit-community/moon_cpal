@@ -30,22 +30,98 @@ fn main {
     }
     Some(d) => d
   }
-  let cfg = try dev.default_output_config() catch {
+  let supported_cfg = try dev.default_output_config() catch {
     e => {
       println("default output config failed: \{e}")
       panic()
     }
   } noraise {
-    supported => supported.config()
+    supported => supported
+  }
+  let cfg = supported_cfg.config()
+
+  // Validate BufferSize::Fixed semantics: for JACK, the server controls buffer size.
+  // A mismatched fixed buffer request must be rejected.
+  match supported_cfg.buffer_size() {
+    Unknown => ()
+    Range(min=mn, max=mx) => {
+      // JACK should report a fixed buffer size range.
+      if mn != mx || mn <= 0 {
+        println(
+          "unexpected JACK buffer size range: \{supported_cfg.buffer_size()}",
+        )
+        panic()
+      }
+      let fixed_ok = @moon_cpal.StreamConfig::new(
+        cfg.channels,
+        cfg.sample_rate,
+        @moon_cpal.BufferSize::fixed(mn),
+      )
+      let fixed_bad = @moon_cpal.StreamConfig::new(
+        cfg.channels,
+        cfg.sample_rate,
+        @moon_cpal.BufferSize::fixed(mn + 1),
+      )
+
+      // Should succeed.
+      let s_ok = try
+        dev.build_output_stream(
+          fixed_ok,
+          fn(data, _info) { fill_silence_f32(data) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        e => {
+          println("fixed buffer (expected ok) build failed: \{e}")
+          panic()
+        }
+      } noraise {
+        s => s
+      }
+      s_ok.close()
+
+      // Should fail.
+      let _ = try
+        dev.build_output_stream(
+          fixed_bad,
+          fn(data, _info) { fill_silence_f32(data) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        // expected
+        _ => ()
+      } noraise {
+        s => {
+          s.close()
+          println("fixed buffer (expected fail) unexpectedly succeeded")
+          panic()
+        }
+      }
+
+    }
   }
 
   // Output stream should always produce callbacks once the server is running.
   let calls : Array[Int] = [0]
+  let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
   let out = try
     dev.build_output_stream(
       cfg,
-      fn(data, _info) {
+      fn(data, info) {
         calls[0] = calls[0] + 1
+        let now = info.timestamp().callback()
+        match last_cb[0] {
+          None => last_cb[0] = Some(now)
+          Some(prev) => {
+            if now.duration_since(prev) is None {
+              println("non-monotonic output callback timestamp")
+              panic()
+            }
+            last_cb[0] = Some(now)
+          }
+        }
         fill_silence_f32(data)
       },
       fn(err) { println("stream error: \{err}") },
@@ -73,6 +149,15 @@ fn main {
     e => println("output stream pause failed: \{e}")
   } noraise {
     _ => ()
+  }
+  let paused = calls[0]
+  sleep_ms(200)
+  if calls[0] > paused + 1 {
+    println(
+      "output callbacks continued after pause (before=\{paused} after=\{calls[0]})",
+    )
+    out.close()
+    panic()
   }
   out.close()
   println("output callbacks: \{calls[0]}")
@@ -108,6 +193,20 @@ fn main {
     _ => ()
   }
   sleep_ms(1000)
+  try in_stream.pause() catch {
+    e => println("input stream pause failed: \{e}")
+  } noraise {
+    _ => ()
+  }
+  let paused = in_calls[0]
+  sleep_ms(200)
+  if in_calls[0] > paused + 1 {
+    println(
+      "input callbacks continued after pause (before=\{paused} after=\{in_calls[0]})",
+    )
+    in_stream.close()
+    panic()
+  }
   in_stream.close()
   println("input callbacks: \{in_calls[0]}")
 }

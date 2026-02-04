@@ -92,7 +92,7 @@ static int alsa_configure_pcm(snd_pcm_t *pcm,
                               uint32_t channels,
                               uint32_t sample_format_tag,
                               uint32_t buffer_frames) {
-  if (pcm == NULL || channels == 0 || sample_rate == 0 || buffer_frames == 0) {
+  if (pcm == NULL || channels == 0 || sample_rate == 0) {
     return -EINVAL;
   }
 
@@ -128,16 +128,18 @@ static int alsa_configure_pcm(snd_pcm_t *pcm,
     return err;
   }
 
-  snd_pcm_uframes_t period = (snd_pcm_uframes_t)buffer_frames;
-  err = snd_pcm_hw_params_set_period_size_near(pcm, hw, &period, NULL);
-  if (err < 0) {
-    return err;
-  }
+  if (buffer_frames != 0) {
+    snd_pcm_uframes_t period = (snd_pcm_uframes_t)buffer_frames;
+    err = snd_pcm_hw_params_set_period_size_near(pcm, hw, &period, NULL);
+    if (err < 0) {
+      return err;
+    }
 
-  snd_pcm_uframes_t buf_sz = period * 4;
-  err = snd_pcm_hw_params_set_buffer_size_near(pcm, hw, &buf_sz);
-  if (err < 0) {
-    return err;
+    snd_pcm_uframes_t buf_sz = period * 4;
+    err = snd_pcm_hw_params_set_buffer_size_near(pcm, hw, &buf_sz);
+    if (err < 0) {
+      return err;
+    }
   }
 
   err = snd_pcm_hw_params(pcm, hw);
@@ -150,6 +152,28 @@ static int alsa_configure_pcm(snd_pcm_t *pcm,
     return err;
   }
   return 0;
+}
+
+static uint32_t alsa_current_period_frames(snd_pcm_t *pcm) {
+  if (pcm == NULL) {
+    return 0;
+  }
+  snd_pcm_hw_params_t *hw = NULL;
+  snd_pcm_hw_params_alloca(&hw);
+  if (snd_pcm_hw_params_current(pcm, hw) < 0) {
+    return 0;
+  }
+  snd_pcm_uframes_t period = 0;
+  if (snd_pcm_hw_params_get_period_size(hw, &period, NULL) < 0) {
+    return 0;
+  }
+  if (period == 0) {
+    return 0;
+  }
+  if (period > 0xFFFFFFFFu) {
+    return 0xFFFFFFFFu;
+  }
+  return (uint32_t)period;
 }
 
 static void *alsa_thread_main(void *p) {
@@ -196,6 +220,7 @@ static void *alsa_thread_main(void *p) {
         snd_pcm_sframes_t w = snd_pcm_writei(s->pcm, ptr, (snd_pcm_uframes_t)frames_left);
         if (w == -EPIPE) {
           // XRUN
+          alsa_invoke_error(s, 6 /* xrun */, (int32_t)w);
           snd_pcm_prepare(s->pcm);
           continue;
         }
@@ -219,6 +244,7 @@ static void *alsa_thread_main(void *p) {
       while (frames_left > 0 && atomic_load(&s->running) != 0 && atomic_load(&s->closed) == 0) {
         snd_pcm_sframes_t r = snd_pcm_readi(s->pcm, ptr, (snd_pcm_uframes_t)frames_left);
         if (r == -EPIPE) {
+          alsa_invoke_error(s, 6 /* xrun */, (int32_t)r);
           snd_pcm_prepare(s->pcm);
           continue;
         }
@@ -314,15 +340,9 @@ static int alsa_stream_new(const char *device_id,
     moonbit_decref(error_callback);
     return -EINVAL;
   }
-  if (buffer_frames == 0) {
-    buffer_frames = 512;
-  }
-  uint32_t buffer_bytes = buffer_frames * channels * bps;
-  if (buffer_bytes == 0) {
-    moonbit_decref(data_callback);
-    moonbit_decref(error_callback);
-    return -EINVAL;
-  }
+  // `buffer_frames == 0` means "default": do not constrain the device period size.
+  // We'll query the configured period after applying hw_params.
+  uint32_t requested_frames = buffer_frames;
 
   moon_cpal_alsa_stream_t *s = (moon_cpal_alsa_stream_t *)calloc(1, sizeof(*s));
   if (s == NULL) {
@@ -334,8 +354,8 @@ static int alsa_stream_new(const char *device_id,
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = (unsigned int)(sample_rate <= 0.0 ? 48000.0 : sample_rate);
-  s->buffer_frames = buffer_frames;
-  s->buffer_bytes = buffer_bytes;
+  s->buffer_frames = 0;
+  s->buffer_bytes = 0;
   s->call_data_callback = call_data_callback;
   s->mb_data_callback = data_callback;
   s->call_error_callback = call_error_callback;
@@ -361,6 +381,20 @@ static int alsa_stream_new(const char *device_id,
     alsa_stream_destroy(s);
     return err;
   }
+
+  uint32_t period_frames = alsa_current_period_frames(s->pcm);
+  if (period_frames == 0) {
+    period_frames = requested_frames == 0 ? 512u : requested_frames;
+  }
+  uint32_t buffer_bytes = period_frames * channels * bps;
+  if (buffer_bytes == 0) {
+    alsa_invoke_error(s, 4 /* snd_pcm_hw_params */, -EINVAL);
+    alsa_stream_destroy(s);
+    return -EINVAL;
+  }
+
+  s->buffer_frames = period_frames;
+  s->buffer_bytes = buffer_bytes;
 
   s->mb_buffer = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)buffer_bytes, 1);
   if (s->mb_buffer == NULL) {

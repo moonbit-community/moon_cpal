@@ -397,7 +397,10 @@ static int jack_stream_new(int is_input,
 
   s->sample_rate = (double)jack_get_sample_rate(s->client);
   uint32_t period = (uint32_t)jack_get_buffer_size(s->client);
-  s->frames_per_cb = buffer_frames == 0 ? period : buffer_frames;
+  // JACK buffer size is controlled by the server and cannot be changed by clients.
+  // Always use the server period here; `BufferSize::Fixed` validation happens in MoonBit.
+  (void)buffer_frames;
+  s->frames_per_cb = period;
   if (s->frames_per_cb == 0) {
     s->frames_per_cb = 64;
   }

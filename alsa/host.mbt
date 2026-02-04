@@ -37,9 +37,27 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
       }
     }
     if out.length() == 0 {
+      return [default_device()]
+    }
+
+    // Try to filter out entries that cannot be opened for either capture or playback.
+    // Keep "default" even if probing fails, as it is a stable virtual device id.
+    let filtered : Array[Device] = []
+    for d in out {
+      if d.id == "default" {
+        filtered.push(d)
+        continue
+      }
+      let has_out = supported_configs_bin(d.id, false).length() > 0
+      let has_in = supported_configs_bin(d.id, true).length() > 0
+      if has_out || has_in {
+        filtered.push(d)
+      }
+    }
+    if filtered.length() == 0 {
       [default_device()]
     } else {
-      out
+      filtered
     }
   } else {
     []
@@ -49,10 +67,20 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    match Host::devices(_self).get(0) {
-      None => Some(default_device())
-      Some(d) => Some(d)
+    let ds = Host::devices(_self)
+    // Prefer "default" when it actually supports output.
+    for d in ds {
+      if d.id == "default" && d.supported_output_configs().length() > 0 {
+        return Some(d)
+      }
     }
+    // Otherwise pick the first device that reports any output configs.
+    for d in ds {
+      if d.supported_output_configs().length() > 0 {
+        return Some(d)
+      }
+    }
+    None
   } else {
     None
   }
@@ -61,10 +89,18 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    match Host::devices(_self).get(0) {
-      None => Some(default_device())
-      Some(d) => Some(d)
+    let ds = Host::devices(_self)
+    for d in ds {
+      if d.id == "default" && d.supported_input_configs().length() > 0 {
+        return Some(d)
+      }
     }
+    for d in ds {
+      if d.supported_input_configs().length() > 0 {
+        return Some(d)
+      }
+    }
+    None
   } else {
     None
   }

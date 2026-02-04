@@ -21,6 +21,7 @@ fn main {
         println("building output stream: \{supported}")
         let phase : Array[Double] = [0.0]
         let calls : Array[Int] = [0]
+        let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
         let sr = cfg.sample_rate.to_double()
         let ch = cfg.channels
         let two_pi = 6.283185307179586
@@ -29,8 +30,19 @@ fn main {
         try
           dev.build_output_stream(
             cfg,
-            fn(data, _info) {
+            fn(data, info) {
               calls[0] = calls[0] + 1
+              let now = info.timestamp().callback()
+              match last_cb[0] {
+                None => last_cb[0] = Some(now)
+                Some(prev) => {
+                  if now.duration_since(prev) is None {
+                    println("non-monotonic output callback timestamp")
+                    panic()
+                  }
+                  last_cb[0] = Some(now)
+                }
+              }
               match data.sample_format() {
                 @moon_cpal.SampleFormat::F32 => {
                   let bytes = data.bytes()
@@ -106,6 +118,15 @@ fn main {
             } noraise {
               _ => ()
             }
+            let paused = calls[0]
+            ignore(sleep(1))
+            if calls[0] > paused + 1 {
+              println(
+                "output callbacks continued after pause (before=\{paused} after=\{calls[0]})",
+              )
+              stream.close()
+              panic()
+            }
             stream.close()
             println("output stream ok (callbacks=\{calls[0]})")
           }
@@ -127,11 +148,23 @@ fn main {
         println("building input stream: \{supported}")
         let calls : Array[Int] = [0]
         let printed : Array[Bool] = [false]
+        let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
         try
           dev.build_input_stream(
             cfg,
             fn(data, info) {
               calls[0] = calls[0] + 1
+              let now = info.timestamp().callback()
+              match last_cb[0] {
+                None => last_cb[0] = Some(now)
+                Some(prev) => {
+                  if now.duration_since(prev) is None {
+                    println("non-monotonic input callback timestamp")
+                    panic()
+                  }
+                  last_cb[0] = Some(now)
+                }
+              }
               if !printed[0] {
                 printed[0] = true
                 println("input ts: \{info.timestamp()}")
@@ -170,6 +203,15 @@ fn main {
               e => println("input stream pause failed: \{e}")
             } noraise {
               _ => ()
+            }
+            let paused = calls[0]
+            ignore(sleep(1))
+            if calls[0] > paused + 1 {
+              println(
+                "input callbacks continued after pause (before=\{paused} after=\{calls[0]})",
+              )
+              stream.close()
+              panic()
             }
             stream.close()
             println("input stream ok")

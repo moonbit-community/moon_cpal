@@ -1,0 +1,12 @@
+///|
+test "alsa errno mapping (unit)" {
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  inspect(
+    alsa_stream_error_from_errno(-19, "snd_pcm_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(alsa_stream_error_from_errno(-32, "xrun"), content="BufferUnderrun")
+}

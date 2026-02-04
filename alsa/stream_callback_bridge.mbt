@@ -112,11 +112,29 @@ fn call_stream_error_callback(
     3 => "snd_pcm_open"
     4 => "snd_pcm_hw_params"
     5 => "pthread_create"
+    6 => "xrun"
     _ => "AlsaStream"
   }
-  error_callback(
-    @moon_cpal.stream_error_backend_specific("\{op} (errno \{status})"),
-  )
+  error_callback(alsa_stream_error_from_errno(status, op))
+}
+
+///|
+fn alsa_stream_error_from_errno(
+  status : Int,
+  op : String,
+) -> @moon_cpal.StreamError {
+  // Best-effort errno mapping (Linux): match common CPAL error variants.
+  //
+  // Note: `status` is typically a negative errno value (e.g. -ENODEV, -EPIPE).
+  if status == -19 {
+    // ENODEV
+    @moon_cpal.stream_error_device_not_available()
+  } else if status == -32 {
+    // EPIPE (XRUN)
+    @moon_cpal.stream_error_buffer_underrun()
+  } else {
+    @moon_cpal.stream_error_backend_specific("\{op} (errno \{status})")
+  }
 }
 
 ///|

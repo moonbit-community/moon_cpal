@@ -115,9 +115,24 @@ fn call_stream_error_callback(
     6 => "DeviceInit"
     _ => "WasapiStream"
   }
-  error_callback(
-    @moon_cpal.stream_error_backend_specific("\{op} (HRESULT \{status})"),
-  )
+  error_callback(wasapi_stream_error_from_hresult(status, op))
+}
+
+///|
+fn wasapi_stream_error_from_hresult(
+  status : Int,
+  op : String,
+) -> @moon_cpal.StreamError {
+  // Match upstream mapping for the most common "device went away" errors.
+  //
+  // Note: we pass HRESULT as a signed 32-bit int from C.
+  // AUDCLNT_E_DEVICE_INVALIDATED = 0x88890004
+  // AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A
+  if status == -2004287484 || status == -2004287478 {
+    @moon_cpal.stream_error_device_not_available()
+  } else {
+    @moon_cpal.stream_error_backend_specific("\{op} (HRESULT \{status})")
+  }
 }
 
 ///|

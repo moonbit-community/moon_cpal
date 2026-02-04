@@ -157,6 +157,8 @@ pub enum BufferSize {
   Default
   Fixed(Int)
 }
+pub fn BufferSize::default() -> Self
+pub fn BufferSize::fixed(Int) -> Self
 pub impl Eq for BufferSize
 pub impl Show for BufferSize
 
@@ -303,6 +305,7 @@ pub struct StreamConfig {
   sample_rate : Int
   buffer_size : BufferSize
 }
+pub fn StreamConfig::new(Int, Int, BufferSize) -> Self
 pub impl Eq for StreamConfig
 pub impl Show for StreamConfig
 
