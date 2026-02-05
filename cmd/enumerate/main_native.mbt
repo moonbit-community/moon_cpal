@@ -31,6 +31,11 @@ fn print_default_config(
 ///|
 fn main {
   println("native_os: \{@moon_cpal.native_os()}")
+  let all = @platform.all_hosts()
+  println("all_hosts: \{all.length()}")
+  for id in all {
+    println("- all_host: \{@moon_cpal.HostId::to_string(id)}")
+  }
   let hs = @moon_cpal.available_hosts()
   println("available_hosts: \{hs.length()}")
   for id in hs {

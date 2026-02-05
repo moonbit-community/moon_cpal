@@ -45,3 +45,38 @@ test "wasapi fixed buffer larger than device buffer fails (best-effort)" {
     }
   }
 }
+
+///|
+test "wasapi fixed buffer 0 is invalid argument (unit)" {
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+    inspect(true, content="true")
+    return
+  }
+  let dev : Device = { id: "does_not_matter" }
+  let sc = @moon_cpal.StreamConfig::new(
+    2,
+    48000,
+    @moon_cpal.BufferSize::fixed(0),
+  )
+  try
+    dev.build_output_stream_raw(
+      sc,
+      @moon_cpal.SampleFormat::F32,
+      fn(_d, _info) { () },
+      fn(_e) { () },
+      None,
+    )
+  catch {
+    e =>
+      match e {
+        @moon_cpal.BuildStreamError::InvalidArgument =>
+          inspect(true, content="true")
+        _ => inspect(false, content="true")
+      }
+  } noraise {
+    s => {
+      s.close()
+      inspect(false, content="true")
+    }
+  }
+}

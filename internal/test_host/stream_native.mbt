@@ -1,8 +1,8 @@
 ///|
-/// Null streams (native target).
+/// Deterministic test streams (native target).
 ///
-/// This implementation is used for portable unit tests and for exercising the callback-thread
-/// model without relying on system audio devices.
+/// Used for portable unit tests and for exercising the callback-thread model without relying on
+/// system audio devices.
 
 ///|
 #borrow(out_handles)
@@ -165,13 +165,15 @@ pub fn Device::build_output_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  validate_config_or_raise(config)
+  let fmt = @moon_cpal.SampleFormat::F32
   Device::build_output_stream_raw(
     _self,
     config,
-    @moon_cpal.SampleFormat::F32,
+    fmt,
     data_callback,
     error_callback,
-    _timeout,
+    None,
   )
 }
 
@@ -185,32 +187,32 @@ pub fn Device::build_output_stream_raw(
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   validate_config_or_raise(config)
-  let frames = buffer_frames_from_config(config)
   let tag = match format_tag_from_sample_format(sample_format) {
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
-    Some(t) => t
+    Some(x) => x
   }
-  let out = FixedArray::make(1, (0 : UInt64))
-  let status = null_stream_build_output(
+  let buf_frames = buffer_frames_from_config(config)
+  let handles : FixedArray[UInt64] = FixedArray::make(1, 0)
+  let st = null_stream_build_output(
     config.sample_rate.to_double(),
     config.channels.reinterpret_as_uint(),
     tag,
-    frames,
+    buf_frames,
     call_output_data_callback_fr,
     data_callback,
     call_stream_error_callback_fr,
     error_callback,
-    out,
-    out.length(),
+    handles,
+    1,
   )
-  if status != 0 {
-    raise_build_status("null_stream_build_output", status)
+  if st != 0 {
+    raise_build_status("test_host build_output_stream", st)
   }
-  let handle = out[0]
-  if handle == (0 : UInt64) {
-    raise_build_status("null_stream_build_output", -22)
+  let h = handles[0]
+  if h == 0 {
+    raise_build_status("test_host build_output_stream", -1)
   }
-  { kind: StreamKind::Output, handle, owner: null_stream_owner_new(handle) }
+  { kind: StreamKind::Output, owner: null_stream_owner_new(h) }
 }
 
 ///|
@@ -221,13 +223,15 @@ pub fn Device::build_input_stream(
   error_callback : (@moon_cpal.StreamError) -> Unit,
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
+  validate_config_or_raise(config)
+  let fmt = @moon_cpal.SampleFormat::F32
   Device::build_input_stream_raw(
     _self,
     config,
-    @moon_cpal.SampleFormat::F32,
+    fmt,
     data_callback,
     error_callback,
-    _timeout,
+    None,
   )
 }
 
@@ -241,47 +245,47 @@ pub fn Device::build_input_stream_raw(
   _timeout : @moon_cpal.Duration?,
 ) -> Stream raise @moon_cpal.BuildStreamError {
   validate_config_or_raise(config)
-  let frames = buffer_frames_from_config(config)
   let tag = match format_tag_from_sample_format(sample_format) {
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
-    Some(t) => t
+    Some(x) => x
   }
-  let out = FixedArray::make(1, (0 : UInt64))
-  let status = null_stream_build_input(
+  let buf_frames = buffer_frames_from_config(config)
+  let handles : FixedArray[UInt64] = FixedArray::make(1, 0)
+  let st = null_stream_build_input(
     config.sample_rate.to_double(),
     config.channels.reinterpret_as_uint(),
     tag,
-    frames,
+    buf_frames,
     call_input_data_callback_fr,
     data_callback,
     call_stream_error_callback_fr,
     error_callback,
-    out,
-    out.length(),
+    handles,
+    1,
   )
-  if status != 0 {
-    raise_build_status("null_stream_build_input", status)
+  if st != 0 {
+    raise_build_status("test_host build_input_stream", st)
   }
-  let handle = out[0]
-  if handle == (0 : UInt64) {
-    raise_build_status("null_stream_build_input", -22)
+  let h = handles[0]
+  if h == 0 {
+    raise_build_status("test_host build_input_stream", -1)
   }
-  { kind: StreamKind::Input, handle, owner: null_stream_owner_new(handle) }
+  { kind: StreamKind::Input, owner: null_stream_owner_new(h) }
 }
 
 ///|
 pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
-  let status = null_stream_owner_play(self.owner)
-  if status != 0 {
-    raise_play_status("null_stream_owner_play", status)
+  let st = null_stream_owner_play(self.owner)
+  if st != 0 {
+    raise_play_status("test_host play", st)
   }
 }
 
 ///|
 pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
-  let status = null_stream_owner_pause(self.owner)
-  if status != 0 {
-    raise_pause_status("null_stream_owner_pause", status)
+  let st = null_stream_owner_pause(self.owner)
+  if st != 0 {
+    raise_pause_status("test_host pause", st)
   }
 }
 

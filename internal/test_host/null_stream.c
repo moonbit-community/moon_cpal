@@ -527,13 +527,17 @@ static void null_stream_destroy(moon_cpal_null_stream_t *s) {
   }
   atomic_store(&s->closed, 1);
   atomic_store(&s->running, 0);
+
   pthread_mutex_lock(&s->mu);
   pthread_cond_broadcast(&s->cv);
   pthread_mutex_unlock(&s->mu);
+
   if (s->thread_started) {
     pthread_join(s->thread, NULL);
-    s->thread_started = 0;
   }
+  pthread_mutex_destroy(&s->mu);
+  pthread_cond_destroy(&s->cv);
+
   if (s->mb_data_callback != NULL) {
     moonbit_decref(s->mb_data_callback);
     s->mb_data_callback = NULL;
@@ -546,8 +550,6 @@ static void null_stream_destroy(moon_cpal_null_stream_t *s) {
     moonbit_decref(s->mb_buffer);
     s->mb_buffer = NULL;
   }
-  pthread_mutex_destroy(&s->mu);
-  pthread_cond_destroy(&s->cv);
   free(s);
 }
 
@@ -567,7 +569,7 @@ static int32_t null_stream_new(int is_input,
   if (out_handle == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -EINVAL;
+    return -22;
   }
   *out_handle = 0;
 
@@ -575,21 +577,21 @@ static int32_t null_stream_new(int is_input,
   if (bps == 0 || channels == 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -EINVAL;
+    return -22;
   }
   uint32_t frames = buffer_frames == 0 ? 128u : buffer_frames;
   uint32_t buffer_bytes = frames * channels * bps;
   if (buffer_bytes == 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -EINVAL;
+    return -22;
   }
 
   moon_cpal_null_stream_t *s = (moon_cpal_null_stream_t *)calloc(1, sizeof(*s));
   if (s == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -ENOMEM;
+    return -12;
   }
   s->is_input = is_input ? 1 : 0;
   s->sample_format_tag = sample_format_tag;
@@ -605,7 +607,9 @@ static int32_t null_stream_new(int is_input,
   atomic_store(&s->running, 0);
   atomic_store(&s->closed, 0);
   s->frame_cursor = 0;
+  s->thread_started = 0;
 
+  // Choose a conservative callback period for tests.
   double ms = ((double)frames * 1000.0) / s->sample_rate;
   if (ms < 1.0) {
     ms = 1.0;
@@ -615,20 +619,19 @@ static int32_t null_stream_new(int is_input,
   }
   s->period_ms = (uint32_t)ms;
 
-  pthread_mutex_init(&s->mu, NULL);
-  pthread_cond_init(&s->cv, NULL);
-  s->thread_started = 0;
+  (void)pthread_mutex_init(&s->mu, NULL);
+  (void)pthread_cond_init(&s->cv, NULL);
 
   s->mb_buffer = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)buffer_bytes, 1);
   if (s->mb_buffer == NULL) {
     null_stream_destroy(s);
-    return -ENOMEM;
+    return -12;
   }
 
   int perr = pthread_create(&s->thread, NULL, null_thread_main, s);
   if (perr != 0) {
     null_stream_destroy(s);
-    return -perr;
+    return -1;
   }
   s->thread_started = 1;
 
@@ -650,7 +653,7 @@ int32_t moon_cpal_null_stream_build_output(double sample_rate,
   if (out_handles == NULL || out_len <= 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -EINVAL;
+    return -22;
   }
   out_handles[0] = 0;
   uint64_t h = 0;
@@ -677,7 +680,7 @@ int32_t moon_cpal_null_stream_build_input(double sample_rate,
   if (out_handles == NULL || out_len <= 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
-    return -EINVAL;
+    return -22;
   }
   out_handles[0] = 0;
   uint64_t h = 0;
@@ -693,7 +696,7 @@ int32_t moon_cpal_null_stream_build_input(double sample_rate,
 static int32_t null_stream_play(uint64_t handle) {
   moon_cpal_null_stream_t *s = (moon_cpal_null_stream_t *)(uintptr_t)handle;
   if (s == NULL || atomic_load(&s->closed) != 0) {
-    return -ENODEV;
+    return -1;
   }
   atomic_store(&s->running, 1);
   pthread_mutex_lock(&s->mu);
@@ -705,7 +708,7 @@ static int32_t null_stream_play(uint64_t handle) {
 static int32_t null_stream_pause(uint64_t handle) {
   moon_cpal_null_stream_t *s = (moon_cpal_null_stream_t *)(uintptr_t)handle;
   if (s == NULL || atomic_load(&s->closed) != 0) {
-    return -ENODEV;
+    return -1;
   }
   atomic_store(&s->running, 0);
   pthread_mutex_lock(&s->mu);
@@ -758,7 +761,7 @@ static uint64_t null_stream_owner_handle(void *owner) {
 int32_t moon_cpal_null_stream_owner_play(void *owner) {
   uint64_t h = null_stream_owner_handle(owner);
   if (h == 0) {
-    return -ENODEV;
+    return -1;
   }
   return null_stream_play(h);
 }
@@ -766,7 +769,7 @@ int32_t moon_cpal_null_stream_owner_play(void *owner) {
 int32_t moon_cpal_null_stream_owner_pause(void *owner) {
   uint64_t h = null_stream_owner_handle(owner);
   if (h == 0) {
-    return -ENODEV;
+    return -1;
   }
   return null_stream_pause(h);
 }

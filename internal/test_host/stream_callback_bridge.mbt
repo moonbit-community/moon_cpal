@@ -1,5 +1,5 @@
 ///|
-/// Trampolines used to bridge the native Null stream worker thread (C) to MoonBit closures.
+/// Trampolines used to bridge the native test stream worker thread (C) to MoonBit closures.
 
 ///|
 fn sample_format_from_tag(tag : UInt) -> @moon_cpal.SampleFormat {
@@ -119,7 +119,7 @@ fn call_stream_error_callback(
   let op = match op_tag {
     1 => "thread_create"
     2 => "stream_loop"
-    _ => "NullStream"
+    _ => "TestHostStream"
   }
   error_callback(
     @moon_cpal.stream_error_backend_specific("\{op} (status \{status})"),

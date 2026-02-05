@@ -35,6 +35,11 @@ pub fn available_hosts() -> Array[@moon_cpal.HostId] {
 }
 
 ///|
+pub fn all_hosts() -> Array[@moon_cpal.HostId] {
+  @platform.all_hosts()
+}
+
+///|
 pub fn host_from_id(
   id : @moon_cpal.HostId,
 ) -> Host raise @moon_cpal.HostUnavailable {

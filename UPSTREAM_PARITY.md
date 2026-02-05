@@ -35,7 +35,7 @@ Top-level:
 
 Native hosts:
 
-- `host/null/mod.rs` — **PARTIAL** (native callback-thread stream exists; parity details pending)
+- `host/null/mod.rs` — **DONE** (fallback host only; no devices; stream/config APIs are unimplemented; deterministic callback-thread tests live in `internal/test_host`)
 - `host/alsa/enumerate.rs` — **PARTIAL**
 - `host/alsa/mod.rs` — **PARTIAL**
 - `host/jack/device.rs` — **PARTIAL**

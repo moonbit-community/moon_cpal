@@ -36,7 +36,10 @@ fn default_input_device() -> Device {
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    [default_input_device(), default_output_device()]
+    match default_server_config() {
+      None => []
+      Some(_) => [default_input_device(), default_output_device()]
+    }
   } else {
     []
   }
@@ -45,7 +48,10 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_output_device())
+    match default_server_config() {
+      None => None
+      Some(_) => Some(default_output_device())
+    }
   } else {
     None
   }
@@ -54,7 +60,10 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    Some(default_input_device())
+    match default_server_config() {
+      None => None
+      Some(_) => Some(default_input_device())
+    }
   } else {
     None
   }

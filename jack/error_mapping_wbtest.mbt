@@ -33,3 +33,32 @@ test "jack build error mapping (unit)" {
     content="InvalidArgument",
   )
 }
+
+///|
+test "jack stream error mapping (unit)" {
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  let slot = FixedArray::make(
+    1,
+    @moon_cpal.stream_error_backend_specific("init"),
+  )
+  // jack_client_open failures => device not available.
+  call_stream_error_callback(fn(e) { slot[0] = e }, 1, 1)
+  inspect(slot[0], content="DeviceNotAvailable")
+
+  // Activation/registration failures => invalidated.
+  call_stream_error_callback(fn(e) { slot[0] = e }, 2, -1)
+  inspect(slot[0], content="StreamInvalidated")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 3, -1)
+  inspect(slot[0], content="StreamInvalidated")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 4, -1)
+  inspect(slot[0], content="StreamInvalidated")
+
+  // Errno-style (op_tag 0) mapping: ENODEV and EPIPE.
+  call_stream_error_callback(fn(e) { slot[0] = e }, 0, -19)
+  inspect(slot[0], content="DeviceNotAvailable")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 0, -32)
+  inspect(slot[0], content="StreamInvalidated")
+}

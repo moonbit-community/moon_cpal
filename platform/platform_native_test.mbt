@@ -8,6 +8,7 @@ test "platform default_host (native)" {
     @moon_cpal.NativeOs::Unknown => @moon_cpal.HostId::Null
   }
   inspect(h.id() == expected, content="true")
+  // Match upstream: platform `HostId` includes `Null` only on unsupported targets.
   match @moon_cpal.native_os() {
     @moon_cpal.NativeOs::Unknown =>
       try host_from_id(Null) catch {
@@ -27,16 +28,28 @@ test "platform default_host (native)" {
 ///|
 test "platform available_hosts + host_from_id (native)" {
   let hs = available_hosts()
-  // Linux should now include JACK as well.
+  let all = all_hosts()
+  // `available_hosts()` must be a subset of `all_hosts()`.
+  for id in hs {
+    inspect(all.contains(id), content="true")
+  }
+  // On supported native platforms, all hosts are available.
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Unknown {
+    inspect(hs.length() == all.length(), content="true")
+  } else {
+    inspect(
+      all.length() == 1 && all[0] == @moon_cpal.HostId::Null,
+      content="true",
+    )
+  }
+
+  // Linux should include JACK as well.
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    match @jack.default_server_config() {
-      None => inspect(!hs.contains(@moon_cpal.HostId::Jack), content="true")
-      Some(_) => inspect(hs.contains(@moon_cpal.HostId::Jack), content="true")
-    }
+    inspect(hs.contains(@moon_cpal.HostId::Jack), content="true")
   }
 
   // All advertised hosts should be constructible.
-  for id in hs {
+  for id in all {
     try host_from_id(id) catch {
       _ => inspect(false, content="true")
     } noraise {

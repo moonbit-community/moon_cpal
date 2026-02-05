@@ -11,6 +11,8 @@ import {
 }
 
 // Values
+pub fn all_hosts() -> Array[@moon_cpal.HostId]
+
 pub fn available_hosts() -> Array[@moon_cpal.HostId]
 
 pub fn default_host() -> Host

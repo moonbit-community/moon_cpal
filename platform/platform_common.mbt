@@ -56,14 +56,28 @@ pub fn available_hosts() -> Array[@moon_cpal.HostId] {
   match @moon_cpal.native_os() {
     @moon_cpal.NativeOs::Macos => [@moon_cpal.HostId::CoreAudio]
     @moon_cpal.NativeOs::Windows => [@moon_cpal.HostId::Wasapi]
-    @moon_cpal.NativeOs::Linux => {
-      let out : Array[@moon_cpal.HostId] = [@moon_cpal.HostId::Alsa]
-      match @jack.default_server_config() {
-        None => ()
-        Some(_) => out.push(@moon_cpal.HostId::Jack)
-      }
-      out
-    }
+    // Match upstream ordering (platform `ALL_HOSTS`): JACK (feature-gated upstream) before ALSA.
+    @moon_cpal.NativeOs::Linux =>
+      [@moon_cpal.HostId::Jack, @moon_cpal.HostId::Alsa]
+    // Match upstream: the Null backend exists as a fallback, but `available_hosts()` yields
+    // only hosts that are currently available for real audio I/O.
+    @moon_cpal.NativeOs::Unknown => []
+  }
+}
+
+///|
+pub fn all_hosts() -> Array[@moon_cpal.HostId] {
+  // Mirrors upstream platform `ALL_HOSTS`: the set of hosts supported by the current compilation
+  // target. This includes hosts that may not be currently available at runtime.
+  //
+  // Note: In upstream, `HostId` is platform-specific; on supported platforms it does not include
+  // `Null`. In MoonBit we keep a cross-platform superset `HostId`, so we expose the platform
+  // subset via this function.
+  match @moon_cpal.native_os() {
+    @moon_cpal.NativeOs::Macos => [@moon_cpal.HostId::CoreAudio]
+    @moon_cpal.NativeOs::Windows => [@moon_cpal.HostId::Wasapi]
+    @moon_cpal.NativeOs::Linux =>
+      [@moon_cpal.HostId::Jack, @moon_cpal.HostId::Alsa]
     @moon_cpal.NativeOs::Unknown => [@moon_cpal.HostId::Null]
   }
 }
@@ -72,23 +86,38 @@ pub fn available_hosts() -> Array[@moon_cpal.HostId] {
 pub fn host_from_id(
   id : @moon_cpal.HostId,
 ) -> Host raise @moon_cpal.HostUnavailable {
-  let hs = available_hosts()
-  let mut ok = false
-  for i in 0..<hs.length() {
-    if hs[i] == id {
-      ok = true
-      break
-    }
-  }
-  if !ok {
-    raise @moon_cpal.host_unavailable()
-  }
   match id {
-    CoreAudio => Host::CoreAudio(@macos.default_host())
-    Alsa => Host::Alsa(@alsa.default_host())
-    Jack => Host::Jack(@jack.default_host())
-    Null => Host::Null(@null.default_host())
-    Wasapi => Host::Wasapi(@wasapi.default_host())
+    // Upstream: platform `HostId` includes `Null` only on unsupported targets.
+    Null =>
+      if @moon_cpal.native_os() == @moon_cpal.NativeOs::Unknown {
+        Host::Null(@null.default_host())
+      } else {
+        raise @moon_cpal.host_unavailable()
+      }
+    CoreAudio =>
+      if @moon_cpal.native_os() == @moon_cpal.NativeOs::Macos {
+        Host::CoreAudio(@macos.default_host())
+      } else {
+        raise @moon_cpal.host_unavailable()
+      }
+    Wasapi =>
+      if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
+        Host::Wasapi(@wasapi.default_host())
+      } else {
+        raise @moon_cpal.host_unavailable()
+      }
+    Alsa =>
+      if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+        Host::Alsa(@alsa.default_host())
+      } else {
+        raise @moon_cpal.host_unavailable()
+      }
+    Jack =>
+      if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+        Host::Jack(@jack.default_host())
+      } else {
+        raise @moon_cpal.host_unavailable()
+      }
     _ => raise @moon_cpal.host_unavailable()
   }
 }
@@ -370,7 +399,12 @@ pub fn Device::try_default_output_config(
   self : Device,
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
-    Null(d) => Some(d.default_output_config())
+    Null(d) =>
+      try d.default_output_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
     CoreAudio(d) =>
       try d.default_output_config() catch {
         _ => None
@@ -403,7 +437,12 @@ pub fn Device::try_default_input_config(
   self : Device,
 ) -> @moon_cpal.SupportedStreamConfig? {
   match self {
-    Null(d) => Some(d.default_input_config())
+    Null(d) =>
+      try d.default_input_config() catch {
+        _ => None
+      } noraise {
+        cfg => Some(cfg)
+      }
     CoreAudio(d) =>
       try d.default_input_config() catch {
         _ => None

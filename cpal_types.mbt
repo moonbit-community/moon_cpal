@@ -14,6 +14,14 @@ pub type SampleRate = Int
 pub type FrameCount = Int
 
 ///|
+/// The buffer size requests the callback size for audio streams.
+///
+/// Mirrors upstream `cpal::BufferSize`:
+/// - `Default` uses the host's default callback size.
+/// - `Fixed(n)` requests approximately `n` frames per callback.
+///
+/// The actual callback size depends on the backend/host implementation and may differ from or
+/// vary around the requested size.
 pub enum BufferSize {
   Default
   Fixed(FrameCount)
