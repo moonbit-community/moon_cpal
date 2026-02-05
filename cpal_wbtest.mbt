@@ -118,7 +118,7 @@ test "sample_format properties (ported from upstream cpal/src/samples_formats.rs
     DsdU32,
   ]
   let out = formats.map(fn(fmt) {
-    "\{fmt.to_debug_string()}:size=\{fmt.sample_size()}:bits=\{fmt.bits_per_sample()}:int=\{fmt.is_int()}:uint=\{fmt.is_uint()}:float=\{fmt.is_float()}:dsd=\{fmt.is_dsd()}"
+    "\{fmt.to_string()}:size=\{fmt.sample_size()}:bits=\{fmt.bits_per_sample()}:int=\{fmt.is_int()}:uint=\{fmt.is_uint()}:float=\{fmt.is_float()}:dsd=\{fmt.is_dsd()}"
   })
   inspect(
     out,
@@ -187,6 +187,10 @@ test "device description builder + direction_from_caps" {
   inspect(direction_from_caps(true, false), content="Input")
   inspect(direction_from_caps(false, true), content="Output")
   inspect(direction_from_caps(false, false), content="Unknown")
+  inspect(direction_from_counts(Some(2), Some(2)), content="Duplex")
+  inspect(direction_from_counts(Some(2), Some(0)), content="Input")
+  inspect(direction_from_counts(None, Some(2)), content="Output")
+  inspect(direction_from_counts(None, None), content="Unknown")
   let built = DeviceDescriptionBuilder::new("X")
     .manufacturer("ACME")
     .driver("drv")

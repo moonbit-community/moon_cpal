@@ -92,3 +92,8 @@ pub fn SampleFormat::to_debug_string(self : SampleFormat) -> String {
     DsdU32 => "dsdu32"
   }
 }
+
+///|
+pub fn SampleFormat::to_string(self : SampleFormat) -> String {
+  self.to_debug_string()
+}

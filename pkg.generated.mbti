@@ -32,6 +32,8 @@ pub fn devices_error_backend_specific(String) -> DevicesError
 
 pub fn direction_from_caps(Bool, Bool) -> DeviceDirection
 
+pub fn direction_from_counts(Int?, Int?) -> DeviceDirection
+
 pub fn host_unavailable() -> HostUnavailable
 
 pub fn native_os() -> NativeOs
@@ -455,6 +457,7 @@ pub fn SampleFormat::is_int(Self) -> Bool
 pub fn SampleFormat::is_uint(Self) -> Bool
 pub fn SampleFormat::sample_size(Self) -> Int
 pub fn SampleFormat::to_debug_string(Self) -> String
+pub fn SampleFormat::to_string(Self) -> String
 pub impl Eq for SampleFormat
 pub impl Show for SampleFormat
 

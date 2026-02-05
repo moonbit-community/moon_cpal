@@ -27,8 +27,8 @@ Top-level:
 
 - `lib.rs` — **PARTIAL** (core types + some heuristics/tests exist; full trait surface pending)
 - `error.rs` — **DONE** (Display-equivalent `to_string` parity + tests)
-- `device_description.rs` — **PARTIAL**
-- `samples_formats.rs` — **PARTIAL**
+- `device_description.rs` — **DONE** (`direction_from_counts` parity + tests)
+- `samples_formats.rs` — **DONE** (`SampleFormat::to_string` parity)
 - `platform/mod.rs` — **PARTIAL**
 - `host/mod.rs` — **PARTIAL**
 
