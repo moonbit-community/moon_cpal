@@ -371,9 +371,7 @@ pub fn Device::supported_output_configs(
         @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
           raise @core.supported_stream_configs_error_device_not_available()
         @macos.CoreAudioError::CoreAudioError(op, status) =>
-          raise @core.supported_stream_configs_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
+          raise @macos.supported_configs_error_from_osstatus(op, status)
       } noraise {
         xs => xs.iter()
       }
@@ -406,9 +404,7 @@ pub fn Device::supported_input_configs(
         @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
           raise @core.supported_stream_configs_error_device_not_available()
         @macos.CoreAudioError::CoreAudioError(op, status) =>
-          raise @core.supported_stream_configs_error_backend_specific(
-            "\{op} (OSStatus \{status})",
-          )
+          raise @macos.supported_configs_error_from_osstatus(op, status)
       } noraise {
         xs => xs.iter()
       }

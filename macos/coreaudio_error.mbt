@@ -19,6 +19,25 @@ pub suberror CoreAudioError {
 }
 
 ///|
+/// Map CoreAudio OSStatus into a cross-platform `SupportedStreamConfigsError`.
+///
+/// This mirrors CPAL's intent: classify only the small set of errors that have stable meaning
+/// across backends, and fall back to a backend-specific error for the rest.
+pub fn supported_configs_error_from_osstatus(
+  op : String,
+  status : Int,
+) -> @core.SupportedStreamConfigsError {
+  match osstatus_kind(status) {
+    1 => @core.supported_stream_configs_error_device_not_available()
+    4 => @core.supported_stream_configs_error_invalid_argument()
+    _ =>
+      @core.supported_stream_configs_error_backend_specific(
+        "\{op} (OSStatus \{status})",
+      )
+  }
+}
+
+///|
 fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
   match osstatus_kind(status) {
     1 => raise CoreAudioError::DeviceNotAvailable(op, status)
@@ -34,6 +53,7 @@ fn[A] raise_default_osstatus(
   match osstatus_kind(status) {
     1 => raise @core.default_stream_config_error_device_not_available()
     2 => raise @core.default_stream_config_error_stream_type_not_supported()
+    4 => raise @core.default_stream_config_error_stream_type_not_supported()
     _ =>
       raise @core.default_stream_config_error_backend_specific(
         "\{op} (OSStatus \{status})",

@@ -27,6 +27,16 @@ test "coreaudio OSStatus kind + stream error mapping (unit)" {
   inspect(osstatus_kind(-66680) == 1, content="true") // kAudioQueueErr_InvalidDevice
   inspect(osstatus_kind(560226676) == 2, content="true") // kAudioDeviceUnsupportedFormatError
   inspect(osstatus_kind(0) == 0, content="true")
+  match supported_configs_error_from_osstatus("x", -50) {
+    @core.SupportedStreamConfigsError::InvalidArgument =>
+      inspect(true, content="true")
+    _ => inspect(false, content="true")
+  }
+  match supported_configs_error_from_osstatus("x", -66680) {
+    @core.SupportedStreamConfigsError::DeviceNotAvailable =>
+      inspect(true, content="true")
+    _ => inspect(false, content="true")
+  }
   let slot = FixedArray::make(1, @core.stream_error_backend_specific("init"))
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, -66668)
   inspect(slot[0], content="BufferUnderrun")

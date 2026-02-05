@@ -51,6 +51,8 @@ jobs:
           jackd -d dummy -r 48000 -p 256 &
           sleep 2
           pgrep -f "jackd .*dummy" >/dev/null
+      - name: Build all packages (native)
+        run: moon build --target native
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -77,6 +79,8 @@ jobs:
         run: |
           cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
           chmod +x scripts/moon_cc.sh
+      - name: Build all packages (native)
+        run: moon build --target native
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -104,6 +108,9 @@ jobs:
           $cc = "C:\mingw64\bin\cc.exe"
           if (-not (Test-Path $cc)) { $cc = "cc.exe" }
           & $cc -O2 scripts\moon_cc.c -o scripts\moon_cc.sh
+      - name: Build all packages (native)
+        shell: pwsh
+        run: moon build --target native
       - name: Install virtual audio device (VB-CABLE)
         shell: pwsh
         run: |
