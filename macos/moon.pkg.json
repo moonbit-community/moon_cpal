@@ -7,7 +7,8 @@
     "stream_native.mbt": ["native"],
     "stream_stub.mbt": ["not", "native"],
     "coreaudio_configs_wbtest.mbt": ["native"],
-    "coreaudio_default_config_wbtest.mbt": ["native"]
+    "coreaudio_default_config_wbtest.mbt": ["native"],
+    "stream_lifecycle_test.mbt": ["native"]
   },
   "link": {
     "native": {

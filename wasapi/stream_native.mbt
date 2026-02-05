@@ -116,8 +116,10 @@ fn wasapi_build_error_from_hresult(
   // - AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A (-2004287478)
   // - AUDCLNT_E_UNSUPPORTED_FORMAT= 0x88890008 (-2004287480)
   // - AUDCLNT_E_BUFFER_SIZE_ERROR = 0x88890019 (-2004287463)
+  // - AUDCLNT_E_ENDPOINT_CREATE_FAILED = 0x8889000E (-2004287474)
+  // - AUDCLNT_E_SERVICE_NOT_RUNNING   = 0x88890010 (-2004287472)
   // - E_INVALIDARG                = 0x80070057 (-2147024809)
-  if status == -2004287484 {
+  if status == -2004287484 || status == -2004287474 || status == -2004287472 {
     @moon_cpal.build_stream_error_device_not_available()
   } else if status == -2004287478 {
     @moon_cpal.build_stream_error_device_busy()
@@ -135,7 +137,7 @@ fn wasapi_play_error_from_hresult(
   status : Int,
   op : String,
 ) -> @moon_cpal.PlayStreamError {
-  if status == -2004287484 || status == -2004287478 {
+  if status == -2004287484 || status == -2004287478 || status == -2004287474 || status == -2004287472 {
     @moon_cpal.play_stream_error_device_not_available()
   } else {
     @moon_cpal.play_stream_error_backend_specific("\{op} (HRESULT \{status})")
@@ -147,7 +149,7 @@ fn wasapi_pause_error_from_hresult(
   status : Int,
   op : String,
 ) -> @moon_cpal.PauseStreamError {
-  if status == -2004287484 || status == -2004287478 {
+  if status == -2004287484 || status == -2004287478 || status == -2004287474 || status == -2004287472 {
     @moon_cpal.pause_stream_error_device_not_available()
   } else {
     @moon_cpal.pause_stream_error_backend_specific("\{op} (HRESULT \{status})")

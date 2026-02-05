@@ -5,7 +5,8 @@
     "ffi_native.mbt": ["native"],
     "stream_types.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],
-    "stream_native.mbt": ["native"]
+    "stream_native.mbt": ["native"],
+    "error_mapping_wbtest.mbt": ["native"]
   },
   "link": {
     "native": {

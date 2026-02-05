@@ -14,8 +14,26 @@ test "wasapi HRESULT mapping (unit)" {
     wasapi_stream_error_from_hresult(-2004287478, "IAudioClientStart"),
     content="DeviceNotAvailable",
   )
+  // AUDCLNT_E_ENDPOINT_CREATE_FAILED (0x8889000E)
+  inspect(
+    wasapi_stream_error_from_hresult(-2004287474, "DeviceInit"),
+    content="DeviceNotAvailable",
+  )
+  // AUDCLNT_E_SERVICE_NOT_RUNNING (0x88890010)
+  inspect(
+    wasapi_stream_error_from_hresult(-2004287472, "DeviceInit"),
+    content="DeviceNotAvailable",
+  )
   inspect(
     wasapi_build_error_from_hresult(-2004287484, "DeviceInit"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    wasapi_build_error_from_hresult(-2004287474, "DeviceInit"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    wasapi_build_error_from_hresult(-2004287472, "DeviceInit"),
     content="DeviceNotAvailable",
   )
   inspect(

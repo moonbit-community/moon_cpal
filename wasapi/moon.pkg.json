@@ -4,7 +4,8 @@
     "ffi_native.mbt": ["native"],
     "wasapi_config_test.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],
-    "stream_native.mbt": ["native"]
+    "stream_native.mbt": ["native"],
+    "stream_lifecycle_test.mbt": ["native"]
   },
   "link": {
     "native": {
