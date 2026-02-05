@@ -21,9 +21,9 @@ pub fn default_host() -> Host {
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
+  if @core.native_os() == @core.NativeOs::Windows {
     let bytes = devices_utf8()
-    let s = @moon_cpal.utf8_bytes_to_string(bytes, bytes.length())
+    let s = @core.utf8_bytes_to_string(bytes, bytes.length())
     let out : Array[Device] = []
     for v in s[:].split("\n"[:]) {
       let id = v.trim().to_string()
@@ -46,7 +46,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
+  if @core.native_os() == @core.NativeOs::Windows {
     match default_device_id_utf8(false) {
       None => None
       Some(id) => Some({ id, })
@@ -58,7 +58,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Windows {
+  if @core.native_os() == @core.NativeOs::Windows {
     match default_device_id_utf8(true) {
       None => None
       Some(id) => Some({ id, })
@@ -70,7 +70,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     return _self.id
   }
   match device_name_utf8(_self.id) {
@@ -89,18 +89,18 @@ fn wasapi_ascii_upper(s : String) -> String {
       cu.to_byte()
     }
   })
-  @moon_cpal.utf8_bytes_to_string(b, b.length())
+  @core.utf8_bytes_to_string(b, b.length())
 }
 
 ///|
 fn wasapi_interface_type_from_enumerator(
   enumerator_name : String,
-) -> @moon_cpal.InterfaceType? {
+) -> @core.InterfaceType? {
   match wasapi_ascii_upper(enumerator_name.trim().to_string()) {
-    "HDAUDIO" => Some(@moon_cpal.InterfaceType::built_in())
-    "USB" => Some(@moon_cpal.InterfaceType::usb())
-    "BTHENUM" => Some(@moon_cpal.InterfaceType::bluetooth())
-    "MMDEVAPI" | "SW" => Some(@moon_cpal.InterfaceType::virtual_())
+    "HDAUDIO" => Some(@core.InterfaceType::built_in())
+    "USB" => Some(@core.InterfaceType::usb())
+    "BTHENUM" => Some(@core.InterfaceType::bluetooth())
+    "MMDEVAPI" | "SW" => Some(@core.InterfaceType::virtual_())
     _ => None
   }
 }
@@ -108,14 +108,14 @@ fn wasapi_interface_type_from_enumerator(
 ///|
 fn wasapi_interface_type_from_jack_subtype(
   jack_subtype : String,
-) -> @moon_cpal.InterfaceType? {
+) -> @core.InterfaceType? {
   match wasapi_ascii_upper(jack_subtype.trim().to_string()) {
     "{D9E55EA0-0C89-4692-84FF-EB3C4B0D172F}" =>
-      Some(@moon_cpal.InterfaceType::hdmi())
+      Some(@core.InterfaceType::hdmi())
     "{E47E4031-3EA6-418D-8F9B-B73843CCB2AD}" =>
-      Some(@moon_cpal.InterfaceType::display_port())
+      Some(@core.InterfaceType::display_port())
     "{DFF21CE1-F70F-11D0-B917-00A0C9223196}" =>
-      Some(@moon_cpal.InterfaceType::spdif())
+      Some(@core.InterfaceType::spdif())
     _ => None
   }
 }
@@ -123,46 +123,36 @@ fn wasapi_interface_type_from_jack_subtype(
 ///|
 fn wasapi_types_from_form_factor(
   form_factor : UInt,
-) -> (@moon_cpal.DeviceType, @moon_cpal.InterfaceType?) {
+) -> (@core.DeviceType, @core.InterfaceType?) {
   match form_factor.reinterpret_as_int() {
     // RemoteNetworkDevice
-    0 =>
-      (
-        @moon_cpal.DeviceType::unknown(),
-        Some(@moon_cpal.InterfaceType::network()),
-      )
+    0 => (@core.DeviceType::unknown(), Some(@core.InterfaceType::network()))
     // Speakers
-    1 => (@moon_cpal.DeviceType::speaker(), None)
+    1 => (@core.DeviceType::speaker(), None)
     // LineLevel
-    2 =>
-      (@moon_cpal.DeviceType::unknown(), Some(@moon_cpal.InterfaceType::line()))
+    2 => (@core.DeviceType::unknown(), Some(@core.InterfaceType::line()))
     // Headphones
-    3 => (@moon_cpal.DeviceType::headphones(), None)
+    3 => (@core.DeviceType::headphones(), None)
     // Microphone
-    4 => (@moon_cpal.DeviceType::microphone(), None)
+    4 => (@core.DeviceType::microphone(), None)
     // Headset
-    5 => (@moon_cpal.DeviceType::headset(), None)
+    5 => (@core.DeviceType::headset(), None)
     // Handset
-    6 => (@moon_cpal.DeviceType::handset(), None)
+    6 => (@core.DeviceType::handset(), None)
     // UnknownDigitalPassthrough
-    7 => (@moon_cpal.DeviceType::unknown(), None)
+    7 => (@core.DeviceType::unknown(), None)
     // SPDIF
-    8 =>
-      (
-        @moon_cpal.DeviceType::unknown(),
-        Some(@moon_cpal.InterfaceType::spdif()),
-      )
+    8 => (@core.DeviceType::unknown(), Some(@core.InterfaceType::spdif()))
     // DigitalAudioDisplayDevice
-    9 =>
-      (@moon_cpal.DeviceType::unknown(), Some(@moon_cpal.InterfaceType::hdmi()))
-    _ => (@moon_cpal.DeviceType::unknown(), None)
+    9 => (@core.DeviceType::unknown(), Some(@core.InterfaceType::hdmi()))
+    _ => (@core.DeviceType::unknown(), None)
   }
 }
 
 ///|
 pub fn Device::description(
   _self : Device,
-) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+) -> @core.DeviceDescription raise @core.DeviceNameError {
   let dev_desc = device_property_utf8(_self.id, 2)
   let friendly = device_property_utf8(_self.id, 6)
   let name = match dev_desc {
@@ -174,14 +164,14 @@ pub fn Device::description(
       }
   }
   if name.length() == 0 {
-    raise @moon_cpal.device_name_error_backend_specific(
+    raise @core.device_name_error_backend_specific(
       "wasapi device description: empty name",
     )
   }
   let direction = match data_flow_tag(_self.id) {
-    Some(1) => @moon_cpal.DeviceDirection::input()
-    Some(2) => @moon_cpal.DeviceDirection::output()
-    _ => @moon_cpal.DeviceDirection::unknown()
+    Some(1) => @core.DeviceDirection::input()
+    Some(2) => @core.DeviceDirection::output()
+    _ => @core.DeviceDirection::unknown()
   }
   let manufacturer = device_property_utf8(_self.id, 1)
   let interface_name = device_property_utf8(_self.id, 3)
@@ -190,7 +180,7 @@ pub fn Device::description(
   let (device_type, interface_type_seed) = match
     device_form_factor_u32(_self.id) {
     Some(ff) => wasapi_types_from_form_factor(ff)
-    None => (@moon_cpal.DeviceType::unknown(), None)
+    None => (@core.DeviceType::unknown(), None)
   }
   let mut interface_type_opt = interface_type_seed
   match enumerator_name {
@@ -210,7 +200,7 @@ pub fn Device::description(
     None => ()
   }
   let interface_type = match interface_type_opt {
-    None => @moon_cpal.InterfaceType::unknown()
+    None => @core.InterfaceType::unknown()
     Some(it) => it
   }
   let extended : Array[String] = ["endpoint_id=\{_self.id}"]
@@ -230,7 +220,7 @@ pub fn Device::description(
     Some(s) => extended.push("jack_subtype=\{s}")
     None => ()
   }
-  @moon_cpal.DeviceDescription::new(
+  @core.DeviceDescription::new(
     name,
     manufacturer~,
     driver=match interface_name {
@@ -246,8 +236,8 @@ pub fn Device::description(
 }
 
 ///|
-pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
-  @moon_cpal.DeviceId::new(@moon_cpal.HostId::Wasapi, _self.id)
+pub fn Device::id(_self : Device) -> @core.DeviceId {
+  @core.DeviceId::new(@core.HostId::Wasapi, _self.id)
 }
 
 ///|
@@ -263,8 +253,8 @@ fn clamp_u32_to_frame_count(u : UInt) -> Int {
 ///|
 pub fn Device::supported_input_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+) -> Array[@core.SupportedStreamConfigRange] {
+  if @core.native_os() != @core.NativeOs::Windows {
     return []
   }
   match data_flow_tag(_self.id) {
@@ -277,16 +267,16 @@ pub fn Device::supported_input_configs(
         None => []
         Some((ch, sr, fmt_tag, bmin, bmax)) => {
           let fmt = match fmt_tag {
-            1 => @moon_cpal.SampleFormat::F32
-            2 => @moon_cpal.SampleFormat::I16
-            _ => @moon_cpal.SampleFormat::F32
+            1 => @core.SampleFormat::F32
+            2 => @core.SampleFormat::I16
+            _ => @core.SampleFormat::F32
           }
-          let buf = @moon_cpal.SupportedBufferSize::Range(
+          let buf = @core.SupportedBufferSize::Range(
             min=clamp_u32_to_frame_count(bmin),
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @moon_cpal.SupportedStreamConfigRange::new(
+            @core.SupportedStreamConfigRange::new(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -297,7 +287,7 @@ pub fn Device::supported_input_configs(
         }
       }
     Some((n, buf)) => {
-      let out : Array[@moon_cpal.SupportedStreamConfigRange] = []
+      let out : Array[@core.SupportedStreamConfigRange] = []
       let count = if n < 0 { 0 } else { n }
       let max = if count > 64 { 64 } else { count }
       for i in 0..<max {
@@ -308,16 +298,16 @@ pub fn Device::supported_input_configs(
         let bmin = buf[off + 3]
         let bmax = buf[off + 4]
         let fmt = match fmt_tag {
-          1 => @moon_cpal.SampleFormat::F32
-          2 => @moon_cpal.SampleFormat::I16
-          _ => @moon_cpal.SampleFormat::F32
+          1 => @core.SampleFormat::F32
+          2 => @core.SampleFormat::I16
+          _ => @core.SampleFormat::F32
         }
-        let b = @moon_cpal.SupportedBufferSize::Range(
+        let b = @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @moon_cpal.SupportedStreamConfigRange::new(
+          @core.SupportedStreamConfigRange::new(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -334,8 +324,8 @@ pub fn Device::supported_input_configs(
 ///|
 pub fn Device::supported_output_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+) -> Array[@core.SupportedStreamConfigRange] {
+  if @core.native_os() != @core.NativeOs::Windows {
     return []
   }
   match data_flow_tag(_self.id) {
@@ -348,16 +338,16 @@ pub fn Device::supported_output_configs(
         None => []
         Some((ch, sr, fmt_tag, bmin, bmax)) => {
           let fmt = match fmt_tag {
-            1 => @moon_cpal.SampleFormat::F32
-            2 => @moon_cpal.SampleFormat::I16
-            _ => @moon_cpal.SampleFormat::F32
+            1 => @core.SampleFormat::F32
+            2 => @core.SampleFormat::I16
+            _ => @core.SampleFormat::F32
           }
-          let buf = @moon_cpal.SupportedBufferSize::Range(
+          let buf = @core.SupportedBufferSize::Range(
             min=clamp_u32_to_frame_count(bmin),
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @moon_cpal.SupportedStreamConfigRange::new(
+            @core.SupportedStreamConfigRange::new(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -368,7 +358,7 @@ pub fn Device::supported_output_configs(
         }
       }
     Some((n, buf)) => {
-      let out : Array[@moon_cpal.SupportedStreamConfigRange] = []
+      let out : Array[@core.SupportedStreamConfigRange] = []
       let count = if n < 0 { 0 } else { n }
       let max = if count > 64 { 64 } else { count }
       for i in 0..<max {
@@ -379,16 +369,16 @@ pub fn Device::supported_output_configs(
         let bmin = buf[off + 3]
         let bmax = buf[off + 4]
         let fmt = match fmt_tag {
-          1 => @moon_cpal.SampleFormat::F32
-          2 => @moon_cpal.SampleFormat::I16
-          _ => @moon_cpal.SampleFormat::F32
+          1 => @core.SampleFormat::F32
+          2 => @core.SampleFormat::I16
+          _ => @core.SampleFormat::F32
         }
-        let b = @moon_cpal.SupportedBufferSize::Range(
+        let b = @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @moon_cpal.SupportedStreamConfigRange::new(
+          @core.SupportedStreamConfigRange::new(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -405,32 +395,32 @@ pub fn Device::supported_output_configs(
 ///|
 pub fn Device::default_input_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
-    raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  if @core.native_os() != @core.NativeOs::Windows {
+    raise @core.default_stream_config_error_backend_specific(
       "wasapi default_input_config: not available on this OS",
     )
   }
   match data_flow_tag(_self.id) {
     Some(2) =>
-      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+      raise @core.default_stream_config_error_stream_type_not_supported()
     _ => ()
   }
   match default_config_ex_u32(_self.id, true) {
     None =>
-      raise @moon_cpal.default_stream_config_error_backend_specific(
+      raise @core.default_stream_config_error_backend_specific(
         "wasapi default_input_config: query failed",
       )
     Some((ch, sr, fmt_tag, bmin, bmax)) => {
       let fmt = match fmt_tag {
-        1 => @moon_cpal.SampleFormat::F32
-        2 => @moon_cpal.SampleFormat::I16
-        _ => @moon_cpal.SampleFormat::F32
+        1 => @core.SampleFormat::F32
+        2 => @core.SampleFormat::I16
+        _ => @core.SampleFormat::F32
       }
-      @moon_cpal.SupportedStreamConfig::new(
+      @core.SupportedStreamConfig::new(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
-        @moon_cpal.SupportedBufferSize::Range(
+        @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         ),
@@ -443,32 +433,32 @@ pub fn Device::default_input_config(
 ///|
 pub fn Device::default_output_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
-    raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  if @core.native_os() != @core.NativeOs::Windows {
+    raise @core.default_stream_config_error_backend_specific(
       "wasapi default_output_config: not available on this OS",
     )
   }
   match data_flow_tag(_self.id) {
     Some(1) =>
-      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+      raise @core.default_stream_config_error_stream_type_not_supported()
     _ => ()
   }
   match default_config_ex_u32(_self.id, false) {
     None =>
-      raise @moon_cpal.default_stream_config_error_backend_specific(
+      raise @core.default_stream_config_error_backend_specific(
         "wasapi default_output_config: query failed",
       )
     Some((ch, sr, fmt_tag, bmin, bmax)) => {
       let fmt = match fmt_tag {
-        1 => @moon_cpal.SampleFormat::F32
-        2 => @moon_cpal.SampleFormat::I16
-        _ => @moon_cpal.SampleFormat::F32
+        1 => @core.SampleFormat::F32
+        2 => @core.SampleFormat::I16
+        _ => @core.SampleFormat::F32
       }
-      @moon_cpal.SupportedStreamConfig::new(
+      @core.SupportedStreamConfig::new(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
-        @moon_cpal.SupportedBufferSize::Range(
+        @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         ),

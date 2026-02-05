@@ -44,27 +44,27 @@ pub fn Device::name(_self : Device) -> String {
 }
 
 ///|
-pub fn Device::description(_self : Device) -> @moon_cpal.DeviceDescription {
+pub fn Device::description(_self : Device) -> @core.DeviceDescription {
   let name = "Null Device"
-  @moon_cpal.DeviceDescription::new(
+  @core.DeviceDescription::new(
     name,
     driver=Some("Null"),
-    device_type=@moon_cpal.DeviceType::virtual_(),
-    interface_type=@moon_cpal.InterfaceType::virtual_(),
-    direction=@moon_cpal.DeviceDirection::unknown(),
+    device_type=@core.DeviceType::virtual_(),
+    interface_type=@core.InterfaceType::virtual_(),
+    direction=@core.DeviceDirection::unknown(),
   )
 }
 
 ///|
-pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
-  @moon_cpal.DeviceId::new(@moon_cpal.HostId::Null, "")
+pub fn Device::id(_self : Device) -> @core.DeviceId {
+  @core.DeviceId::new(@core.HostId::Null, "")
 }
 
 ///|
 pub fn Device::supported_input_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
-  raise @moon_cpal.supported_stream_configs_error_backend_specific(
+) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+  raise @core.supported_stream_configs_error_backend_specific(
     "null supported_input_configs: unimplemented",
   )
 }
@@ -72,8 +72,8 @@ pub fn Device::supported_input_configs(
 ///|
 pub fn Device::supported_output_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
-  raise @moon_cpal.supported_stream_configs_error_backend_specific(
+) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+  raise @core.supported_stream_configs_error_backend_specific(
     "null supported_output_configs: unimplemented",
   )
 }
@@ -81,8 +81,8 @@ pub fn Device::supported_output_configs(
 ///|
 pub fn Device::default_input_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  raise @core.default_stream_config_error_backend_specific(
     "null default_input_config: unimplemented",
   )
 }
@@ -90,8 +90,8 @@ pub fn Device::default_input_config(
 ///|
 pub fn Device::default_output_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  raise @core.default_stream_config_error_backend_specific(
     "null default_output_config: unimplemented",
   )
 }

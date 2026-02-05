@@ -16,7 +16,7 @@ fn wait_until(counter : Array[Int], min_count : Int, timeout_ms : Int) -> Bool {
 
 ///|
 test "wasapi output stream: no callbacks before play; pause/close stops callbacks (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }

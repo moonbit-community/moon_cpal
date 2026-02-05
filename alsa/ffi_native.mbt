@@ -58,20 +58,20 @@ pub fn device_name_utf8(id : String) -> String? {
   if id.length() == 0 {
     return None
   }
-  let b1 = @moon_cpal.string_to_utf8_bytes(id)
+  let b1 = @core.string_to_utf8_bytes(id)
   let id_len = b1.length()
   let n = alsa_device_name_utf8_len(b1, id_len)
   if n <= 0 {
     return None
   }
   let out = Bytes::make(n, (0 : Int).to_byte())
-  let b2 = @moon_cpal.string_to_utf8_bytes(id)
+  let b2 = @core.string_to_utf8_bytes(id)
   let used = alsa_device_name_utf8(b2, id_len, out, out.length())
   if used <= 0 {
     return None
   }
   let need = if used > out.length() { out.length() } else { used }
-  Some(@moon_cpal.utf8_bytes_to_string(out, need))
+  Some(@core.utf8_bytes_to_string(out, need))
 }
 
 ///|
@@ -79,7 +79,7 @@ pub fn supported_configs_bin(id : String, is_input : Bool) -> Bytes {
   if id.length() == 0 {
     return Bytes::make(0, (0 : Int).to_byte())
   }
-  let b = @moon_cpal.string_to_ascii_bytes(id)
+  let b = @core.string_to_ascii_bytes(id)
   alsa_supported_configs_bin(
     b,
     b.length(),

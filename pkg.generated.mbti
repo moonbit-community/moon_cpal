@@ -1,579 +1,92 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "Milky2018/moon_cpal"
 
+import {
+  "Milky2018/moon_cpal/core",
+  "Milky2018/moon_cpal/spec",
+}
+
 // Values
-pub fn available_hosts() -> Array[HostId]
+pub fn all_hosts() -> Array[@core.HostId]
 
-pub fn build_stream_error_backend_specific(String) -> BuildStreamError
+pub fn available_hosts() -> Array[@core.HostId]
 
-pub fn build_stream_error_device_busy() -> BuildStreamError
+pub fn default_host() -> @spec.Host
 
-pub fn build_stream_error_device_not_available() -> BuildStreamError
+pub fn host_from_id(@core.HostId) -> @spec.Host raise @core.HostUnavailable
 
-pub fn build_stream_error_invalid_argument() -> BuildStreamError
-
-pub fn build_stream_error_stream_config_not_supported() -> BuildStreamError
-
-pub fn build_stream_error_stream_id_overflow() -> BuildStreamError
-
-pub fn common_sample_rates() -> Array[Int]
-
-pub fn default_stream_config_error_backend_specific(String) -> DefaultStreamConfigError
-
-pub fn default_stream_config_error_device_busy() -> DefaultStreamConfigError
-
-pub fn default_stream_config_error_device_not_available() -> DefaultStreamConfigError
-
-pub fn default_stream_config_error_stream_type_not_supported() -> DefaultStreamConfigError
-
-pub fn device_id_error_backend_specific(String) -> DeviceIdError
-
-pub fn device_id_error_unsupported_platform() -> DeviceIdError
-
-pub fn device_name_error_backend_specific(String) -> DeviceNameError
-
-pub fn devices_error_backend_specific(String) -> DevicesError
-
-pub fn direction_from_caps(Bool, Bool) -> DeviceDirection
-
-pub fn direction_from_counts(Int?, Int?) -> DeviceDirection
-
-pub fn host_unavailable() -> HostUnavailable
-
-pub fn native_os() -> NativeOs
-
-pub fn pause_stream_error_backend_specific(String) -> PauseStreamError
-
-pub fn pause_stream_error_device_not_available() -> PauseStreamError
-
-pub fn play_stream_error_backend_specific(String) -> PlayStreamError
-
-pub fn play_stream_error_device_not_available() -> PlayStreamError
-
-pub fn[A : Sample, B : Sample] sample_cast(A) -> B
-
-pub fn stream_error_backend_specific(String) -> StreamError
-
-pub fn stream_error_buffer_underrun() -> StreamError
-
-pub fn stream_error_device_not_available() -> StreamError
-
-pub fn stream_error_stream_invalidated() -> StreamError
-
-pub fn string_to_ascii_bytes(String) -> Bytes
-
-pub fn string_to_utf8_bytes(String) -> Bytes
-
-pub fn supported_stream_configs_error_backend_specific(String) -> SupportedStreamConfigsError
-
-pub fn supported_stream_configs_error_device_busy() -> SupportedStreamConfigsError
-
-pub fn supported_stream_configs_error_device_not_available() -> SupportedStreamConfigsError
-
-pub fn supported_stream_configs_error_invalid_argument() -> SupportedStreamConfigsError
-
-pub fn utf8_bytes_to_string(Bytes, Int) -> String
+pub fn try_host_from_id(@core.HostId) -> @spec.Host?
 
 // Errors
-pub suberror BuildStreamError {
-  DeviceNotAvailable
-  DeviceBusy
-  StreamConfigNotSupported
-  InvalidArgument
-  StreamIdOverflow
-  BackendSpecific(BackendSpecificError)
-}
-pub fn BuildStreamError::to_string(Self) -> String
-pub impl Eq for BuildStreamError
-pub impl Show for BuildStreamError
-
-pub suberror DefaultStreamConfigError {
-  DeviceNotAvailable
-  DeviceBusy
-  StreamTypeNotSupported
-  BackendSpecific(BackendSpecificError)
-}
-pub fn DefaultStreamConfigError::to_string(Self) -> String
-pub impl Eq for DefaultStreamConfigError
-pub impl Show for DefaultStreamConfigError
-
-pub suberror DeviceIdError {
-  UnsupportedPlatform
-  BackendSpecific(BackendSpecificError)
-}
-pub fn DeviceIdError::to_string(Self) -> String
-pub impl Eq for DeviceIdError
-pub impl Show for DeviceIdError
-
-pub suberror DeviceNameError {
-  BackendSpecific(BackendSpecificError)
-}
-pub fn DeviceNameError::to_string(Self) -> String
-pub impl Eq for DeviceNameError
-pub impl Show for DeviceNameError
-
-pub suberror DevicesError {
-  BackendSpecific(BackendSpecificError)
-}
-pub fn DevicesError::to_string(Self) -> String
-pub impl Eq for DevicesError
-pub impl Show for DevicesError
-
-pub suberror HostUnavailable {
-  HostUnavailable
-}
-pub fn HostUnavailable::to_string(Self) -> String
-pub impl Eq for HostUnavailable
-pub impl Show for HostUnavailable
-
-pub suberror PauseStreamError {
-  DeviceNotAvailable
-  BackendSpecific(BackendSpecificError)
-}
-pub fn PauseStreamError::to_string(Self) -> String
-pub impl Eq for PauseStreamError
-pub impl Show for PauseStreamError
-
-pub suberror PlayStreamError {
-  DeviceNotAvailable
-  BackendSpecific(BackendSpecificError)
-}
-pub fn PlayStreamError::to_string(Self) -> String
-pub impl Eq for PlayStreamError
-pub impl Show for PlayStreamError
-
-pub suberror StreamError {
-  DeviceNotAvailable
-  StreamInvalidated
-  BufferUnderrun
-  BackendSpecific(BackendSpecificError)
-}
-pub fn StreamError::to_string(Self) -> String
-pub impl Eq for StreamError
-pub impl Show for StreamError
-
-pub suberror SupportedStreamConfigsError {
-  DeviceNotAvailable
-  DeviceBusy
-  InvalidArgument
-  BackendSpecific(BackendSpecificError)
-}
-pub fn SupportedStreamConfigsError::to_string(Self) -> String
-pub impl Eq for SupportedStreamConfigsError
-pub impl Show for SupportedStreamConfigsError
 
 // Types and methods
-pub struct BackendSpecificError {
-  description : String
-}
-pub fn BackendSpecificError::description(Self) -> String
-pub fn BackendSpecificError::new(String) -> Self
-pub fn BackendSpecificError::to_string(Self) -> String
-pub impl Eq for BackendSpecificError
-pub impl Show for BackendSpecificError
-
-pub enum BufferSize {
-  Default
-  Fixed(Int)
-}
-pub fn BufferSize::default() -> Self
-pub fn BufferSize::fixed(Int) -> Self
-pub impl Eq for BufferSize
-pub impl Show for BufferSize
-
-pub struct Data {
-  sample_format : SampleFormat
-  bytes : FixedArray[Byte]
-}
-pub fn Data::bytes(Self) -> FixedArray[Byte]
-pub fn Data::clear(Self) -> Unit
-pub fn Data::len(Self) -> Int
-pub fn Data::new(SampleFormat, FixedArray[Byte]) -> Self
-pub fn Data::sample_format(Self) -> SampleFormat
-pub fn Data::try_as_f32(Self) -> Array[Float]?
-pub fn Data::try_as_f64(Self) -> Array[Double]?
-pub fn Data::try_as_i16(Self) -> Array[Int16]?
-pub fn Data::try_as_i24(Self) -> Array[I24]?
-pub fn Data::try_as_i32(Self) -> Array[Int]?
-pub fn Data::try_as_i64(Self) -> Array[Int64]?
-pub fn Data::try_as_i8(Self) -> Array[Int]?
-pub fn Data::try_as_u16(Self) -> Array[UInt16]?
-pub fn Data::try_as_u24(Self) -> Array[U24]?
-pub fn Data::try_as_u32(Self) -> Array[UInt]?
-pub fn Data::try_as_u64(Self) -> Array[UInt64]?
-pub fn Data::try_as_u8(Self) -> Array[Byte]?
-pub fn Data::write_f32(Self, Array[Float]) -> Bool
-pub fn Data::write_f64(Self, Array[Double]) -> Bool
-pub fn Data::write_i16(Self, Array[Int16]) -> Bool
-pub fn Data::write_i24(Self, Array[I24]) -> Bool
-pub fn Data::write_i32(Self, Array[Int]) -> Bool
-pub fn Data::write_i64(Self, Array[Int64]) -> Bool
-pub fn Data::write_i8(Self, Array[Int]) -> Bool
-pub fn Data::write_u16(Self, Array[UInt16]) -> Bool
-pub fn Data::write_u24(Self, Array[U24]) -> Bool
-pub fn Data::write_u32(Self, Array[UInt]) -> Bool
-pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
-pub fn Data::write_u8(Self, Array[Byte]) -> Bool
-pub impl Eq for Data
-pub impl Show for Data
-
-pub struct DeviceDescription {
-  name : String
-  manufacturer : String?
-  driver : String?
-  device_type : DeviceType
-  interface_type : InterfaceType
-  direction : DeviceDirection
-  address : String?
-  extended : Array[String]
-}
-pub fn DeviceDescription::address(Self) -> String?
-pub fn DeviceDescription::device_type(Self) -> DeviceType
-pub fn DeviceDescription::direction(Self) -> DeviceDirection
-pub fn DeviceDescription::driver(Self) -> String?
-pub fn DeviceDescription::extended(Self) -> Array[String]
-pub fn DeviceDescription::interface_type(Self) -> InterfaceType
-pub fn DeviceDescription::manufacturer(Self) -> String?
-pub fn DeviceDescription::name(Self) -> String
-pub fn DeviceDescription::new(String, manufacturer? : String?, driver? : String?, device_type? : DeviceType, interface_type? : InterfaceType, direction? : DeviceDirection, address? : String?, extended? : Array[String]) -> Self
-pub fn DeviceDescription::supports_input(Self) -> Bool
-pub fn DeviceDescription::supports_output(Self) -> Bool
-pub fn DeviceDescription::to_string(Self) -> String
-pub impl Eq for DeviceDescription
-pub impl Show for DeviceDescription
-
-pub struct DeviceDescriptionBuilder {
-  name : String
-  manufacturer : String?
-  driver : String?
-  device_type : DeviceType
-  interface_type : InterfaceType
-  direction : DeviceDirection
-  address : String?
-  extended : Array[String]
-}
-pub fn DeviceDescriptionBuilder::add_extended_line(Self, String) -> Self
-pub fn DeviceDescriptionBuilder::address(Self, String) -> Self
-pub fn DeviceDescriptionBuilder::build(Self) -> DeviceDescription
-pub fn DeviceDescriptionBuilder::device_type(Self, DeviceType) -> Self
-pub fn DeviceDescriptionBuilder::direction(Self, DeviceDirection) -> Self
-pub fn DeviceDescriptionBuilder::driver(Self, String) -> Self
-pub fn DeviceDescriptionBuilder::extended(Self, Array[String]) -> Self
-pub fn DeviceDescriptionBuilder::interface_type(Self, InterfaceType) -> Self
-pub fn DeviceDescriptionBuilder::manufacturer(Self, String) -> Self
-pub fn DeviceDescriptionBuilder::new(String) -> Self
-pub impl Eq for DeviceDescriptionBuilder
-pub impl Show for DeviceDescriptionBuilder
-
-pub enum DeviceDirection {
-  Input
-  Output
-  Duplex
-  Unknown
-}
-pub fn DeviceDirection::duplex() -> Self
-pub fn DeviceDirection::input() -> Self
-pub fn DeviceDirection::output() -> Self
-pub fn DeviceDirection::to_string(Self) -> String
-pub fn DeviceDirection::unknown() -> Self
-pub impl Eq for DeviceDirection
-pub impl Show for DeviceDirection
-
-pub struct DeviceId {
-  host_id : HostId
-  device_id : String
-}
-pub fn DeviceId::device_id(Self) -> String
-pub fn DeviceId::from_string(String) -> Self raise DeviceIdError
-pub fn DeviceId::host_id(Self) -> HostId
-pub fn DeviceId::new(HostId, String) -> Self
-pub fn DeviceId::to_string(Self) -> String
-pub impl Eq for DeviceId
-pub impl Show for DeviceId
-
-pub enum DeviceType {
-  Speaker
-  Microphone
-  Headphones
-  Headset
-  Earpiece
-  Handset
-  HearingAid
-  Dock
-  Tuner
-  Virtual
-  Unknown
-}
-pub fn DeviceType::dock() -> Self
-pub fn DeviceType::earpiece() -> Self
-pub fn DeviceType::handset() -> Self
-pub fn DeviceType::headphones() -> Self
-pub fn DeviceType::headset() -> Self
-pub fn DeviceType::hearing_aid() -> Self
-pub fn DeviceType::microphone() -> Self
-pub fn DeviceType::speaker() -> Self
-pub fn DeviceType::to_string(Self) -> String
-pub fn DeviceType::tuner() -> Self
-pub fn DeviceType::unknown() -> Self
-pub fn DeviceType::virtual_() -> Self
-pub impl Eq for DeviceType
-pub impl Show for DeviceType
-
-pub struct Duration {
-  secs : UInt64
-  nanos : Int
-}
-pub fn Duration::from_secs(UInt64) -> Self
-pub impl Eq for Duration
-pub impl Show for Duration
-
-pub(all) enum HostId {
-  AAudio
-  Alsa
-  Asio
-  CoreAudio
-  Custom
-  Emscripten
-  Jack
-  Null
-  Wasapi
-  WebAudio
-  AudioWorklet
-}
-pub fn HostId::from_string(String) -> Self?
-pub fn HostId::from_view(StringView) -> Self?
-pub fn HostId::name(Self) -> String
-pub fn HostId::parse(String) -> Self raise HostUnavailable
-pub fn HostId::to_string(Self) -> String
-pub impl Eq for HostId
-pub impl Show for HostId
-
-pub struct I24 {
-  raw : Int
-}
-pub fn I24::new(Int) -> Self
-pub fn I24::to_int(Self) -> Int
-pub impl FromSample for I24
-pub impl Sample for I24
-pub impl SizedSample for I24
-pub impl Eq for I24
-pub impl Show for I24
-
-pub struct InputCallbackInfo {
-  timestamp : InputStreamTimestamp
-}
-pub fn InputCallbackInfo::new(InputStreamTimestamp) -> Self
-pub fn InputCallbackInfo::timestamp(Self) -> InputStreamTimestamp
-pub impl Eq for InputCallbackInfo
-pub impl Show for InputCallbackInfo
-
-pub struct InputStreamTimestamp {
-  callback : StreamInstant
-  capture : StreamInstant
-}
-pub fn InputStreamTimestamp::callback(Self) -> StreamInstant
-pub fn InputStreamTimestamp::capture(Self) -> StreamInstant
-pub fn InputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
-pub impl Eq for InputStreamTimestamp
-pub impl Show for InputStreamTimestamp
-
-pub enum InterfaceType {
-  BuiltIn
-  Usb
-  Bluetooth
-  Pci
-  FireWire
-  Thunderbolt
-  Hdmi
-  Line
-  Spdif
-  Network
-  Virtual
-  DisplayPort
-  Aggregate
-  Unknown
-}
-pub fn InterfaceType::aggregate() -> Self
-pub fn InterfaceType::bluetooth() -> Self
-pub fn InterfaceType::built_in() -> Self
-pub fn InterfaceType::display_port() -> Self
-pub fn InterfaceType::fire_wire() -> Self
-pub fn InterfaceType::hdmi() -> Self
-pub fn InterfaceType::line() -> Self
-pub fn InterfaceType::network() -> Self
-pub fn InterfaceType::pci() -> Self
-pub fn InterfaceType::spdif() -> Self
-pub fn InterfaceType::thunderbolt() -> Self
-pub fn InterfaceType::to_string(Self) -> String
-pub fn InterfaceType::unknown() -> Self
-pub fn InterfaceType::usb() -> Self
-pub fn InterfaceType::virtual_() -> Self
-pub impl Eq for InterfaceType
-pub impl Show for InterfaceType
-
-pub(all) enum NativeOs {
-  Unknown
-  Macos
-  Windows
-  Linux
-}
-pub impl Eq for NativeOs
-pub impl Show for NativeOs
-
-pub struct OutputCallbackInfo {
-  timestamp : OutputStreamTimestamp
-}
-pub fn OutputCallbackInfo::new(OutputStreamTimestamp) -> Self
-pub fn OutputCallbackInfo::timestamp(Self) -> OutputStreamTimestamp
-pub impl Eq for OutputCallbackInfo
-pub impl Show for OutputCallbackInfo
-
-pub struct OutputStreamTimestamp {
-  callback : StreamInstant
-  playback : StreamInstant
-}
-pub fn OutputStreamTimestamp::callback(Self) -> StreamInstant
-pub fn OutputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
-pub fn OutputStreamTimestamp::playback(Self) -> StreamInstant
-pub impl Eq for OutputStreamTimestamp
-pub impl Show for OutputStreamTimestamp
-
-pub(all) enum SampleFormat {
-  I8
-  I16
-  I24
-  I32
-  I64
-  U8
-  U16
-  U24
-  U32
-  U64
-  F32
-  F64
-  DsdU8
-  DsdU16
-  DsdU32
-}
-pub fn SampleFormat::bits_per_sample(Self) -> Int
-pub fn SampleFormat::is_dsd(Self) -> Bool
-pub fn SampleFormat::is_float(Self) -> Bool
-pub fn SampleFormat::is_int(Self) -> Bool
-pub fn SampleFormat::is_uint(Self) -> Bool
-pub fn SampleFormat::sample_size(Self) -> Int
-pub fn SampleFormat::to_debug_string(Self) -> String
-pub fn SampleFormat::to_string(Self) -> String
-pub impl Eq for SampleFormat
-pub impl Show for SampleFormat
-
-pub struct StreamConfig {
-  channels : Int
-  sample_rate : Int
-  buffer_size : BufferSize
-}
-pub fn StreamConfig::new(Int, Int, BufferSize) -> Self
-pub impl Eq for StreamConfig
-pub impl Show for StreamConfig
-
-pub struct StreamInstant {
-  secs : Int64
-  nanos : Int
-}
-pub fn StreamInstant::add(Self, Duration) -> Self?
-pub fn StreamInstant::duration_since(Self, Self) -> Duration?
-pub fn StreamInstant::new(Int64, Int) -> Self
-pub fn StreamInstant::sub(Self, Duration) -> Self?
-pub impl Eq for StreamInstant
-pub impl Show for StreamInstant
-
-pub(all) enum SupportedBufferSize {
-  Range(min~ : Int, max~ : Int)
-  Unknown
-}
-pub fn SupportedBufferSize::contains(Self, Int) -> Bool
-pub impl Eq for SupportedBufferSize
-pub impl Show for SupportedBufferSize
-
-pub struct SupportedStreamConfig {
-  buffer_size : SupportedBufferSize
-  channels : Int
-  sample_rate : Int
-  sample_format : SampleFormat
-}
-pub fn SupportedStreamConfig::buffer_size(Self) -> SupportedBufferSize
-pub fn SupportedStreamConfig::channels(Self) -> Int
-pub fn SupportedStreamConfig::config(Self) -> StreamConfig
-pub fn SupportedStreamConfig::new(Int, Int, SupportedBufferSize, SampleFormat) -> Self
-pub fn SupportedStreamConfig::sample_format(Self) -> SampleFormat
-pub fn SupportedStreamConfig::sample_rate(Self) -> Int
-pub impl Eq for SupportedStreamConfig
-pub impl Show for SupportedStreamConfig
-
-pub struct SupportedStreamConfigRange {
-  buffer_size : SupportedBufferSize
-  channels : Int
-  min_sample_rate : Int
-  max_sample_rate : Int
-  sample_format : SampleFormat
-}
-pub fn SupportedStreamConfigRange::buffer_size(Self) -> SupportedBufferSize
-pub fn SupportedStreamConfigRange::channels(Self) -> Int
-pub fn SupportedStreamConfigRange::cmp_default_heuristics(Self, Self) -> Int
-pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int
-pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int
-pub fn SupportedStreamConfigRange::new(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
-pub fn SupportedStreamConfigRange::sample_format(Self) -> SampleFormat
-pub fn SupportedStreamConfigRange::try_with_sample_rate(Self, Int) -> SupportedStreamConfig?
-pub fn SupportedStreamConfigRange::with_max_sample_rate(Self) -> SupportedStreamConfig
-pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int) -> SupportedStreamConfig
-pub impl Eq for SupportedStreamConfigRange
-pub impl Show for SupportedStreamConfigRange
-
-pub struct U24 {
-  raw : Int
-}
-pub fn U24::new(Int) -> Self
-pub fn U24::to_int(Self) -> Int
-pub impl FromSample for U24
-pub impl Sample for U24
-pub impl SizedSample for U24
-pub impl Eq for U24
-pub impl Show for U24
 
 // Type aliases
-pub type ChannelCount = Int
+pub using @core {type BackendSpecificError}
 
-pub type FrameCount = Int
+pub using @core {type BufferSize}
 
-pub type SampleRate = Int
+pub using @core {type BuildStreamError}
+
+pub using @spec {type Data}
+
+pub using @core {type DefaultStreamConfigError}
+
+pub using @spec {type Device}
+
+pub using @core {type DeviceDescription}
+
+pub using @core {type DeviceDirection}
+
+pub using @core {type DeviceId}
+
+pub using @core {type DeviceIdError}
+
+pub using @core {type DeviceNameError}
+
+pub using @core {type DeviceType}
+
+pub using @core {type DevicesError}
+
+pub using @core {type Duration}
+
+pub using @spec {type Host}
+
+pub using @core {type HostId}
+
+pub using @core {type HostUnavailable}
+
+pub using @core {type InputCallbackInfo}
+
+pub using @core {type InputStreamTimestamp}
+
+pub using @core {type InterfaceType}
+
+pub using @core {type OutputCallbackInfo}
+
+pub using @core {type OutputStreamTimestamp}
+
+pub using @core {type PauseStreamError}
+
+pub using @core {type PlayStreamError}
+
+pub using @core {type SampleFormat}
+
+pub using @spec {type Stream}
+
+pub using @core {type StreamConfig}
+
+pub using @core {type StreamError}
+
+pub using @core {type StreamInstant}
+
+pub using @core {type SupportedBufferSize}
+
+pub using @core {type SupportedStreamConfig}
+
+pub using @core {type SupportedStreamConfigRange}
+
+pub using @core {type SupportedStreamConfigsError}
 
 // Traits
-pub trait FromSample : Sample {
-  from_sample(Float) -> Self
-}
-pub impl FromSample for Byte
-pub impl FromSample for Int16
-pub impl FromSample for UInt16
-pub impl FromSample for Float
-pub impl FromSample for Double
-
-pub trait Sample {
-  equilibrium() -> Self
-  to_f32(Self) -> Float
-  from_f32(Float) -> Self
-}
-pub impl Sample for Byte
-pub impl Sample for Int16
-pub impl Sample for UInt16
-pub impl Sample for Float
-pub impl Sample for Double
-
-pub trait SizedSample : Sample {
-  format(Self) -> SampleFormat
-}
-pub impl SizedSample for Byte
-pub impl SizedSample for Int16
-pub impl SizedSample for UInt16
-pub impl SizedSample for Float
-pub impl SizedSample for Double
 

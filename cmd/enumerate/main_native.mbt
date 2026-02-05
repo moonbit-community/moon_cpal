@@ -30,7 +30,7 @@ fn print_default_config(
 
 ///|
 fn main {
-  println("native_os: \{@moon_cpal.native_os()}")
+  println("native_os: \{@core.native_os()}")
   let all = @platform.all_hosts()
   println("all_hosts: \{all.length()}")
   for id in all {

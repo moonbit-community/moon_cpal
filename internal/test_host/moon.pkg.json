@@ -1,5 +1,5 @@
 {
-  "import": ["Milky2018/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/core"],
   "targets": {
     "stream_types.mbt": ["native"],
     "stream_callback_bridge.mbt": ["native"],
@@ -16,4 +16,3 @@
   },
   "native-stub": ["null_stream.c"]
 }
-

@@ -44,58 +44,54 @@ pub fn Device::name(self : Device) -> String raise CoreAudioError {
 }
 
 ///|
-pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
+pub fn Device::id(self : Device) -> @core.DeviceId {
   match device_uid(self.id) {
     Some(uid) if uid.trim().length() > 0 =>
-      @moon_cpal.DeviceId::new(@moon_cpal.HostId::CoreAudio, uid)
-    _ =>
-      @moon_cpal.DeviceId::new(
-        @moon_cpal.HostId::CoreAudio,
-        self.id.to_string(),
-      )
+      @core.DeviceId::new(@core.HostId::CoreAudio, uid)
+    _ => @core.DeviceId::new(@core.HostId::CoreAudio, self.id.to_string())
   }
 }
 
 ///|
-fn coreaudio_interface_type_from_tag(tag : Int) -> @moon_cpal.InterfaceType {
+fn coreaudio_interface_type_from_tag(tag : Int) -> @core.InterfaceType {
   match tag {
-    1 => @moon_cpal.InterfaceType::built_in()
-    2 => @moon_cpal.InterfaceType::usb()
-    3 => @moon_cpal.InterfaceType::bluetooth()
-    4 => @moon_cpal.InterfaceType::pci()
-    5 => @moon_cpal.InterfaceType::fire_wire()
-    6 => @moon_cpal.InterfaceType::thunderbolt()
-    7 => @moon_cpal.InterfaceType::hdmi()
-    10 => @moon_cpal.InterfaceType::network()
-    11 => @moon_cpal.InterfaceType::virtual_()
-    12 => @moon_cpal.InterfaceType::display_port()
-    13 => @moon_cpal.InterfaceType::aggregate()
-    _ => @moon_cpal.InterfaceType::unknown()
+    1 => @core.InterfaceType::built_in()
+    2 => @core.InterfaceType::usb()
+    3 => @core.InterfaceType::bluetooth()
+    4 => @core.InterfaceType::pci()
+    5 => @core.InterfaceType::fire_wire()
+    6 => @core.InterfaceType::thunderbolt()
+    7 => @core.InterfaceType::hdmi()
+    10 => @core.InterfaceType::network()
+    11 => @core.InterfaceType::virtual_()
+    12 => @core.InterfaceType::display_port()
+    13 => @core.InterfaceType::aggregate()
+    _ => @core.InterfaceType::unknown()
   }
 }
 
 ///|
 pub fn Device::description(
   self : Device,
-) -> @moon_cpal.DeviceDescription raise CoreAudioError {
+) -> @core.DeviceDescription raise CoreAudioError {
   let name = device_name(self.id)
   let in_ch = ca_input_channel_count(self.id)
   let out_ch = ca_output_channel_count(self.id)
   let has_in = in_ch > 0
   let has_out = out_ch > 0
   let direction = if has_in && has_out {
-    @moon_cpal.DeviceDirection::duplex()
+    @core.DeviceDirection::duplex()
   } else if has_in {
-    @moon_cpal.DeviceDirection::input()
+    @core.DeviceDirection::input()
   } else if has_out {
-    @moon_cpal.DeviceDirection::output()
+    @core.DeviceDirection::output()
   } else {
-    @moon_cpal.DeviceDirection::unknown()
+    @core.DeviceDirection::unknown()
   }
   let device_type = match direction {
-    @moon_cpal.DeviceDirection::Input => @moon_cpal.DeviceType::microphone()
-    @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
-    _ => @moon_cpal.DeviceType::unknown()
+    @core.DeviceDirection::Input => @core.DeviceType::microphone()
+    @core.DeviceDirection::Output => @core.DeviceType::speaker()
+    _ => @core.DeviceType::unknown()
   }
   let manufacturer = device_manufacturer(self.id)
   let uid = device_uid(self.id)
@@ -115,7 +111,7 @@ pub fn Device::description(
   if transport != 0 {
     extended.push("transport_type_u32=\{transport}")
   }
-  @moon_cpal.DeviceDescription::new(
+  @core.DeviceDescription::new(
     name,
     manufacturer~,
     driver=Some("CoreAudio"),
@@ -130,27 +126,27 @@ pub fn Device::description(
 ///|
 pub fn Device::supported_input_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   supported_input_configs(self.id)
 }
 
 ///|
 pub fn Device::supported_output_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   supported_output_configs(self.id)
 }
 
 ///|
 pub fn Device::default_input_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   default_input_config(self.id)
 }
 
 ///|
 pub fn Device::default_output_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   default_output_config(self.id)
 }

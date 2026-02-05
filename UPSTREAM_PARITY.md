@@ -25,7 +25,7 @@ MoonBit port.
 
 Top-level:
 
-- `lib.rs` — **PARTIAL** (core types + some heuristics/tests exist; high-level host API lives in `spec`)
+- `lib.rs` — **PARTIAL** (root API now re-exports platform + core via `core/` split; remaining: iterator-style APIs + docs)
 - `traits.rs` — **PARTIAL** (MoonBit `traits` package exists; iterator-associated types pending)
 - `error.rs` — **DONE** (Display-equivalent `to_string` parity + tests)
 - `device_description.rs` — **DONE** (`direction_from_counts` parity + tests)

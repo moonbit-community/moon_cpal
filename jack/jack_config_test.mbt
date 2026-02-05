@@ -1,6 +1,6 @@
 ///|
 test "jack supported configs reflect server sample rate/buffer size (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -17,10 +17,7 @@ test "jack supported configs reflect server sample rate/buffer size (best-effort
       } noraise {
         x => x
       }
-      inspect(
-        cfg.sample_format() == @moon_cpal.SampleFormat::F32,
-        content="true",
-      )
+      inspect(cfg.sample_format() == @core.SampleFormat::F32, content="true")
       inspect(cfg.sample_rate() > 0, content="true")
       match cfg.buffer_size() {
         Unknown => inspect(false, content="true")

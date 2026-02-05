@@ -13,7 +13,7 @@ extern "C" fn jack_stream_build_output(
   buffer_frames : UInt,
   call_data_callback : FuncRef[
     (
-      (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+      (@core.Data, @core.OutputCallbackInfo) -> Unit,
       UInt,
       FixedArray[Byte],
       Int64,
@@ -22,11 +22,9 @@ extern "C" fn jack_stream_build_output(
       Int,
     ) -> Unit,
   ],
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[
-    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
-  ],
-  error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_jack_stream_build_output"
@@ -43,7 +41,7 @@ extern "C" fn jack_stream_build_input(
   buffer_frames : UInt,
   call_data_callback : FuncRef[
     (
-      (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+      (@core.Data, @core.InputCallbackInfo) -> Unit,
       UInt,
       FixedArray[Byte],
       Int64,
@@ -52,11 +50,9 @@ extern "C" fn jack_stream_build_input(
       Int,
     ) -> Unit,
   ],
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[
-    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
-  ],
-  error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_jack_stream_build_input"
@@ -80,7 +76,7 @@ extern "C" fn jack_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_j
 fn[A] raise_build_error(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.BuildStreamError {
+) -> A raise @core.BuildStreamError {
   raise jack_build_error_from_status(status, op)
 }
 
@@ -88,19 +84,19 @@ fn[A] raise_build_error(
 fn jack_build_error_from_status(
   status : Int,
   op : String,
-) -> @moon_cpal.BuildStreamError {
+) -> @core.BuildStreamError {
   // Best-effort errno-like mapping (Linux).
   if status == -2 || status == -1 || status == -13 || status == -19 {
     // ENOENT / EPERM / EACCES / ENODEV
-    @moon_cpal.build_stream_error_device_not_available()
+    @core.build_stream_error_device_not_available()
   } else if status == -16 || status == -11 {
     // EBUSY / EAGAIN
-    @moon_cpal.build_stream_error_device_busy()
+    @core.build_stream_error_device_busy()
   } else if status == -22 {
     // EINVAL
-    @moon_cpal.build_stream_error_invalid_argument()
+    @core.build_stream_error_invalid_argument()
   } else {
-    @moon_cpal.build_stream_error_backend_specific("\{op}: \{status}")
+    @core.build_stream_error_backend_specific("\{op}: \{status}")
   }
 }
 
@@ -108,20 +104,20 @@ fn jack_build_error_from_status(
 fn[A] raise_play_error(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.PlayStreamError {
-  raise @moon_cpal.play_stream_error_backend_specific("\{op}: \{status}")
+) -> A raise @core.PlayStreamError {
+  raise @core.play_stream_error_backend_specific("\{op}: \{status}")
 }
 
 ///|
 fn[A] raise_pause_error(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.PauseStreamError {
-  raise @moon_cpal.pause_stream_error_backend_specific("\{op}: \{status}")
+) -> A raise @core.PauseStreamError {
+  raise @core.pause_stream_error_backend_specific("\{op}: \{status}")
 }
 
 ///|
-fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
   match config.buffer_size {
     Default => 0
     Fixed(n) => if n > 0 { n.reinterpret_as_uint() } else { 0 }
@@ -130,22 +126,25 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 
 ///|
 fn validate_buffer_size_or_raise(
-  config : @moon_cpal.StreamConfig,
-) -> Unit raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+) -> Unit raise @core.BuildStreamError {
   if config.channels <= 0 || config.sample_rate <= 0 {
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    raise @core.build_stream_error_invalid_argument()
   }
   match config.buffer_size {
     Default => ()
     Fixed(n) => {
-      if n <= 0 {
-        raise @moon_cpal.build_stream_error_invalid_argument()
+      if n < 0 {
+        raise @core.build_stream_error_invalid_argument()
+      }
+      if n == 0 {
+        raise @core.build_stream_error_stream_config_not_supported()
       }
       match default_server_config() {
         None => ()
         Some((_sr, buf)) =>
           if n != buf {
-            raise @moon_cpal.build_stream_error_stream_config_not_supported()
+            raise @core.build_stream_error_stream_config_not_supported()
           }
       }
     }
@@ -154,32 +153,32 @@ fn validate_buffer_size_or_raise(
 
 ///|
 fn validate_sample_format_or_raise(
-  sample_format : @moon_cpal.SampleFormat,
-) -> Unit raise @moon_cpal.BuildStreamError {
-  if sample_format != @moon_cpal.SampleFormat::F32 {
-    raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  sample_format : @core.SampleFormat,
+) -> Unit raise @core.BuildStreamError {
+  if sample_format != @core.SampleFormat::F32 {
+    raise @core.build_stream_error_stream_config_not_supported()
   }
 }
 
 ///|
 pub fn Device::build_output_stream_raw(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  if @core.native_os() != @core.NativeOs::Linux {
     raise_build_error("jack build_output_stream_raw", -1)
   }
-  if self.direction != @moon_cpal.DeviceDirection::output() {
-    raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  if self.direction != @core.DeviceDirection::output() {
+    raise @core.build_stream_error_stream_config_not_supported()
   }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)
   let fmt_tag = (1 : UInt)
-  let dev = @moon_cpal.string_to_utf8_bytes(self.id)
+  let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = jack_stream_build_output(
     dev,
@@ -208,15 +207,15 @@ pub fn Device::build_output_stream_raw(
 ///|
 pub fn Device::build_output_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   Device::build_output_stream_raw(
     self,
     config,
-    @moon_cpal.SampleFormat::F32,
+    @core.SampleFormat::F32,
     data_callback,
     error_callback,
     _timeout,
@@ -226,22 +225,22 @@ pub fn Device::build_output_stream(
 ///|
 pub fn Device::build_input_stream_raw(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  if @core.native_os() != @core.NativeOs::Linux {
     raise_build_error("jack build_input_stream_raw", -1)
   }
-  if self.direction != @moon_cpal.DeviceDirection::input() {
-    raise @moon_cpal.build_stream_error_stream_config_not_supported()
+  if self.direction != @core.DeviceDirection::input() {
+    raise @core.build_stream_error_stream_config_not_supported()
   }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)
   let fmt_tag = (1 : UInt)
-  let dev = @moon_cpal.string_to_utf8_bytes(self.id)
+  let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = jack_stream_build_input(
     dev,
@@ -270,15 +269,15 @@ pub fn Device::build_input_stream_raw(
 ///|
 pub fn Device::build_input_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   Device::build_input_stream_raw(
     self,
     config,
-    @moon_cpal.SampleFormat::F32,
+    @core.SampleFormat::F32,
     data_callback,
     error_callback,
     _timeout,
@@ -286,7 +285,7 @@ pub fn Device::build_input_stream(
 }
 
 ///|
-pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
+pub fn Stream::play(self : Stream) -> Unit raise @core.PlayStreamError {
   let st = jack_stream_owner_play(self.owner)
   if st < 0 {
     raise_play_error("jack_stream_owner_play", st)
@@ -294,7 +293,7 @@ pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
 }
 
 ///|
-pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
+pub fn Stream::pause(self : Stream) -> Unit raise @core.PauseStreamError {
   let st = jack_stream_owner_pause(self.owner)
   if st < 0 {
     raise_pause_error("jack_stream_owner_pause", st)

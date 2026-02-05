@@ -7,7 +7,7 @@ test "spec default_host routes to platform" {
 
 ///|
 test "spec host_from_id roundtrip for available hosts" {
-  let hs = @moon_cpal.available_hosts()
+  let hs = available_hosts()
   for id in hs {
     let h = try! host_from_id(id)
     inspect(h.id() == id, content="true")
@@ -16,9 +16,9 @@ test "spec host_from_id roundtrip for available hosts" {
 
 ///|
 test "spec host_from_id rejects unavailable host ids (native only)" {
-  let os = @moon_cpal.native_os()
-  let hs = @moon_cpal.available_hosts()
-  fn has(xs : Array[@moon_cpal.HostId], x : @moon_cpal.HostId) -> Bool {
+  let os = @core.native_os()
+  let hs = available_hosts()
+  fn has(xs : Array[@core.HostId], x : @core.HostId) -> Bool {
     for y in xs {
       if y == x {
         return true
@@ -29,17 +29,17 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
 
   // Pick a host id that should not be present on this OS.
   let bad = match os {
-    @moon_cpal.NativeOs::Linux => @moon_cpal.HostId::CoreAudio
-    @moon_cpal.NativeOs::Macos => @moon_cpal.HostId::Alsa
-    @moon_cpal.NativeOs::Windows => @moon_cpal.HostId::CoreAudio
-    @moon_cpal.NativeOs::Unknown => @moon_cpal.HostId::CoreAudio
+    @core.NativeOs::Linux => @core.HostId::CoreAudio
+    @core.NativeOs::Macos => @core.HostId::Alsa
+    @core.NativeOs::Windows => @core.HostId::CoreAudio
+    @core.NativeOs::Unknown => @core.HostId::CoreAudio
   }
   if has(hs, bad) {
     inspect(true, content="true")
     return
   }
   try host_from_id(bad) catch {
-    @moon_cpal.HostUnavailable => inspect(true, content="true")
+    @core.HostUnavailable => inspect(true, content="true")
   } noraise {
     _ => inspect(false, content="true")
   }
@@ -47,7 +47,7 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
 
 ///|
 test "spec device id + supports + device_by_id (best-effort)" {
-  for host_id in @moon_cpal.available_hosts() {
+  for host_id in available_hosts() {
     let host = try! host_from_id(host_id)
     let ds = try host.devices() catch {
       _ => []
@@ -120,15 +120,15 @@ test "spec: raw + typed stream builders (best-effort)" {
   } noraise {
     x => x
   }
-  let out_sc = @moon_cpal.StreamConfig::new(
+  let out_sc = @core.StreamConfig::new(
     out_cfg.channels(),
     out_cfg.sample_rate(),
-    @moon_cpal.BufferSize::fixed(64),
+    @core.BufferSize::fixed(64),
   )
-  let inp_sc = @moon_cpal.StreamConfig::new(
+  let inp_sc = @core.StreamConfig::new(
     inp_cfg.channels(),
     inp_cfg.sample_rate(),
-    @moon_cpal.BufferSize::fixed(64),
+    @core.BufferSize::fixed(64),
   )
 
   // Raw output.

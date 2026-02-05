@@ -1,6 +1,6 @@
 ///|
 test "jack build error mapping (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -36,14 +36,11 @@ test "jack build error mapping (unit)" {
 
 ///|
 test "jack stream error mapping (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
-  let slot = FixedArray::make(
-    1,
-    @moon_cpal.stream_error_backend_specific("init"),
-  )
+  let slot = FixedArray::make(1, @core.stream_error_backend_specific("init"))
   // jack_client_open failures => device not available.
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, 1)
   inspect(slot[0], content="DeviceNotAvailable")

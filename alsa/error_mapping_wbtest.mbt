@@ -1,6 +1,6 @@
 ///|
 test "alsa errno mapping (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }

@@ -1,6 +1,6 @@
 ///|
 test "alsa: devices includes default (linux-only)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     return
   }
   let h = default_host()
@@ -18,7 +18,7 @@ test "alsa: devices includes default (linux-only)" {
 
 ///|
 test "alsa: default devices are always Some (linux-only)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }

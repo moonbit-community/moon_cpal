@@ -1,6 +1,6 @@
 ///|
-test "alsa fixed buffer 0 is invalid argument (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -16,10 +16,10 @@ test "alsa fixed buffer 0 is invalid argument (best-effort)" {
       } noraise {
         x => x
       }
-      let sc = @moon_cpal.StreamConfig::new(
+      let sc = @core.StreamConfig::new(
         cfg.channels(),
         cfg.sample_rate(),
-        @moon_cpal.BufferSize::fixed(0),
+        @core.BufferSize::fixed(0),
       )
       try
         dev.build_output_stream_raw(
@@ -32,7 +32,7 @@ test "alsa fixed buffer 0 is invalid argument (best-effort)" {
       catch {
         e =>
           match e {
-            @moon_cpal.BuildStreamError::InvalidArgument =>
+            @core.BuildStreamError::StreamConfigNotSupported =>
               inspect(true, content="true")
             _ => inspect(false, content="true")
           }
@@ -48,7 +48,7 @@ test "alsa fixed buffer 0 is invalid argument (best-effort)" {
 
 ///|
 test "alsa fixed buffer larger than supported range fails (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -64,11 +64,23 @@ test "alsa fixed buffer larger than supported range fails (best-effort)" {
       } noraise {
         x => x
       }
-      let big = 1000000000
-      let sc = @moon_cpal.StreamConfig::new(
+      let max_buf = match cfg.buffer_size() {
+        @core.SupportedBufferSize::Unknown => {
+          inspect(true, content="true")
+          return
+        }
+        @core.SupportedBufferSize::Range(max=mx, ..) => mx
+      }
+      // Avoid overflow when buffer size is effectively unbounded.
+      if max_buf >= 2147483647 {
+        inspect(true, content="true")
+        return
+      }
+      let want = max_buf + 1
+      let sc = @core.StreamConfig::new(
         cfg.channels(),
         cfg.sample_rate(),
-        @moon_cpal.BufferSize::fixed(big),
+        @core.BufferSize::fixed(want),
       )
       let got = try
         dev.build_output_stream_raw(
@@ -79,7 +91,11 @@ test "alsa fixed buffer larger than supported range fails (best-effort)" {
           None,
         )
       catch {
-        _ => None
+        e =>
+          match e {
+            @core.BuildStreamError::StreamConfigNotSupported => None
+            _ => None
+          }
       } noraise {
         s => Some(s)
       }

@@ -30,22 +30,22 @@ pub fn device_name(_device_id : DeviceId) -> String raise CoreAudioError {
 ///|
 pub fn supported_input_configs(
   _device_id : DeviceId,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   raise_osstatus("supported_input_configs (non-native backend)", -1)
 }
 
 ///|
 pub fn supported_output_configs(
   _device_id : DeviceId,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   raise_osstatus("supported_output_configs (non-native backend)", -1)
 }
 
 ///|
 pub fn default_input_config(
   _device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  raise @core.default_stream_config_error_backend_specific(
     "default_input_config (non-native backend)",
   )
 }
@@ -53,8 +53,8 @@ pub fn default_input_config(
 ///|
 pub fn default_output_config(
   _device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  raise @core.default_stream_config_error_backend_specific(
     "default_output_config (non-native backend)",
   )
 }

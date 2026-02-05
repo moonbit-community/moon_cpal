@@ -16,13 +16,12 @@ fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
 fn[A] raise_default_osstatus(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.DefaultStreamConfigError {
+) -> A raise @core.DefaultStreamConfigError {
   match osstatus_kind(status) {
-    1 => raise @moon_cpal.default_stream_config_error_device_not_available()
-    2 =>
-      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+    1 => raise @core.default_stream_config_error_device_not_available()
+    2 => raise @core.default_stream_config_error_stream_type_not_supported()
     _ =>
-      raise @moon_cpal.default_stream_config_error_backend_specific(
+      raise @core.default_stream_config_error_backend_specific(
         "\{op} (OSStatus \{status})",
       )
   }

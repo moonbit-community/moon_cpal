@@ -7,12 +7,12 @@
 ///|
 pub fn Device::build_output_stream(
   _self : Device,
-  _config : @moon_cpal.StreamConfig,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
+  _config : @core.StreamConfig,
+  _data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  _error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  raise @core.build_stream_error_backend_specific(
     "null build_output_stream: unimplemented",
   )
 }
@@ -20,13 +20,13 @@ pub fn Device::build_output_stream(
 ///|
 pub fn Device::build_output_stream_raw(
   _self : Device,
-  _config : @moon_cpal.StreamConfig,
-  _sample_format : @moon_cpal.SampleFormat,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
+  _config : @core.StreamConfig,
+  _sample_format : @core.SampleFormat,
+  _data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  _error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  raise @core.build_stream_error_backend_specific(
     "null build_output_stream_raw: unimplemented",
   )
 }
@@ -34,12 +34,12 @@ pub fn Device::build_output_stream_raw(
 ///|
 pub fn Device::build_input_stream(
   _self : Device,
-  _config : @moon_cpal.StreamConfig,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
+  _config : @core.StreamConfig,
+  _data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  _error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  raise @core.build_stream_error_backend_specific(
     "null build_input_stream: unimplemented",
   )
 }
@@ -47,13 +47,13 @@ pub fn Device::build_input_stream(
 ///|
 pub fn Device::build_input_stream_raw(
   _self : Device,
-  _config : @moon_cpal.StreamConfig,
-  _sample_format : @moon_cpal.SampleFormat,
-  _data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  _error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
-  raise @moon_cpal.build_stream_error_backend_specific(
+  _config : @core.StreamConfig,
+  _sample_format : @core.SampleFormat,
+  _data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  _error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  raise @core.build_stream_error_backend_specific(
     "null build_input_stream_raw: unimplemented",
   )
 }

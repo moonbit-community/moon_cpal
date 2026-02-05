@@ -1,6 +1,6 @@
 ///|
 test "coreaudio OSStatus kind + stream error mapping (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Macos {
+  if @core.native_os() != @core.NativeOs::Macos {
     inspect(true, content="true")
     return
   }
@@ -13,10 +13,7 @@ test "coreaudio OSStatus kind + stream error mapping (unit)" {
   inspect(osstatus_kind(-66680) == 1, content="true") // kAudioQueueErr_InvalidDevice
   inspect(osstatus_kind(560226676) == 2, content="true") // kAudioDeviceUnsupportedFormatError
   inspect(osstatus_kind(0) == 0, content="true")
-  let slot = FixedArray::make(
-    1,
-    @moon_cpal.stream_error_backend_specific("init"),
-  )
+  let slot = FixedArray::make(1, @core.stream_error_backend_specific("init"))
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, -66668)
   inspect(slot[0], content="BufferUnderrun")
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, -66671)

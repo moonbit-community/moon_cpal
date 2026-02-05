@@ -1,6 +1,6 @@
 ///|
 test "wasapi output configs reflect device mix format (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }
@@ -40,7 +40,7 @@ test "wasapi output configs reflect device mix format (best-effort)" {
 
 ///|
 test "wasapi data_flow gating (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }

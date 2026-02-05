@@ -12,15 +12,15 @@ pub struct Stream {
 let _unused_stream_for_lint : Stream = { _unit: () }
 
 ///|
-pub fn Stream::play(_self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
-  raise @moon_cpal.play_stream_error_backend_specific(
+pub fn Stream::play(_self : Stream) -> Unit raise @core.PlayStreamError {
+  raise @core.play_stream_error_backend_specific(
     "null stream play: unimplemented",
   )
 }
 
 ///|
-pub fn Stream::pause(_self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
-  raise @moon_cpal.pause_stream_error_backend_specific(
+pub fn Stream::pause(_self : Stream) -> Unit raise @core.PauseStreamError {
+  raise @core.pause_stream_error_backend_specific(
     "null stream pause: unimplemented",
   )
 }

@@ -1,6 +1,6 @@
 ///|
 test "wasapi fixed buffer larger than device buffer fails (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }
@@ -16,11 +16,22 @@ test "wasapi fixed buffer larger than device buffer fails (best-effort)" {
       } noraise {
         x => x
       }
-      let big = 1000000000
-      let sc = @moon_cpal.StreamConfig::new(
+      let max_buf = match cfg.buffer_size() {
+        @core.SupportedBufferSize::Unknown => {
+          inspect(true, content="true")
+          return
+        }
+        @core.SupportedBufferSize::Range(max=mx, ..) => mx
+      }
+      if max_buf >= 2147483647 {
+        inspect(true, content="true")
+        return
+      }
+      let want = max_buf + 1
+      let sc = @core.StreamConfig::new(
         cfg.channels(),
         cfg.sample_rate(),
-        @moon_cpal.BufferSize::fixed(big),
+        @core.BufferSize::fixed(want),
       )
       let got = try
         dev.build_output_stream_raw(
@@ -47,21 +58,17 @@ test "wasapi fixed buffer larger than device buffer fails (best-effort)" {
 }
 
 ///|
-test "wasapi fixed buffer 0 is invalid argument (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }
   let dev : Device = { id: "does_not_matter" }
-  let sc = @moon_cpal.StreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.BufferSize::fixed(0),
-  )
+  let sc = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(0))
   try
     dev.build_output_stream_raw(
       sc,
-      @moon_cpal.SampleFormat::F32,
+      @core.SampleFormat::F32,
       fn(_d, _info) { () },
       fn(_e) { () },
       None,
@@ -69,7 +76,7 @@ test "wasapi fixed buffer 0 is invalid argument (unit)" {
   catch {
     e =>
       match e {
-        @moon_cpal.BuildStreamError::InvalidArgument =>
+        @core.BuildStreamError::StreamConfigNotSupported =>
           inspect(true, content="true")
         _ => inspect(false, content="true")
       }

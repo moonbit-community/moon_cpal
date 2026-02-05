@@ -1,6 +1,6 @@
 ///|
 test "wasapi HRESULT mapping (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Windows {
+  if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")
     return
   }
@@ -16,11 +16,11 @@ test "wasapi HRESULT mapping (unit)" {
   )
   // Other HRESULTs should be backend-specific.
   match wasapi_stream_error_from_hresult(-2004287474, "DeviceInit") {
-    @moon_cpal.StreamError::BackendSpecific(_) => inspect(true, content="true")
+    @core.StreamError::BackendSpecific(_) => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   match wasapi_stream_error_from_hresult(-2004287472, "DeviceInit") {
-    @moon_cpal.StreamError::BackendSpecific(_) => inspect(true, content="true")
+    @core.StreamError::BackendSpecific(_) => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   inspect(
@@ -32,13 +32,11 @@ test "wasapi HRESULT mapping (unit)" {
     content="DeviceNotAvailable",
   )
   match wasapi_build_error_from_hresult(-2004287474, "DeviceInit") {
-    @moon_cpal.BuildStreamError::BackendSpecific(_) =>
-      inspect(true, content="true")
+    @core.BuildStreamError::BackendSpecific(_) => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   match wasapi_build_error_from_hresult(-2004287472, "DeviceInit") {
-    @moon_cpal.BuildStreamError::BackendSpecific(_) =>
-      inspect(true, content="true")
+    @core.BuildStreamError::BackendSpecific(_) => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   inspect(

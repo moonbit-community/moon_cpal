@@ -101,7 +101,7 @@ pub fn default_device_id_utf8(is_input : Bool) -> String? {
   if b.length() <= 0 {
     None
   } else {
-    Some(@moon_cpal.utf8_bytes_to_string(b, b.length()))
+    Some(@core.utf8_bytes_to_string(b, b.length()))
   }
 }
 
@@ -110,20 +110,20 @@ pub fn device_name_utf8(id : String) -> String? {
   if id.length() == 0 {
     return None
   }
-  let b1 = @moon_cpal.string_to_utf8_bytes(id)
+  let b1 = @core.string_to_utf8_bytes(id)
   let id_len = b1.length()
   let n = wasapi_device_name_utf8_len(b1, id_len)
   if n <= 0 {
     return None
   }
   let out = Bytes::make(n, (0 : Int).to_byte())
-  let b2 = @moon_cpal.string_to_utf8_bytes(id)
+  let b2 = @core.string_to_utf8_bytes(id)
   let used = wasapi_device_name_utf8(b2, id_len, out, out.length())
   if used <= 0 {
     return None
   }
   let need = if used > out.length() { out.length() } else { used }
-  Some(@moon_cpal.utf8_bytes_to_string(out, need))
+  Some(@core.utf8_bytes_to_string(out, need))
 }
 
 ///|
@@ -131,7 +131,7 @@ pub fn device_form_factor_u32(id : String) -> UInt? {
   if id.length() == 0 {
     return None
   }
-  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let b = @core.string_to_utf8_bytes(id)
   let v = wasapi_device_form_factor_u32(b, b.length())
   if v == 0xFFFFFFFF {
     None
@@ -145,14 +145,14 @@ pub fn device_property_utf8(id : String, prop_tag : Int) -> String? {
   if id.length() == 0 {
     return None
   }
-  let b1 = @moon_cpal.string_to_utf8_bytes(id)
+  let b1 = @core.string_to_utf8_bytes(id)
   let id_len = b1.length()
   let n = wasapi_device_property_utf8_len(b1, id_len, prop_tag)
   if n <= 0 {
     return None
   }
   let out = Bytes::make(n, (0 : Int).to_byte())
-  let b2 = @moon_cpal.string_to_utf8_bytes(id)
+  let b2 = @core.string_to_utf8_bytes(id)
   let used = wasapi_device_property_utf8(
     b2,
     id_len,
@@ -164,12 +164,12 @@ pub fn device_property_utf8(id : String, prop_tag : Int) -> String? {
     return None
   }
   let need = if used > out.length() { out.length() } else { used }
-  Some(@moon_cpal.utf8_bytes_to_string(out, need))
+  Some(@core.utf8_bytes_to_string(out, need))
 }
 
 ///|
 pub fn default_config_u32(id : String, is_input : Bool) -> (UInt, UInt, UInt)? {
-  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let b = @core.string_to_utf8_bytes(id)
   let out = FixedArray::make(3, (0 : UInt))
   let st = wasapi_default_config_u32(
     b,
@@ -191,7 +191,7 @@ pub fn default_config_u32(id : String, is_input : Bool) -> (UInt, UInt, UInt)? {
 
 ///|
 pub fn data_flow_tag(id : String) -> Int? {
-  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let b = @core.string_to_utf8_bytes(id)
   let st = wasapi_device_data_flow_tag(b, b.length())
   if st <= 0 {
     None
@@ -205,7 +205,7 @@ pub fn default_config_ex_u32(
   id : String,
   is_input : Bool,
 ) -> (UInt, UInt, UInt, UInt, UInt)? {
-  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let b = @core.string_to_utf8_bytes(id)
   let out = FixedArray::make(5, (0 : UInt))
   let st = wasapi_default_config_ex_u32(
     b,
@@ -232,7 +232,7 @@ pub fn supported_configs_u32(
 ) -> (Int, FixedArray[UInt])? {
   // 21 sample rates * 2 formats => 42 entries, each uses 5 u32s.
   let out = FixedArray::make(5 * 64, (0 : UInt))
-  let b = @moon_cpal.string_to_utf8_bytes(id)
+  let b = @core.string_to_utf8_bytes(id)
   let st = wasapi_supported_configs_u32(
     b,
     b.length(),

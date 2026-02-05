@@ -1,6 +1,6 @@
 {
   "import": [
-    "Milky2018/moon_cpal",
+    "Milky2018/moon_cpal/core",
     "Milky2018/moon_cpal/alsa",
     "Milky2018/moon_cpal/jack",
     "Milky2018/moon_cpal/macos",

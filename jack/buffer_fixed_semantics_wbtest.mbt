@@ -1,22 +1,18 @@
 ///|
-test "jack fixed buffer 0 is invalid argument (unit)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
   let dev : Device = {
     id: "moon_cpal_out",
-    direction: @moon_cpal.DeviceDirection::output(),
+    direction: @core.DeviceDirection::output(),
   }
-  let sc = @moon_cpal.StreamConfig::new(
-    2,
-    48000,
-    @moon_cpal.BufferSize::fixed(0),
-  )
+  let sc = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(0))
   try
     dev.build_output_stream_raw(
       sc,
-      @moon_cpal.SampleFormat::F32,
+      @core.SampleFormat::F32,
       fn(_d, _info) { () },
       fn(_e) { () },
       None,
@@ -24,7 +20,7 @@ test "jack fixed buffer 0 is invalid argument (unit)" {
   catch {
     e =>
       match e {
-        @moon_cpal.BuildStreamError::InvalidArgument =>
+        @core.BuildStreamError::StreamConfigNotSupported =>
           inspect(true, content="true")
         _ => inspect(false, content="true")
       }
@@ -38,7 +34,7 @@ test "jack fixed buffer 0 is invalid argument (unit)" {
 
 ///|
 test "jack fixed buffer mismatch fails when server config known (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -50,18 +46,14 @@ test "jack fixed buffer mismatch fails when server config known (best-effort)" {
     Some((_sr, buf)) => {
       let dev : Device = {
         id: "moon_cpal_out",
-        direction: @moon_cpal.DeviceDirection::output(),
+        direction: @core.DeviceDirection::output(),
       }
       let want = buf + 1
-      let sc = @moon_cpal.StreamConfig::new(
-        2,
-        48000,
-        @moon_cpal.BufferSize::fixed(want),
-      )
+      let sc = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(want))
       try
         dev.build_output_stream_raw(
           sc,
-          @moon_cpal.SampleFormat::F32,
+          @core.SampleFormat::F32,
           fn(_d, _info) { () },
           fn(_e) { () },
           None,
@@ -69,7 +61,7 @@ test "jack fixed buffer mismatch fails when server config known (best-effort)" {
       catch {
         e =>
           match e {
-            @moon_cpal.BuildStreamError::StreamConfigNotSupported =>
+            @core.BuildStreamError::StreamConfigNotSupported =>
               inspect(true, content="true")
             _ => inspect(false, content="true")
           }

@@ -160,13 +160,13 @@ fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int) -> String {
 ///|
 fn get_buffer_frame_size_range(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedBufferSize raise CoreAudioError {
+) -> @core.SupportedBufferSize raise CoreAudioError {
   let out = FixedArray::make(2, (0 : UInt))
   let st = ca_buffer_frame_size_range(device_id, out, 2)
   if st < 0 {
     raise_osstatus("ca_buffer_frame_size_range", st)
   }
-  @moon_cpal.SupportedBufferSize::Range(
+  @core.SupportedBufferSize::Range(
     min=out[0].reinterpret_as_int(),
     max=out[1].reinterpret_as_int(),
   )
@@ -175,13 +175,13 @@ fn get_buffer_frame_size_range(
 ///|
 fn get_buffer_frame_size_range_default(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedBufferSize raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedBufferSize raise @core.DefaultStreamConfigError {
   let out = FixedArray::make(2, (0 : UInt))
   let st = ca_buffer_frame_size_range(device_id, out, 2)
   if st < 0 {
     raise_default_osstatus("ca_buffer_frame_size_range", st)
   }
-  @moon_cpal.SupportedBufferSize::Range(
+  @core.SupportedBufferSize::Range(
     min=out[0].reinterpret_as_int(),
     max=out[1].reinterpret_as_int(),
   )
@@ -191,7 +191,7 @@ fn get_buffer_frame_size_range_default(
 fn default_stream_config(
   device_id : DeviceId,
   input~ : Bool,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   // Layout: [sample_rate, channels, sample_format_tag]
   // - sample_format_tag: 1 => F32, 2 => I16, other => unsupported
   let out = FixedArray::make(3, (0 : UInt))
@@ -211,13 +211,12 @@ fn default_stream_config(
   let sample_rate = out[0].reinterpret_as_int()
   let channels = out[1].reinterpret_as_int()
   let sample_format = match out[2] {
-    1 => @moon_cpal.SampleFormat::F32
-    2 => @moon_cpal.SampleFormat::I16
-    _ =>
-      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+    1 => @core.SampleFormat::F32
+    2 => @core.SampleFormat::I16
+    _ => raise @core.default_stream_config_error_stream_type_not_supported()
   }
   let buffer_size = get_buffer_frame_size_range_default(device_id)
-  @moon_cpal.SupportedStreamConfig::new(
+  @core.SupportedStreamConfig::new(
     channels, sample_rate, buffer_size, sample_format,
   )
 }
@@ -260,7 +259,7 @@ fn sample_rate_ranges(
 fn supported_configs(
   device_id : DeviceId,
   input~ : Bool,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   let channels = if input {
     ca_input_channel_count(device_id)
   } else {
@@ -281,7 +280,7 @@ fn supported_configs(
   }
 
   // NOTE: Upstream cpal currently returns F32 for macOS supported configs.
-  let sample_format = @moon_cpal.SampleFormat::F32
+  let sample_format = @core.SampleFormat::F32
   let buffer_size = get_buffer_frame_size_range(device_id)
   let ranges = sample_rate_ranges(device_id, input~)
   if ranges.is_empty() {
@@ -300,7 +299,7 @@ fn supported_configs(
     for i in 0..<ranges.length() {
       let (minv, maxv) = ranges[i]
       out.push(
-        @moon_cpal.SupportedStreamConfigRange::new(
+        @core.SupportedStreamConfigRange::new(
           channels,
           minv.to_int(),
           maxv.to_int(),
@@ -325,7 +324,7 @@ fn supported_configs(
       }
     }
     [
-      @moon_cpal.SupportedStreamConfigRange::new(
+      @core.SupportedStreamConfigRange::new(
         channels, min_sr, max_sr, buffer_size, sample_format,
       ),
     ]
@@ -461,27 +460,27 @@ pub fn device_interface_type_tag(device_id : DeviceId) -> Int {
 ///|
 pub fn supported_input_configs(
   device_id : DeviceId,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   supported_configs(device_id, input=true)
 }
 
 ///|
 pub fn supported_output_configs(
   device_id : DeviceId,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError {
+) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError {
   supported_configs(device_id, input=false)
 }
 
 ///|
 pub fn default_input_config(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   default_stream_config(device_id, input=true)
 }
 
 ///|
 pub fn default_output_config(
   device_id : DeviceId,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   default_stream_config(device_id, input=false)
 }

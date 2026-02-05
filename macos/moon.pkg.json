@@ -1,5 +1,5 @@
 {
-  "import": ["Milky2018/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/core"],
   "targets": {
     "coreaudio_native.mbt": ["native"],
     "coreaudio_stub.mbt": ["not", "native"],

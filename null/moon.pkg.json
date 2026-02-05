@@ -1,4 +1,4 @@
 {
-  "import": ["Milky2018/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/core"],
   "targets": {}
 }

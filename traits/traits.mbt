@@ -6,117 +6,117 @@
 
 ///|
 pub trait HostTrait {
-  devices(Self) -> Array[@spec.Device] raise @moon_cpal.DevicesError
-  device_by_id(Self, @moon_cpal.DeviceId) -> @spec.Device?
+  devices(Self) -> Array[@spec.Device] raise @core.DevicesError
+  device_by_id(Self, @core.DeviceId) -> @spec.Device?
   default_input_device(Self) -> @spec.Device?
   default_output_device(Self) -> @spec.Device?
-  input_devices(Self) -> Array[@spec.Device] raise @moon_cpal.DevicesError
-  output_devices(Self) -> Array[@spec.Device] raise @moon_cpal.DevicesError
+  input_devices(Self) -> Array[@spec.Device] raise @core.DevicesError
+  output_devices(Self) -> Array[@spec.Device] raise @core.DevicesError
 }
 
 ///|
 pub trait DeviceTrait {
-  name(Self) -> String raise @moon_cpal.DeviceNameError
-  id(Self) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError
-  description(Self) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError
+  name(Self) -> String raise @core.DeviceNameError
+  id(Self) -> @core.DeviceId raise @core.DeviceIdError
+  description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
   supports_input(Self) -> Bool
   supports_output(Self) -> Bool
-  supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
-  supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
-  default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
-  default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+  supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+  default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
   build_input_stream(
     Self,
-    @moon_cpal.StreamConfig,
-    (@spec.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (@spec.Data, @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_input_stream_raw(
     Self,
-    @moon_cpal.StreamConfig,
-    @moon_cpal.SampleFormat,
-    (@spec.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    @core.SampleFormat,
+    (@spec.Data, @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream(
     Self,
-    @moon_cpal.StreamConfig,
-    (@spec.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (@spec.Data, @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream_raw(
     Self,
-    @moon_cpal.StreamConfig,
-    @moon_cpal.SampleFormat,
-    (@spec.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    @core.SampleFormat,
+    (@spec.Data, @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream_f32(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Float], @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Float], @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream_i16(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Int16], @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Int16], @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream_u16(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[UInt16], @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[UInt16], @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_output_stream_u8(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Byte], @moon_cpal.OutputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Byte], @core.OutputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_input_stream_f32(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Float], @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Float], @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_input_stream_i16(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Int16], @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Int16], @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_input_stream_u16(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[UInt16], @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[UInt16], @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
   build_input_stream_u8(
     Self,
-    @moon_cpal.StreamConfig,
-    (Array[Byte], @moon_cpal.InputCallbackInfo) -> Unit,
-    (@moon_cpal.StreamError) -> Unit,
-    @moon_cpal.Duration?,
-  ) -> @spec.Stream raise @moon_cpal.BuildStreamError
+    @core.StreamConfig,
+    (Array[Byte], @core.InputCallbackInfo) -> Unit,
+    (@core.StreamError) -> Unit,
+    @core.Duration?,
+  ) -> @spec.Stream raise @core.BuildStreamError
 }
 
 ///|
 pub trait StreamTrait {
-  play(Self) -> Unit raise @moon_cpal.PlayStreamError
-  pause(Self) -> Unit raise @moon_cpal.PauseStreamError
+  play(Self) -> Unit raise @core.PlayStreamError
+  pause(Self) -> Unit raise @core.PauseStreamError
   close(Self) -> Unit
 }
 
@@ -128,7 +128,7 @@ pub impl HostTrait for @spec.Host with devices(self : @spec.Host) {
 ///|
 pub impl HostTrait for @spec.Host with device_by_id(
   self : @spec.Host,
-  id : @moon_cpal.DeviceId,
+  id : @core.DeviceId,
 ) {
   self.device_by_id(id)
 }
@@ -209,10 +209,10 @@ pub impl DeviceTrait for @spec.Device with default_output_config(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@spec.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (@spec.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream(config, data_callback, error_callback, timeout)
 }
@@ -220,11 +220,11 @@ pub impl DeviceTrait for @spec.Device with build_input_stream(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream_raw(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@spec.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@spec.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream_raw(
     config, sample_format, data_callback, error_callback, timeout,
@@ -234,10 +234,10 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_raw(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@spec.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (@spec.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream(config, data_callback, error_callback, timeout)
 }
@@ -245,11 +245,11 @@ pub impl DeviceTrait for @spec.Device with build_output_stream(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream_raw(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@spec.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@spec.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream_raw(
     config, sample_format, data_callback, error_callback, timeout,
@@ -259,10 +259,10 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_raw(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream_f32(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Float], @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Float], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream_f32(config, data_callback, error_callback, timeout)
 }
@@ -270,10 +270,10 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_f32(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream_i16(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Int16], @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Int16], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream_i16(config, data_callback, error_callback, timeout)
 }
@@ -281,10 +281,10 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_i16(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream_u16(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[UInt16], @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[UInt16], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream_u16(config, data_callback, error_callback, timeout)
 }
@@ -292,10 +292,10 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_u16(
 ///|
 pub impl DeviceTrait for @spec.Device with build_output_stream_u8(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Byte], @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Byte], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_output_stream_u8(config, data_callback, error_callback, timeout)
 }
@@ -303,10 +303,10 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_u8(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream_f32(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Float], @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Float], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream_f32(config, data_callback, error_callback, timeout)
 }
@@ -314,10 +314,10 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_f32(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream_i16(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Int16], @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Int16], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream_i16(config, data_callback, error_callback, timeout)
 }
@@ -325,10 +325,10 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_i16(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream_u16(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[UInt16], @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[UInt16], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream_u16(config, data_callback, error_callback, timeout)
 }
@@ -336,10 +336,10 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_u16(
 ///|
 pub impl DeviceTrait for @spec.Device with build_input_stream_u8(
   self : @spec.Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Array[Byte], @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
+  config : @core.StreamConfig,
+  data_callback : (Array[Byte], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
 ) {
   self.build_input_stream_u8(config, data_callback, error_callback, timeout)
 }

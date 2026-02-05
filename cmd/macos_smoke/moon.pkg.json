@@ -1,6 +1,6 @@
 {
   "is_main": true,
-  "import": ["Milky2018/moon_cpal/macos", "Milky2018/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/macos"],
   "link": {
     "native": {
       "cc": "./scripts/moon_cc.sh",

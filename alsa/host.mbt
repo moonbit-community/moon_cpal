@@ -26,9 +26,9 @@ fn default_device() -> Device {
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+  if @core.native_os() == @core.NativeOs::Linux {
     let bytes = devices_utf8()
-    let s = @moon_cpal.utf8_bytes_to_string(bytes, bytes.length())
+    let s = @core.utf8_bytes_to_string(bytes, bytes.length())
     let out : Array[Device] = []
     for v in s[:].split("\n"[:]) {
       let id = v.trim().to_string()
@@ -47,7 +47,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+  if @core.native_os() == @core.NativeOs::Linux {
     // Match upstream CPAL ALSA host: always return the "default" PCM, even though the actual
     // availability of output formats can only be determined by attempting to open a stream.
     Some(default_device())
@@ -58,7 +58,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
+  if @core.native_os() == @core.NativeOs::Linux {
     // Match upstream CPAL ALSA host: always return the "default" PCM (see above).
     Some(default_device())
   } else {
@@ -68,7 +68,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     return _self.id
   }
   match device_name_utf8(_self.id) {
@@ -80,10 +80,10 @@ pub fn Device::name(_self : Device) -> String {
 ///|
 pub fn Device::description(
   _self : Device,
-) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError {
+) -> @core.DeviceDescription raise @core.DeviceNameError {
   let name = Device::name(_self)
   if name.length() == 0 {
-    raise @moon_cpal.device_name_error_backend_specific(
+    raise @core.device_name_error_backend_specific(
       "alsa device description: empty name",
     )
   }
@@ -100,24 +100,24 @@ pub fn Device::description(
     }) >
     0
   let direction = if has_in && has_out {
-    @moon_cpal.DeviceDirection::duplex()
+    @core.DeviceDirection::duplex()
   } else if has_in {
-    @moon_cpal.DeviceDirection::input()
+    @core.DeviceDirection::input()
   } else if has_out {
-    @moon_cpal.DeviceDirection::output()
+    @core.DeviceDirection::output()
   } else {
-    @moon_cpal.DeviceDirection::unknown()
+    @core.DeviceDirection::unknown()
   }
   let device_type = match direction {
-    @moon_cpal.DeviceDirection::Input => @moon_cpal.DeviceType::microphone()
-    @moon_cpal.DeviceDirection::Output => @moon_cpal.DeviceType::speaker()
-    _ => @moon_cpal.DeviceType::unknown()
+    @core.DeviceDirection::Input => @core.DeviceType::microphone()
+    @core.DeviceDirection::Output => @core.DeviceType::speaker()
+    _ => @core.DeviceType::unknown()
   }
-  @moon_cpal.DeviceDescription::new(
+  @core.DeviceDescription::new(
     name,
     driver=Some("ALSA"),
     device_type~,
-    interface_type=@moon_cpal.InterfaceType::unknown(),
+    interface_type=@core.InterfaceType::unknown(),
     direction~,
     address=Some(_self.id),
     extended=["alsa_id=\{_self.id}"],
@@ -125,15 +125,15 @@ pub fn Device::description(
 }
 
 ///|
-pub fn Device::id(_self : Device) -> @moon_cpal.DeviceId {
-  @moon_cpal.DeviceId::new(@moon_cpal.HostId::Alsa, _self.id)
+pub fn Device::id(_self : Device) -> @core.DeviceId {
+  @core.DeviceId::new(@core.HostId::Alsa, _self.id)
 }
 
 ///|
 pub fn Device::supported_input_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+  if @core.native_os() != @core.NativeOs::Linux {
     return []
   }
   supported_configs(_self, true)
@@ -142,8 +142,8 @@ pub fn Device::supported_input_configs(
 ///|
 pub fn Device::supported_output_configs(
   _self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+  if @core.native_os() != @core.NativeOs::Linux {
     return []
   }
   supported_configs(_self, false)
@@ -152,9 +152,9 @@ pub fn Device::supported_output_configs(
 ///|
 pub fn Device::default_input_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
-    raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  if @core.native_os() != @core.NativeOs::Linux {
+    raise @core.default_stream_config_error_backend_specific(
       "alsa default_input_config: not available on this OS",
     )
   }
@@ -164,9 +164,9 @@ pub fn Device::default_input_config(
 ///|
 pub fn Device::default_output_config(
   _self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
-    raise @moon_cpal.default_stream_config_error_backend_specific(
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
+  if @core.native_os() != @core.NativeOs::Linux {
+    raise @core.default_stream_config_error_backend_specific(
       "alsa default_output_config: not available on this OS",
     )
   }
@@ -193,10 +193,10 @@ fn i32_le_to_int(b : Bytes, off : Int) -> Int {
 }
 
 ///|
-fn sample_format_from_bin_tag(tag : Int) -> @moon_cpal.SampleFormat? {
+fn sample_format_from_bin_tag(tag : Int) -> @core.SampleFormat? {
   match tag {
-    1 => Some(@moon_cpal.SampleFormat::F32)
-    2 => Some(@moon_cpal.SampleFormat::I16)
+    1 => Some(@core.SampleFormat::F32)
+    2 => Some(@core.SampleFormat::I16)
     _ => None
   }
 }
@@ -204,7 +204,7 @@ fn sample_format_from_bin_tag(tag : Int) -> @moon_cpal.SampleFormat? {
 ///|
 fn parse_supported_configs_bin(
   b : Bytes,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] {
+) -> Array[@core.SupportedStreamConfigRange] {
   if b.length() < 8 {
     return []
   }
@@ -213,7 +213,7 @@ fn parse_supported_configs_bin(
   if n <= 0 {
     return []
   }
-  let out : Array[@moon_cpal.SupportedStreamConfigRange] = []
+  let out : Array[@core.SupportedStreamConfigRange] = []
   let mut off = 8
   for _i in 0..<n {
     if off + 24 > b.length() {
@@ -229,14 +229,12 @@ fn parse_supported_configs_bin(
     match sample_format_from_bin_tag(tag) {
       None => ()
       Some(fmt) => {
-        let buf = @moon_cpal.SupportedBufferSize::Range(
+        let buf = @core.SupportedBufferSize::Range(
           min=if buf_min > 0 { buf_min } else { 1 },
           max=if buf_max >= buf_min && buf_max > 0 { buf_max } else { buf_min },
         )
         out.push(
-          @moon_cpal.SupportedStreamConfigRange::new(
-            ch, min_sr, max_sr, buf, fmt,
-          ),
+          @core.SupportedStreamConfigRange::new(ch, min_sr, max_sr, buf, fmt),
         )
       }
     }
@@ -248,26 +246,26 @@ fn parse_supported_configs_bin(
 fn supported_configs(
   d : Device,
   is_input : Bool,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
+) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   let b = supported_configs_bin(d.id, is_input)
   if b.length() == 0 {
     return []
   }
   if b.length() < 8 {
-    raise @moon_cpal.supported_stream_configs_error_backend_specific(
+    raise @core.supported_stream_configs_error_backend_specific(
       "alsa supported_configs: malformed header",
     )
   }
   let status = i32_le_to_int(b, 0)
   if status != 0 {
     if status == -19 {
-      raise @moon_cpal.supported_stream_configs_error_device_not_available()
+      raise @core.supported_stream_configs_error_device_not_available()
     } else if status == -16 {
-      raise @moon_cpal.supported_stream_configs_error_device_busy()
+      raise @core.supported_stream_configs_error_device_busy()
     } else if status == -22 {
-      raise @moon_cpal.supported_stream_configs_error_invalid_argument()
+      raise @core.supported_stream_configs_error_invalid_argument()
     } else {
-      raise @moon_cpal.supported_stream_configs_error_backend_specific(
+      raise @core.supported_stream_configs_error_backend_specific(
         "alsa supported_configs: errno \{status}",
       )
     }
@@ -279,23 +277,23 @@ fn supported_configs(
 fn default_config(
   d : Device,
   is_input : Bool,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   let ranges = try supported_configs(d, is_input) catch {
-    @moon_cpal.SupportedStreamConfigsError::DeviceNotAvailable =>
-      raise @moon_cpal.default_stream_config_error_device_not_available()
-    @moon_cpal.SupportedStreamConfigsError::DeviceBusy =>
-      raise @moon_cpal.default_stream_config_error_device_busy()
-    @moon_cpal.SupportedStreamConfigsError::InvalidArgument =>
-      raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
-    @moon_cpal.SupportedStreamConfigsError::BackendSpecific(err) =>
-      raise @moon_cpal.default_stream_config_error_backend_specific(
+    @core.SupportedStreamConfigsError::DeviceNotAvailable =>
+      raise @core.default_stream_config_error_device_not_available()
+    @core.SupportedStreamConfigsError::DeviceBusy =>
+      raise @core.default_stream_config_error_device_busy()
+    @core.SupportedStreamConfigsError::InvalidArgument =>
+      raise @core.default_stream_config_error_stream_type_not_supported()
+    @core.SupportedStreamConfigsError::BackendSpecific(err) =>
+      raise @core.default_stream_config_error_backend_specific(
         err.description(),
       )
   } noraise {
     xs => xs
   }
   if ranges.length() == 0 {
-    raise @moon_cpal.default_stream_config_error_stream_type_not_supported()
+    raise @core.default_stream_config_error_stream_type_not_supported()
   }
 
   // Mirror upstream ALSA default selection:

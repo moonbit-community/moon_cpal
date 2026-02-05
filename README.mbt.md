@@ -6,9 +6,11 @@ Pinned upstream reference: see `UPSTREAM.md`.
 
 ## Status
 
-- `Milky2018/moon_cpal`: core CPAL-like types (configs, heuristics, timestamps, sample helpers).
-- `Milky2018/moon_cpal/spec`: CPAL-like host/device/stream API backed by `platform` dynamic dispatch.
-- `Milky2018/moon_cpal/traits`: CPAL-like `HostTrait`/`DeviceTrait`/`StreamTrait` implemented for `spec`.
+- `Milky2018/moon_cpal`: public CPAL-like API (native-only): host/device/stream + core type re-exports.
+- `Milky2018/moon_cpal/core`: pure core types/errors (configs, heuristics, timestamps, sample helpers).
+- `Milky2018/moon_cpal/platform`: dynamic dispatch host/device/stream (backend selection).
+- `Milky2018/moon_cpal/spec`: root API implementation backed by `platform`.
+- `Milky2018/moon_cpal/traits`: CPAL-like `HostTrait`/`DeviceTrait`/`StreamTrait` implemented for the root types.
 - Native backends (real I/O, callback-thread model):
   - macOS: CoreAudio (AudioQueue)
   - Linux: ALSA + JACK

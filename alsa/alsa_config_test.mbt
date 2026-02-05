@@ -1,6 +1,6 @@
 ///|
 test "alsa default config matches supported configs (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }
@@ -44,7 +44,7 @@ test "alsa default config matches supported configs (best-effort)" {
 
 ///|
 test "alsa supported configs include sane buffer size ranges (best-effort)" {
-  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+  if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
   }

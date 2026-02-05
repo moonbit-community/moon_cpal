@@ -20,7 +20,7 @@ extern "C" fn ca_stream_build_output(
   buffer_frames : UInt,
   call_data_callback : FuncRef[
     (
-      (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
+      (@core.Data, @core.OutputCallbackInfo) -> Unit,
       UInt,
       FixedArray[Byte],
       Int64,
@@ -29,11 +29,9 @@ extern "C" fn ca_stream_build_output(
       Int,
     ) -> Unit,
   ],
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[
-    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
-  ],
-  error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_ca_stream_build_output"
@@ -49,7 +47,7 @@ extern "C" fn ca_stream_build_input(
   buffer_frames : UInt,
   call_data_callback : FuncRef[
     (
-      (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
+      (@core.Data, @core.InputCallbackInfo) -> Unit,
       UInt,
       FixedArray[Byte],
       Int64,
@@ -58,11 +56,9 @@ extern "C" fn ca_stream_build_input(
       Int,
     ) -> Unit,
   ],
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[
-    ((@moon_cpal.StreamError) -> Unit, Int, Int) -> Unit,
-  ],
-  error_callback : (@moon_cpal.StreamError) -> Unit,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
   out_len : Int,
 ) -> Int = "moon_cpal_ca_stream_build_input"
@@ -86,13 +82,13 @@ extern "C" fn ca_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_ca_
 fn[A] raise_build_osstatus(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.BuildStreamError {
+) -> A raise @core.BuildStreamError {
   match osstatus_kind(status) {
-    1 => raise @moon_cpal.build_stream_error_device_not_available()
-    2 => raise @moon_cpal.build_stream_error_stream_config_not_supported()
-    4 => raise @moon_cpal.build_stream_error_invalid_argument()
+    1 => raise @core.build_stream_error_device_not_available()
+    2 => raise @core.build_stream_error_stream_config_not_supported()
+    4 => raise @core.build_stream_error_invalid_argument()
     _ =>
-      raise @moon_cpal.build_stream_error_backend_specific(
+      raise @core.build_stream_error_backend_specific(
         "\{op} (OSStatus \{status})",
       )
   }
@@ -102,11 +98,11 @@ fn[A] raise_build_osstatus(
 fn[A] raise_play_osstatus(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.PlayStreamError {
+) -> A raise @core.PlayStreamError {
   match osstatus_kind(status) {
-    1 => raise @moon_cpal.play_stream_error_device_not_available()
+    1 => raise @core.play_stream_error_device_not_available()
     _ =>
-      raise @moon_cpal.play_stream_error_backend_specific(
+      raise @core.play_stream_error_backend_specific(
         "\{op} (OSStatus \{status})",
       )
   }
@@ -116,11 +112,11 @@ fn[A] raise_play_osstatus(
 fn[A] raise_pause_osstatus(
   op : String,
   status : Int,
-) -> A raise @moon_cpal.PauseStreamError {
+) -> A raise @core.PauseStreamError {
   match osstatus_kind(status) {
-    1 => raise @moon_cpal.pause_stream_error_device_not_available()
+    1 => raise @core.pause_stream_error_device_not_available()
     _ =>
-      raise @moon_cpal.pause_stream_error_backend_specific(
+      raise @core.pause_stream_error_backend_specific(
         "\{op} (OSStatus \{status})",
       )
   }
@@ -131,29 +127,29 @@ fn[A] raise_pause_osstatus(
 ///|
 
 ///|
-fn format_tag_from_range(r : @moon_cpal.SupportedStreamConfigRange) -> UInt? {
+fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
   match r.sample_format() {
-    @moon_cpal.SampleFormat::F32 => Some((1 : UInt))
-    @moon_cpal.SampleFormat::I16 => Some((2 : UInt))
+    @core.SampleFormat::F32 => Some((1 : UInt))
+    @core.SampleFormat::I16 => Some((2 : UInt))
     _ => None
   }
 }
 
 ///|
-fn format_tag_from_sample_format(fmt : @moon_cpal.SampleFormat) -> UInt? {
+fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
-    @moon_cpal.SampleFormat::F32 => Some((1 : UInt))
-    @moon_cpal.SampleFormat::I16 => Some((2 : UInt))
+    @core.SampleFormat::F32 => Some((1 : UInt))
+    @core.SampleFormat::I16 => Some((2 : UInt))
     _ => None
   }
 }
 
 ///|
 fn find_matching_range_for_format(
-  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
-  config : @moon_cpal.StreamConfig,
-  fmt : @moon_cpal.SampleFormat,
-) -> @moon_cpal.SupportedStreamConfigRange? {
+  ranges : Array[@core.SupportedStreamConfigRange],
+  config : @core.StreamConfig,
+  fmt : @core.SampleFormat,
+) -> @core.SupportedStreamConfigRange? {
   let sr = config.sample_rate
   let ch = config.channels
   for r in ranges {
@@ -169,12 +165,12 @@ fn find_matching_range_for_format(
 
 ///|
 fn choose_default_range(
-  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
-  config : @moon_cpal.StreamConfig,
-) -> @moon_cpal.SupportedStreamConfigRange? {
+  ranges : Array[@core.SupportedStreamConfigRange],
+  config : @core.StreamConfig,
+) -> @core.SupportedStreamConfigRange? {
   let sr = config.sample_rate
   let ch = config.channels
-  let mut best : @moon_cpal.SupportedStreamConfigRange? = None
+  let mut best : @core.SupportedStreamConfigRange? = None
   for r in ranges {
     if r.channels() == ch &&
       r.min_sample_rate() <= sr &&
@@ -191,24 +187,24 @@ fn choose_default_range(
 
 ///|
 fn validate_buffer_size_or_raise(
-  r : @moon_cpal.SupportedStreamConfigRange,
-  config : @moon_cpal.StreamConfig,
-) -> Unit raise @moon_cpal.BuildStreamError {
+  r : @core.SupportedStreamConfigRange,
+  config : @core.StreamConfig,
+) -> Unit raise @core.BuildStreamError {
   match config.buffer_size {
     Default => ()
     Fixed(n) => {
-      if n <= 0 {
-        raise @moon_cpal.build_stream_error_invalid_argument()
+      if n < 0 {
+        raise @core.build_stream_error_invalid_argument()
       }
       if !r.buffer_size().contains(n) {
-        raise @moon_cpal.build_stream_error_stream_config_not_supported()
+        raise @core.build_stream_error_stream_config_not_supported()
       }
     }
   }
 }
 
 ///|
-fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
   match config.buffer_size {
     Default => 0
     Fixed(n) => if n > 0 { n.reinterpret_as_uint() } else { 0 }
@@ -218,18 +214,18 @@ fn buffer_frames_from_config(config : @moon_cpal.StreamConfig) -> UInt {
 ///|
 pub fn Device::build_output_stream_raw(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   if config.channels <= 0 || config.sample_rate <= 0 {
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    raise @core.build_stream_error_invalid_argument()
   }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   let ranges = try self.supported_output_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
@@ -239,7 +235,7 @@ pub fn Device::build_output_stream_raw(
   }
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   validate_buffer_size_or_raise(r, config)
   let out = FixedArray::make(1, (0 : UInt64))
@@ -269,13 +265,13 @@ pub fn Device::build_output_stream_raw(
 ///|
 pub fn Device::build_output_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   if config.channels <= 0 || config.sample_rate <= 0 {
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    raise @core.build_stream_error_invalid_argument()
   }
   let ranges = try self.supported_output_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
@@ -285,7 +281,7 @@ pub fn Device::build_output_stream(
   }
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   Device::build_output_stream_raw(
     self,
@@ -300,18 +296,18 @@ pub fn Device::build_output_stream(
 ///|
 pub fn Device::build_input_stream_raw(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  sample_format : @moon_cpal.SampleFormat,
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   if config.channels <= 0 || config.sample_rate <= 0 {
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    raise @core.build_stream_error_invalid_argument()
   }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   let ranges = try self.supported_input_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
@@ -321,7 +317,7 @@ pub fn Device::build_input_stream_raw(
   }
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   validate_buffer_size_or_raise(r, config)
   let out = FixedArray::make(1, (0 : UInt64))
@@ -351,13 +347,13 @@ pub fn Device::build_input_stream_raw(
 ///|
 pub fn Device::build_input_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  _timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  _timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   if config.channels <= 0 || config.sample_rate <= 0 {
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    raise @core.build_stream_error_invalid_argument()
   }
   let ranges = try self.supported_input_configs() catch {
     CoreAudioError(op, status) => raise_build_osstatus(op, status)
@@ -367,7 +363,7 @@ pub fn Device::build_input_stream(
   }
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
-    None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
+    None => raise @core.build_stream_error_stream_config_not_supported()
   }
   Device::build_input_stream_raw(
     self,
@@ -380,9 +376,9 @@ pub fn Device::build_input_stream(
 }
 
 ///|
-pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
+pub fn Stream::play(self : Stream) -> Unit raise @core.PlayStreamError {
   if self.handle == 0 {
-    raise @moon_cpal.play_stream_error_backend_specific("invalid stream handle")
+    raise @core.play_stream_error_backend_specific("invalid stream handle")
   }
   let st = ca_stream_owner_play(self.owner)
   if st < 0 {
@@ -391,11 +387,9 @@ pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
 }
 
 ///|
-pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
+pub fn Stream::pause(self : Stream) -> Unit raise @core.PauseStreamError {
   if self.handle == 0 {
-    raise @moon_cpal.pause_stream_error_backend_specific(
-      "invalid stream handle",
-    )
+    raise @core.pause_stream_error_backend_specific("invalid stream handle")
   }
   let st = ca_stream_owner_pause(self.owner)
   if st < 0 {

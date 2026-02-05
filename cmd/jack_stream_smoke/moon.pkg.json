@@ -1,6 +1,6 @@
 {
   "is_main": true,
-  "import": ["Milky2018/moon_cpal/jack", "Milky2018/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/jack", "Milky2018/moon_cpal/core", "Milky2018/moon_cpal"],
   "targets": {
     "main_native.mbt": ["native"],
     "main_stub.mbt": ["not", "native"]
