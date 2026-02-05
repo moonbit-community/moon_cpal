@@ -40,8 +40,8 @@ pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig raise 
 pub fn Device::description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
 pub fn Device::id(Self) -> @core.DeviceId raise @core.DeviceIdError
 pub fn Device::name(Self) -> String raise @core.DeviceNameError
-pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+pub fn Device::supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+pub fn Device::supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
 pub fn Device::supports_input(Self) -> Bool
 pub fn Device::supports_output(Self) -> Bool
 pub fn Device::try_default_input_config(Self) -> @core.SupportedStreamConfig?
@@ -59,10 +59,10 @@ pub enum Host {
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::device_by_id(Self, @core.DeviceId) -> Device?
-pub fn Host::devices(Self) -> Array[Device] raise @core.DevicesError
+pub fn Host::devices(Self) -> Iter[Device] raise @core.DevicesError
 pub fn Host::id(Self) -> @core.HostId
-pub fn Host::input_devices(Self) -> Array[Device] raise @core.DevicesError
-pub fn Host::output_devices(Self) -> Array[Device] raise @core.DevicesError
+pub fn Host::input_devices(Self) -> Iter[Device] raise @core.DevicesError
+pub fn Host::output_devices(Self) -> Iter[Device] raise @core.DevicesError
 pub impl Eq for Host
 pub impl Show for Host
 

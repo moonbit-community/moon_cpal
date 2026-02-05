@@ -30,8 +30,15 @@ typedef struct moon_cpal_null_stream_t {
   atomic_int running;
   atomic_int closed;
 
+  atomic_int inject_pending;
+  atomic_int inject_after;
+  atomic_int inject_op_tag;
+  atomic_int inject_status;
+  atomic_int inject_sent;
+
   uint64_t frame_cursor;
   uint32_t period_ms;
+  uint32_t cb_count;
 } moon_cpal_null_stream_t;
 
 static uint32_t null_bytes_per_sample_from_tag(uint32_t tag) {
@@ -107,6 +114,24 @@ static DWORD WINAPI null_thread_main(LPVOID p) {
                             io_nanos);
     }
 
+    s->cb_count += 1;
+    if (atomic_load(&s->inject_pending) != 0 && atomic_load(&s->inject_sent) == 0) {
+      int32_t after = atomic_load(&s->inject_after);
+      if (after < 0) {
+        after = 0;
+      }
+      if ((int32_t)s->cb_count >= after) {
+        atomic_store(&s->inject_sent, 1);
+        atomic_store(&s->inject_pending, 0);
+        if (s->mb_error_callback != NULL && s->call_error_callback != NULL) {
+          int32_t op_tag = atomic_load(&s->inject_op_tag);
+          int32_t status = atomic_load(&s->inject_status);
+          moonbit_incref(s->mb_error_callback);
+          s->call_error_callback(s->mb_error_callback, op_tag, status);
+        }
+      }
+    }
+
     s->frame_cursor += (uint64_t)s->frames_per_cb;
 
     // Wait for the next callback period, but allow immediate wake on pause/close.
@@ -160,8 +185,6 @@ static int32_t null_stream_new(int is_input,
                                void (*call_error_callback)(void *, int32_t, int32_t),
                                void *error_callback,
                                uint64_t *out_handle) {
-  (void)call_error_callback;
-  (void)error_callback;
   if (out_handle == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
@@ -202,7 +225,13 @@ static int32_t null_stream_new(int is_input,
   s->mb_error_callback = error_callback;
   atomic_store(&s->running, 0);
   atomic_store(&s->closed, 0);
+  atomic_store(&s->inject_pending, 0);
+  atomic_store(&s->inject_after, 0);
+  atomic_store(&s->inject_op_tag, 0);
+  atomic_store(&s->inject_status, 0);
+  atomic_store(&s->inject_sent, 0);
   s->frame_cursor = 0;
+  s->cb_count = 0;
 
   // Choose a conservative callback period for tests.
   double ms = ((double)frames * 1000.0) / s->sample_rate;
@@ -324,6 +353,22 @@ static int32_t null_stream_destroy_handle(uint64_t handle) {
   return 0;
 }
 
+static int32_t null_stream_inject_error(uint64_t handle, int32_t after_callbacks, int32_t op_tag, int32_t status) {
+  moon_cpal_null_stream_t *s = (moon_cpal_null_stream_t *)(uintptr_t)handle;
+  if (s == NULL || atomic_load(&s->closed) != 0) {
+    return -1;
+  }
+  atomic_store(&s->inject_after, after_callbacks);
+  atomic_store(&s->inject_op_tag, op_tag);
+  atomic_store(&s->inject_status, status);
+  atomic_store(&s->inject_sent, 0);
+  atomic_store(&s->inject_pending, 1);
+  if (s->wake_event != NULL) {
+    SetEvent(s->wake_event);
+  }
+  return 0;
+}
+
 typedef struct moon_cpal_null_stream_owner_payload_t {
   uint64_t handle;
 } moon_cpal_null_stream_owner_payload_t;
@@ -384,6 +429,14 @@ int32_t moon_cpal_null_stream_owner_close(void *owner) {
   return 0;
 }
 
+int32_t moon_cpal_null_stream_owner_inject_error(void *owner, int32_t after_callbacks, int32_t op_tag, int32_t status) {
+  uint64_t h = null_stream_owner_handle(owner);
+  if (h == 0) {
+    return -1;
+  }
+  return null_stream_inject_error(h, after_callbacks, op_tag, status);
+}
+
 #else
 
 #include <pthread.h>
@@ -414,8 +467,15 @@ typedef struct moon_cpal_null_stream_t {
   atomic_int running;
   atomic_int closed;
 
+  atomic_int inject_pending;
+  atomic_int inject_after;
+  atomic_int inject_op_tag;
+  atomic_int inject_status;
+  atomic_int inject_sent;
+
   uint64_t frame_cursor;
   uint32_t period_ms;
+  uint32_t cb_count;
   int thread_started;
 } moon_cpal_null_stream_t;
 
@@ -504,6 +564,24 @@ static void *null_thread_main(void *p) {
                             io_nanos);
     }
 
+    s->cb_count += 1;
+    if (atomic_load(&s->inject_pending) != 0 && atomic_load(&s->inject_sent) == 0) {
+      int32_t after = atomic_load(&s->inject_after);
+      if (after < 0) {
+        after = 0;
+      }
+      if ((int32_t)s->cb_count >= after) {
+        atomic_store(&s->inject_sent, 1);
+        atomic_store(&s->inject_pending, 0);
+        if (s->mb_error_callback != NULL && s->call_error_callback != NULL) {
+          int32_t op_tag = atomic_load(&s->inject_op_tag);
+          int32_t status = atomic_load(&s->inject_status);
+          moonbit_incref(s->mb_error_callback);
+          s->call_error_callback(s->mb_error_callback, op_tag, status);
+        }
+      }
+    }
+
     s->frame_cursor += (uint64_t)s->frames_per_cb;
 
     // Timed wait for period_ms, wakeable by play/pause/close.
@@ -564,8 +642,6 @@ static int32_t null_stream_new(int is_input,
                                void (*call_error_callback)(void *, int32_t, int32_t),
                                void *error_callback,
                                uint64_t *out_handle) {
-  (void)call_error_callback;
-  (void)error_callback;
   if (out_handle == NULL) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
@@ -606,7 +682,13 @@ static int32_t null_stream_new(int is_input,
   s->mb_error_callback = error_callback;
   atomic_store(&s->running, 0);
   atomic_store(&s->closed, 0);
+  atomic_store(&s->inject_pending, 0);
+  atomic_store(&s->inject_after, 0);
+  atomic_store(&s->inject_op_tag, 0);
+  atomic_store(&s->inject_status, 0);
+  atomic_store(&s->inject_sent, 0);
   s->frame_cursor = 0;
+  s->cb_count = 0;
   s->thread_started = 0;
 
   // Choose a conservative callback period for tests.
@@ -726,6 +808,22 @@ static int32_t null_stream_destroy_handle(uint64_t handle) {
   return 0;
 }
 
+static int32_t null_stream_inject_error(uint64_t handle, int32_t after_callbacks, int32_t op_tag, int32_t status) {
+  moon_cpal_null_stream_t *s = (moon_cpal_null_stream_t *)(uintptr_t)handle;
+  if (s == NULL || atomic_load(&s->closed) != 0) {
+    return -1;
+  }
+  atomic_store(&s->inject_after, after_callbacks);
+  atomic_store(&s->inject_op_tag, op_tag);
+  atomic_store(&s->inject_status, status);
+  atomic_store(&s->inject_sent, 0);
+  atomic_store(&s->inject_pending, 1);
+  pthread_mutex_lock(&s->mu);
+  pthread_cond_broadcast(&s->cv);
+  pthread_mutex_unlock(&s->mu);
+  return 0;
+}
+
 typedef struct moon_cpal_null_stream_owner_payload_t {
   uint64_t handle;
 } moon_cpal_null_stream_owner_payload_t;
@@ -786,5 +884,12 @@ int32_t moon_cpal_null_stream_owner_close(void *owner) {
   return 0;
 }
 
-#endif
+int32_t moon_cpal_null_stream_owner_inject_error(void *owner, int32_t after_callbacks, int32_t op_tag, int32_t status) {
+  uint64_t h = null_stream_owner_handle(owner);
+  if (h == 0) {
+    return -1;
+  }
+  return null_stream_inject_error(h, after_callbacks, op_tag, status);
+}
 
+#endif

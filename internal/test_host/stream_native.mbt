@@ -86,6 +86,15 @@ extern "C" fn null_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_n
 extern "C" fn null_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_null_stream_owner_close"
 
 ///|
+#borrow(owner)
+extern "C" fn null_stream_owner_inject_error(
+  owner : StreamOwner,
+  after_callbacks : Int,
+  op_tag : Int,
+  status : Int,
+) -> Int = "moon_cpal_null_stream_owner_inject_error"
+
+///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
     @core.SampleFormat::F32 => Some((1 : UInt))
@@ -300,4 +309,20 @@ pub fn Stream::pause(self : Stream) -> Unit raise @core.PauseStreamError {
 ///|
 pub fn Stream::close(self : Stream) -> Unit {
   ignore(null_stream_owner_close(self.owner))
+}
+
+///|
+/// Internal test hook: schedule an async stream error callback from the worker thread.
+///
+/// `after_callbacks` is the number of successful data callbacks after which the error will be
+/// delivered (best-effort). Errors are delivered at most once per injection request.
+pub fn Stream::inject_error(
+  self : Stream,
+  after_callbacks : Int,
+  op_tag : Int,
+  status : Int,
+) -> Unit {
+  ignore(
+    null_stream_owner_inject_error(self.owner, after_callbacks, op_tag, status),
+  )
 }

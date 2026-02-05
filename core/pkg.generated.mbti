@@ -50,6 +50,8 @@ pub fn play_stream_error_device_not_available() -> PlayStreamError
 
 pub fn[A : Sample, B : Sample] sample_cast(A) -> B
 
+pub fn sleep_millis(Int) -> Unit
+
 pub fn stream_error_backend_specific(String) -> StreamError
 
 pub fn stream_error_buffer_underrun() -> StreamError

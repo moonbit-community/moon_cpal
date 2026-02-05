@@ -96,6 +96,9 @@ pub type OutputCallbackInfo = @core.OutputCallbackInfo
 pub type DeviceDescription = @core.DeviceDescription
 
 ///|
+pub type DeviceDescriptionBuilder = @core.DeviceDescriptionBuilder
+
+///|
 pub type DeviceDirection = @core.DeviceDirection
 
 ///|
@@ -103,6 +106,15 @@ pub type DeviceType = @core.DeviceType
 
 ///|
 pub type InterfaceType = @core.InterfaceType
+
+///|
+pub type ChannelCount = @core.ChannelCount
+
+///|
+pub type SampleRate = @core.SampleRate
+
+///|
+pub type FrameCount = @core.FrameCount
 
 ///|
 pub type HostUnavailable = @core.HostUnavailable
@@ -122,6 +134,18 @@ pub type Data = @spec.Data
 ///|
 /// Iterator types (upstream exports named iterator structs; here we expose `Iter` aliases).
 pub type Devices = Iter[Device]
+
+///|
+/// Iterator of devices wrapped in a filter (upstream: `DevicesFiltered`).
+pub type DevicesFiltered[A] = Iter[A]
+
+///|
+/// A host's device iterator yielding only *input* devices (upstream: `InputDevices`).
+pub type InputDevices[A] = DevicesFiltered[A]
+
+///|
+/// A host's device iterator yielding only *output* devices (upstream: `OutputDevices`).
+pub type OutputDevices[A] = DevicesFiltered[A]
 
 ///|
 pub type SupportedInputConfigs = Iter[SupportedStreamConfigRange]

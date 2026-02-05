@@ -43,6 +43,7 @@ pub struct Stream {
   owner : StreamOwner
 }
 pub fn Stream::close(Self) -> Unit
+pub fn Stream::inject_error(Self, Int, Int, Int) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
 pub impl Show for Stream

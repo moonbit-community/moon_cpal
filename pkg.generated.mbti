@@ -4,6 +4,8 @@ package "Milky2018/moon_cpal"
 import {
   "Milky2018/moon_cpal/core",
   "Milky2018/moon_cpal/spec",
+  "Milky2018/moon_cpal/traits",
+  "moonbitlang/core/builtin",
 }
 
 // Values
@@ -28,6 +30,8 @@ pub using @core {type BufferSize}
 
 pub using @core {type BuildStreamError}
 
+pub type ChannelCount = Int
+
 pub using @spec {type Data}
 
 pub using @core {type DefaultStreamConfigError}
@@ -35,6 +39,8 @@ pub using @core {type DefaultStreamConfigError}
 pub using @spec {type Device}
 
 pub using @core {type DeviceDescription}
+
+pub using @core {type DeviceDescriptionBuilder}
 
 pub using @core {type DeviceDirection}
 
@@ -46,9 +52,15 @@ pub using @core {type DeviceNameError}
 
 pub using @core {type DeviceType}
 
+pub type Devices = Iter[@spec.Device]
+
 pub using @core {type DevicesError}
 
+pub using @builtin {type Iter as DevicesFiltered}
+
 pub using @core {type Duration}
+
+pub type FrameCount = Int
 
 pub using @spec {type Host}
 
@@ -56,13 +68,19 @@ pub using @core {type HostId}
 
 pub using @core {type HostUnavailable}
 
+pub using @core {type I24}
+
 pub using @core {type InputCallbackInfo}
+
+pub using @builtin {type Iter as InputDevices}
 
 pub using @core {type InputStreamTimestamp}
 
 pub using @core {type InterfaceType}
 
 pub using @core {type OutputCallbackInfo}
+
+pub using @builtin {type Iter as OutputDevices}
 
 pub using @core {type OutputStreamTimestamp}
 
@@ -71,6 +89,8 @@ pub using @core {type PauseStreamError}
 pub using @core {type PlayStreamError}
 
 pub using @core {type SampleFormat}
+
+pub type SampleRate = Int
 
 pub using @spec {type Stream}
 
@@ -82,11 +102,29 @@ pub using @core {type StreamInstant}
 
 pub using @core {type SupportedBufferSize}
 
+pub type SupportedInputConfigs = Iter[@core.SupportedStreamConfigRange]
+
+pub type SupportedOutputConfigs = Iter[@core.SupportedStreamConfigRange]
+
 pub using @core {type SupportedStreamConfig}
 
 pub using @core {type SupportedStreamConfigRange}
 
 pub using @core {type SupportedStreamConfigsError}
+
+pub using @core {type U24}
+
+pub using @traits {trait DeviceTrait}
+
+pub using @core {trait FromSample}
+
+pub using @traits {trait HostTrait}
+
+pub using @core {trait Sample}
+
+pub using @core {trait SizedSample}
+
+pub using @traits {trait StreamTrait}
 
 // Traits
 

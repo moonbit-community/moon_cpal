@@ -135,9 +135,19 @@ fn call_stream_error_callback(
     2 => "stream_loop"
     _ => "TestHostStream"
   }
-  error_callback(
-    @core.stream_error_backend_specific("\{op} (status \{status})"),
-  )
+  let err = if status == -32 {
+    // EPIPE (xrun) semantics.
+    @core.stream_error_buffer_underrun()
+  } else if status == -5 || status == -77 || status == -86 {
+    // EIO / EBADFD / ESTRPIPE style invalidation.
+    @core.stream_error_stream_invalidated()
+  } else if status == -19 || status == -2 || status == -1 || status == -13 {
+    // ENODEV / ENOENT / EPERM / EACCES family.
+    @core.stream_error_device_not_available()
+  } else {
+    @core.stream_error_backend_specific("\{op} (status \{status})")
+  }
+  error_callback(err)
 }
 
 ///|
