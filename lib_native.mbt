@@ -18,6 +18,7 @@
 /// Mirrors upstream `cpal::lib.rs` re-exports:
 /// - core types/errors live in `Milky2018/moon_cpal/core`
 /// - dynamic dispatch host/device/stream live in `Milky2018/moon_cpal/platform`
+/// - CPAL-like traits live in `Milky2018/moon_cpal/traits`
 
 ///|
 pub type HostId = @core.HostId
@@ -117,6 +118,30 @@ pub type Stream = @spec.Stream
 
 ///|
 pub type Data = @spec.Data
+
+///|
+/// Iterator types (upstream exports named iterator structs; here we expose `Iter` aliases).
+pub type Devices = Iter[Device]
+
+///|
+pub type SupportedInputConfigs = Iter[SupportedStreamConfigRange]
+
+///|
+pub type SupportedOutputConfigs = Iter[SupportedStreamConfigRange]
+
+///|
+/// Sample and conversion traits/types (from `samples_formats.rs` in upstream).
+pub using @core {trait Sample, trait SizedSample, trait FromSample}
+
+///|
+pub type I24 = @core.I24
+
+///|
+pub type U24 = @core.U24
+
+///|
+/// CPAL-like trait surface (from `traits.rs` in upstream).
+pub using @traits {trait HostTrait, trait DeviceTrait, trait StreamTrait}
 
 ///|
 pub fn available_hosts() -> Array[HostId] {
