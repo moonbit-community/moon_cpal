@@ -3,7 +3,7 @@
     "moonbitlang/core/bigint"
   ],
   "native-stub": [
-    "os_stub.c"
+    "os_stub.c",
+    "sleep_stub.c"
   ]
 }
-
