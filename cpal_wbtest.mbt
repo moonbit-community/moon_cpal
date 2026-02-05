@@ -262,19 +262,16 @@ test "available_hosts depends on native_os (native only)" {
   match os {
     NativeOs::Macos => {
       inspect(has(hs, CoreAudio), content="true")
-      inspect(has(hs, Null), content="true")
       inspect(!has(hs, Alsa), content="true")
       inspect(!has(hs, Wasapi), content="true")
     }
     NativeOs::Linux => {
       inspect(has(hs, Alsa), content="true")
-      inspect(has(hs, Null), content="true")
       inspect(!has(hs, CoreAudio), content="true")
       inspect(!has(hs, Wasapi), content="true")
     }
     NativeOs::Windows => {
       inspect(has(hs, Wasapi), content="true")
-      inspect(has(hs, Null), content="true")
       inspect(!has(hs, CoreAudio), content="true")
       inspect(!has(hs, Alsa), content="true")
     }

@@ -8,19 +8,25 @@ test "platform default_host (native)" {
     @moon_cpal.NativeOs::Unknown => @moon_cpal.HostId::Null
   }
   inspect(h.id() == expected, content="true")
-  try host_from_id(Null) catch {
-    _ => inspect(false, content="true")
-  } noraise {
-    _ => inspect(true, content="true")
+  match @moon_cpal.native_os() {
+    @moon_cpal.NativeOs::Unknown =>
+      try host_from_id(Null) catch {
+        _ => inspect(false, content="true")
+      } noraise {
+        _ => inspect(true, content="true")
+      }
+    _ =>
+      try host_from_id(Null) catch {
+        _ => inspect(true, content="true")
+      } noraise {
+        _ => inspect(false, content="true")
+      }
   }
 }
 
 ///|
 test "platform available_hosts + host_from_id (native)" {
   let hs = available_hosts()
-  // Always includes Null.
-  inspect(hs.contains(@moon_cpal.HostId::Null), content="true")
-
   // Linux should now include JACK as well.
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
     match @jack.default_server_config() {
