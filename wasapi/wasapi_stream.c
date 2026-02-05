@@ -58,6 +58,29 @@ typedef struct moon_cpal_wasapi_stream_t {
   uint32_t cap_accum_frames;
 } moon_cpal_wasapi_stream_t;
 
+// CPAL upstream prefers initializing COM in STA mode (COINIT_APARTMENTTHREADED) while allowing
+// RPC_E_CHANGED_MODE if another library already initialized COM with a different apartment model.
+//
+// Returns S_OK on success (including RPC_E_CHANGED_MODE). When returning S_OK, sets
+// `*out_did_uninit` to 1 iff the caller should call CoUninitialize().
+static HRESULT wasapi_com_init(int *out_did_uninit) {
+  if (out_did_uninit != NULL) {
+    *out_did_uninit = 0;
+  }
+  HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+  if (SUCCEEDED(hr)) {
+    if (out_did_uninit != NULL) {
+      *out_did_uninit = 1;
+    }
+    return S_OK;
+  }
+  if (hr == RPC_E_CHANGED_MODE) {
+    // COM already initialized with a different apartment model; proceed without uninitializing.
+    return S_OK;
+  }
+  return hr;
+}
+
 static int wasapi_utf8_is_loopback(const char *s) {
   if (s == NULL) {
     return 0;
@@ -118,14 +141,9 @@ static int wasapi_endpoint_is_render(const wchar_t *endpoint_id_w) {
     return 0;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
   int did_uninit = 0;
-  if (SUCCEEDED(hr)) {
-    did_uninit = 1;
-  } else if (hr == RPC_E_CHANGED_MODE) {
-    // COM already initialized on this thread with a different model.
-    did_uninit = 0;
-  } else {
+  HRESULT hr = wasapi_com_init(&did_uninit);
+  if (FAILED(hr)) {
     return 0;
   }
 
@@ -286,7 +304,8 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     return 0;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     wasapi_invoke_error(s, 5 /* CoInitializeEx */, (int32_t)hr);
     s->init_hr = hr;
@@ -302,8 +321,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     s->init_hr = hr;
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   if (s->endpoint_id_w != NULL) {
@@ -325,8 +343,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   hr = IMMDevice_Activate(s->device, &IID_IAudioClient, CLSCTX_ALL, NULL, (void **)&s->client);
@@ -336,8 +353,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   hr = wasapi_build_wfx(s->sample_rate, s->channels, s->sample_format_tag, &s->wfx);
@@ -347,8 +363,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   // Shared mode, event callback.
@@ -381,8 +396,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   hr = IAudioClient_GetBufferSize(s->client, &s->buffer_frame_count);
@@ -392,19 +406,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
-  }
-
-  // Enforce BufferSize::Fixed semantics: if the caller requested a fixed callback size larger than
-  // the WASAPI buffer, fail initialization rather than silently clamping.
-  if (s->requested_frames > 0 && s->requested_frames > s->buffer_frame_count) {
-    s->init_hr = AUDCLNT_E_BUFFER_SIZE_ERROR;
-    InterlockedExchange(&s->initialized, 1);
-    SetEvent(s->wake_event);
-    wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   s->frames_per_cb = s->requested_frames > 0 ? s->requested_frames : (s->buffer_frame_count / 2);
@@ -426,7 +428,15 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
   }
 
   s->bytes_per_frame = s->channels * wasapi_bytes_per_sample_from_tag(s->sample_format_tag);
-  s->buffer_bytes = s->frames_per_cb * s->bytes_per_frame;
+  uint64_t buffer_bytes64 = (uint64_t)s->frames_per_cb * (uint64_t)s->bytes_per_frame;
+  if (buffer_bytes64 == 0 || buffer_bytes64 > 0x7FFFFFFFu) {
+    s->init_hr = E_OUTOFMEMORY;
+    InterlockedExchange(&s->initialized, 1);
+    SetEvent(s->wake_event);
+    wasapi_release_objects(s);
+    goto thread_done;
+  }
+  s->buffer_bytes = (uint32_t)buffer_bytes64;
 
   s->mb_buffer = (moonbit_bytes_t)moonbit_make_scalar_valtype_array_raw((int32_t)s->buffer_bytes, 1);
   if (s->mb_buffer == NULL) {
@@ -434,8 +444,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   s->audio_event = CreateEventW(NULL, FALSE, FALSE, NULL);
@@ -444,8 +453,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     InterlockedExchange(&s->initialized, 1);
     SetEvent(s->wake_event);
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
   hr = IAudioClient_SetEventHandle(s->client, s->audio_event);
   if (FAILED(hr)) {
@@ -456,8 +464,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
     CloseHandle(s->audio_event);
     s->audio_event = NULL;
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   if (s->is_input) {
@@ -475,8 +482,7 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
       s->audio_event = NULL;
     }
     wasapi_release_objects(s);
-    CoUninitialize();
-    return 0;
+    goto thread_done;
   }
 
   s->init_hr = S_OK;
@@ -615,7 +621,10 @@ static DWORD WINAPI wasapi_thread_main(LPVOID param) {
   }
 
   wasapi_release_objects(s);
-  CoUninitialize();
+thread_done:
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return 0;
 }
 

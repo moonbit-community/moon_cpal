@@ -255,24 +255,6 @@ fn choose_default_range(
 }
 
 ///|
-fn validate_buffer_size_or_raise(
-  r : @core.SupportedStreamConfigRange,
-  config : @core.StreamConfig,
-) -> Unit raise @core.BuildStreamError {
-  match config.buffer_size {
-    Default => ()
-    Fixed(n) => {
-      if n < 0 {
-        raise @core.build_stream_error_invalid_argument()
-      }
-      if !r.buffer_size().contains(n) {
-        raise @core.build_stream_error_stream_config_not_supported()
-      }
-    }
-  }
-}
-
-///|
 fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
   match config.buffer_size {
     Default => 0
@@ -295,6 +277,17 @@ pub fn Device::build_output_stream_raw(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @core.build_stream_error_invalid_argument()
   }
+  match config.buffer_size {
+    Default => ()
+    Fixed(n) => {
+      if n < 0 {
+        raise @core.build_stream_error_invalid_argument()
+      }
+      if n == 0 {
+        raise @core.build_stream_error_stream_config_not_supported()
+      }
+    }
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
@@ -308,7 +301,7 @@ pub fn Device::build_output_stream_raw(
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(r, config)
+  ignore(r)
   let dev = @core.string_to_ascii_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = alsa_stream_build_output(
@@ -380,6 +373,17 @@ pub fn Device::build_input_stream_raw(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @core.build_stream_error_invalid_argument()
   }
+  match config.buffer_size {
+    Default => ()
+    Fixed(n) => {
+      if n < 0 {
+        raise @core.build_stream_error_invalid_argument()
+      }
+      if n == 0 {
+        raise @core.build_stream_error_stream_config_not_supported()
+      }
+    }
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
@@ -393,7 +397,7 @@ pub fn Device::build_input_stream_raw(
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(r, config)
+  ignore(r)
   let dev = @core.string_to_ascii_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = alsa_stream_build_input(

@@ -102,15 +102,8 @@ pub fn Device::description(
       "jack device description: empty name",
     )
   }
-  @core.DeviceDescription::new(
-    name,
-    driver=Some("JACK"),
-    device_type=@core.DeviceType::virtual_(),
-    interface_type=@core.InterfaceType::virtual_(),
-    direction=_self.direction,
-    address=Some(_self.id),
-    extended=["jack_client=\{_self.id}"],
-  )
+  // Mirrors upstream CPAL: only name + direction are filled for JACK.
+  @core.DeviceDescriptionBuilder::new(name).direction(_self.direction).build()
 }
 
 ///|

@@ -61,7 +61,7 @@ test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
 }
 
 ///|
-test "alsa fixed buffer larger than supported range fails (best-effort)" {
+test "alsa fixed buffer outside supported range is best-effort (best-effort)" {
   if @core.native_os() != @core.NativeOs::Linux {
     inspect(true, content="true")
     return
@@ -96,7 +96,7 @@ test "alsa fixed buffer larger than supported range fails (best-effort)" {
         cfg.sample_rate(),
         @core.BufferSize::fixed(want),
       )
-      let got = try
+      try
         dev.build_output_stream_raw(
           sc,
           cfg.sample_format(),
@@ -105,19 +105,19 @@ test "alsa fixed buffer larger than supported range fails (best-effort)" {
           None,
         )
       catch {
+        // Upstream CPAL uses "near" period-size setting for ALSA; requests outside the supported
+        // range may be rounded rather than rejected. Accept any backend error here, but ensure
+        // we don't pre-classify this as StreamConfigNotSupported purely due to the buffer size.
         e =>
           match e {
-            @core.BuildStreamError::StreamConfigNotSupported => None
-            _ => None
+            @core.BuildStreamError::StreamConfigNotSupported =>
+              inspect(false, content="true")
+            _ => inspect(true, content="true")
           }
       } noraise {
-        s => Some(s)
-      }
-      match got {
-        None => inspect(true, content="true")
-        Some(s) => {
+        s => {
           s.close()
-          inspect(false, content="true")
+          inspect(true, content="true")
         }
       }
     }

@@ -41,7 +41,7 @@ Native hosts:
 - `host/jack/device.rs` — **PARTIAL**
 - `host/jack/stream.rs` — **PARTIAL**
 - `host/jack/mod.rs` — **PARTIAL**
-- `host/wasapi/com.rs` — **PARTIAL**
+- `host/wasapi/com.rs` — **DONE** (STA `CoInitializeEx` with `RPC_E_CHANGED_MODE` tolerated; COM lifetime matches upstream)
 - `host/wasapi/device.rs` — **PARTIAL**
 - `host/wasapi/stream.rs` — **PARTIAL**
 - `host/wasapi/mod.rs` — **PARTIAL**

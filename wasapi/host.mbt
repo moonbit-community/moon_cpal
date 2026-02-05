@@ -187,7 +187,6 @@ pub fn Device::description(
     Some(2) => @core.DeviceDirection::output()
     _ => @core.DeviceDirection::unknown()
   }
-  let manufacturer = device_property_utf8(_self.id, 1)
   let interface_name = device_property_utf8(_self.id, 3)
   let enumerator_name = device_property_utf8(_self.id, 4)
   let jack_subtype = device_property_utf8(_self.id, 5)
@@ -213,40 +212,25 @@ pub fn Device::description(
       }
     None => ()
   }
-  let interface_type = match interface_type_opt {
-    None => @core.InterfaceType::unknown()
-    Some(it) => it
-  }
-  let extended : Array[String] = ["endpoint_id=\{_self.id}"]
-  match dev_desc {
-    Some(s) => extended.push("device_desc=\{s}")
+  let mut builder = @core.DeviceDescriptionBuilder::new(name)
+    .direction(direction)
+    .device_type(device_type)
+  match interface_type_opt {
     None => ()
+    Some(it) => builder = builder.interface_type(it)
   }
-  match friendly {
-    Some(s) if s != name => extended.push("friendly_name=\{s}")
+  match interface_name {
+    Some(s) if s.trim().length() > 0 => builder = builder.driver(s)
     _ => ()
   }
-  match enumerator_name {
-    Some(s) => extended.push("enumerator=\{s}")
-    None => ()
+  // Mirrors upstream CPAL: add FriendlyName to `extended` only when we used DeviceDesc as name.
+  match (dev_desc, friendly) {
+    (Some(dd), Some(fname)) if dd.trim().length() > 0 &&
+      fname.trim().length() > 0 &&
+      fname != dd => builder = builder.add_extended_line(fname)
+    _ => ()
   }
-  match jack_subtype {
-    Some(s) => extended.push("jack_subtype=\{s}")
-    None => ()
-  }
-  @core.DeviceDescription::new(
-    name,
-    manufacturer~,
-    driver=match interface_name {
-      Some(s) if s.trim().length() > 0 => Some(s)
-      _ => Some("WASAPI")
-    },
-    device_type~,
-    interface_type~,
-    direction~,
-    address=Some(_self.id),
-    extended~,
-  )
+  builder.build()
 }
 
 ///|

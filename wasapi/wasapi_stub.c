@@ -82,6 +82,29 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 #include <propvarutil.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+// CPAL upstream prefers initializing COM in STA mode (COINIT_APARTMENTTHREADED) while allowing
+// RPC_E_CHANGED_MODE if another library already initialized COM with a different apartment model.
+//
+// Returns 1 on success (including RPC_E_CHANGED_MODE), 0 on failure. When returning 1, sets
+// `*out_did_uninit` to 1 iff the caller should call CoUninitialize().
+static HRESULT wasapi_com_init(int *out_did_uninit) {
+  if (out_did_uninit != NULL) {
+    *out_did_uninit = 0;
+  }
+  HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+  if (SUCCEEDED(hr)) {
+    if (out_did_uninit != NULL) {
+      *out_did_uninit = 1;
+    }
+    return S_OK;
+  }
+  if (hr == RPC_E_CHANGED_MODE) {
+    // COM already initialized with a different apartment model; proceed without uninitializing.
+    return S_OK;
+  }
+  return hr;
+}
+
 // -----------------------------------------------------------------------------
 // Default config query (Windows)
 // -----------------------------------------------------------------------------
@@ -263,7 +286,8 @@ int32_t moon_cpal_wasapi_device_data_flow_tag(uint8_t *device_id_utf8, int32_t d
     return 0;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     free(endpoint_id_w);
     return 0;
@@ -318,7 +342,9 @@ done:
     enumerator = NULL;
   }
   free(endpoint_id_w);
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return out;
 }
 
@@ -340,14 +366,14 @@ int32_t moon_cpal_wasapi_default_config_ex_u32(uint8_t *device_id_utf8,
   wchar_t *endpoint_id_w = utf8_bytes_to_wide(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     if (endpoint_id_w != NULL) {
       free(endpoint_id_w);
     }
     return (int32_t)hr;
   }
-
   IMMDeviceEnumerator *enumerator = NULL;
   IMMDevice *device = NULL;
   IAudioClient *client = NULL;
@@ -420,7 +446,9 @@ done:
     free(endpoint_id_w);
     endpoint_id_w = NULL;
   }
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
 
   return FAILED(hr) ? (int32_t)hr : 0;
 }
@@ -445,7 +473,8 @@ int32_t moon_cpal_wasapi_supported_configs_u32(uint8_t *device_id_utf8,
   wchar_t *endpoint_id_w = utf8_bytes_to_wide(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     if (endpoint_id_w != NULL) {
       free(endpoint_id_w);
@@ -593,7 +622,9 @@ done:
     free(endpoint_id_w);
     endpoint_id_w = NULL;
   }
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
 
   return FAILED(hr) ? (int32_t)hr : wrote;
 }
@@ -614,7 +645,8 @@ int32_t moon_cpal_wasapi_default_config_u32(uint8_t *device_id_utf8,
   wchar_t *endpoint_id_w = utf8_bytes_to_wide(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     if (endpoint_id_w != NULL) {
       free(endpoint_id_w);
@@ -688,7 +720,9 @@ done:
     free(endpoint_id_w);
     endpoint_id_w = NULL;
   }
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
 
   return FAILED(hr) ? (int32_t)hr : 0;
 }
@@ -749,7 +783,8 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
     return -1;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     return -1;
   }
@@ -757,7 +792,9 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
   IMMDeviceEnumerator *enumerator = NULL;
   hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&enumerator);
   if (FAILED(hr) || enumerator == NULL) {
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     return -1;
   }
 
@@ -765,7 +802,9 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
   hr = IMMDeviceEnumerator_EnumAudioEndpoints(enumerator, eAll, DEVICE_STATE_ACTIVE, &col);
   if (FAILED(hr) || col == NULL) {
     IMMDeviceEnumerator_Release(enumerator);
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     return -1;
   }
 
@@ -774,7 +813,9 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
   if (FAILED(hr)) {
     IMMDeviceCollection_Release(col);
     IMMDeviceEnumerator_Release(enumerator);
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     return -1;
   }
 
@@ -808,7 +849,9 @@ static int wasapi_enum_devices_utf8(char **out_buf, size_t *out_len, size_t *out
 
   IMMDeviceCollection_Release(col);
   IMMDeviceEnumerator_Release(enumerator);
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return 0;
 }
 
@@ -826,7 +869,8 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
     return -1;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     free(idw);
     return -1;
@@ -835,7 +879,9 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   IMMDeviceEnumerator *enumerator = NULL;
   hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (void **)&enumerator);
   if (FAILED(hr) || enumerator == NULL) {
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     free(idw);
     return -1;
   }
@@ -845,7 +891,9 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   free(idw);
   if (FAILED(hr) || dev == NULL) {
     IMMDeviceEnumerator_Release(enumerator);
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     return -1;
   }
 
@@ -854,7 +902,9 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   if (FAILED(hr) || props == NULL) {
     IMMDevice_Release(dev);
     IMMDeviceEnumerator_Release(enumerator);
-    CoUninitialize();
+    if (did_uninit) {
+      CoUninitialize();
+    }
     return -1;
   }
 
@@ -881,7 +931,9 @@ static int wasapi_lookup_friendly_name_utf8(const char *id_utf8, size_t id_len, 
   IPropertyStore_Release(props);
   IMMDevice_Release(dev);
   IMMDeviceEnumerator_Release(enumerator);
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return *out_name ? 0 : -1;
 }
 
@@ -893,7 +945,8 @@ static int wasapi_open_property_store(const char *id_utf8,
                                       size_t id_len,
                                       IMMDeviceEnumerator **out_enumerator,
                                       IMMDevice **out_device,
-                                      IPropertyStore **out_props) {
+                                      IPropertyStore **out_props,
+                                      int *out_did_uninit) {
   if (out_enumerator != NULL) {
     *out_enumerator = NULL;
   }
@@ -902,6 +955,9 @@ static int wasapi_open_property_store(const char *id_utf8,
   }
   if (out_props != NULL) {
     *out_props = NULL;
+  }
+  if (out_did_uninit != NULL) {
+    *out_did_uninit = 0;
   }
   if (id_utf8 == NULL || id_len == 0 || out_props == NULL) {
     return -1;
@@ -912,7 +968,8 @@ static int wasapi_open_property_store(const char *id_utf8,
     return -1;
   }
 
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     free(idw);
     return -1;
@@ -945,6 +1002,9 @@ static int wasapi_open_property_store(const char *id_utf8,
     *out_device = dev;
   }
   *out_props = props;
+  if (out_did_uninit != NULL) {
+    *out_did_uninit = did_uninit;
+  }
   free(idw);
   return 0;
 
@@ -962,13 +1022,16 @@ fail:
     enumerator = NULL;
   }
   free(idw);
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return -1;
 }
 
 static void wasapi_close_property_store(IMMDeviceEnumerator *enumerator,
                                        IMMDevice *device,
-                                       IPropertyStore *props) {
+                                       IPropertyStore *props,
+                                       int did_uninit) {
   if (props != NULL) {
     IPropertyStore_Release(props);
     props = NULL;
@@ -981,7 +1044,9 @@ static void wasapi_close_property_store(IMMDeviceEnumerator *enumerator,
     IMMDeviceEnumerator_Release(enumerator);
     enumerator = NULL;
   }
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
 }
 
 static int wasapi_get_property_string_utf8(const char *id_utf8,
@@ -999,7 +1064,8 @@ static int wasapi_get_property_string_utf8(const char *id_utf8,
   IMMDeviceEnumerator *enumerator = NULL;
   IMMDevice *dev = NULL;
   IPropertyStore *props = NULL;
-  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props) != 0) {
+  int did_uninit = 0;
+  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props, &did_uninit) != 0) {
     return -1;
   }
 
@@ -1023,7 +1089,7 @@ static int wasapi_get_property_string_utf8(const char *id_utf8,
   }
   PropVariantClear(&pv);
 
-  wasapi_close_property_store(enumerator, dev, props);
+  wasapi_close_property_store(enumerator, dev, props, did_uninit);
   return *out_str ? 0 : -1;
 }
 
@@ -1042,7 +1108,8 @@ static int wasapi_get_property_u32(const char *id_utf8,
   IMMDeviceEnumerator *enumerator = NULL;
   IMMDevice *dev = NULL;
   IPropertyStore *props = NULL;
-  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props) != 0) {
+  int did_uninit = 0;
+  if (wasapi_open_property_store(id_utf8, id_len, &enumerator, &dev, &props, &did_uninit) != 0) {
     return -1;
   }
 
@@ -1053,7 +1120,7 @@ static int wasapi_get_property_u32(const char *id_utf8,
     *out_u32 = (uint32_t)pv.ulVal;
   }
   PropVariantClear(&pv);
-  wasapi_close_property_store(enumerator, dev, props);
+  wasapi_close_property_store(enumerator, dev, props, did_uninit);
   return 0;
 }
 
@@ -1126,7 +1193,10 @@ moonbit_bytes_t moon_cpal_wasapi_devices_utf8(void) {
 
 moonbit_bytes_t moon_cpal_wasapi_default_device_id_utf8(int32_t is_input) {
 #if defined(_WIN32)
-  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  moonbit_bytes_t out = NULL;
+
+  int did_uninit = 0;
+  HRESULT hr = wasapi_com_init(&did_uninit);
   if (FAILED(hr)) {
     return moonbit_make_bytes_raw(0);
   }
@@ -1156,7 +1226,7 @@ moonbit_bytes_t moon_cpal_wasapi_default_device_id_utf8(int32_t is_input) {
   if (n <= 0) {
     goto done;
   }
-  moonbit_bytes_t out = moonbit_make_bytes_raw((int32_t)n);
+  out = moonbit_make_bytes_raw((int32_t)n);
   if (out == NULL) {
     goto done;
   }
@@ -1179,7 +1249,9 @@ done:
     IMMDeviceEnumerator_Release(enumerator);
     enumerator = NULL;
   }
-  CoUninitialize();
+  if (did_uninit) {
+    CoUninitialize();
+  }
   return out != NULL ? out : moonbit_make_bytes_raw(0);
 #else
   (void)is_input;

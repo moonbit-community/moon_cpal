@@ -225,24 +225,6 @@ fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
 }
 
 ///|
-fn validate_buffer_size_or_raise(
-  r : @core.SupportedStreamConfigRange,
-  config : @core.StreamConfig,
-) -> Unit raise @core.BuildStreamError {
-  match config.buffer_size {
-    Default => ()
-    Fixed(n) => {
-      if n < 0 {
-        raise @core.build_stream_error_invalid_argument()
-      }
-      if !r.buffer_size().contains(n) {
-        raise @core.build_stream_error_stream_config_not_supported()
-      }
-    }
-  }
-}
-
-///|
 pub fn Device::build_output_stream_raw(
   self : Device,
   config : @core.StreamConfig,
@@ -278,7 +260,7 @@ pub fn Device::build_output_stream_raw(
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(r, config)
+  ignore(r)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_output(
@@ -367,7 +349,7 @@ pub fn Device::build_input_stream_raw(
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(r, config)
+  ignore(r)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(
@@ -460,7 +442,7 @@ pub fn Device::build_loopback_input_stream(
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  validate_buffer_size_or_raise(r, config)
+  ignore(r)
 
   // We pass a special sentinel id to the C layer to enable loopback on the default render endpoint.
   let dev = @core.string_to_utf8_bytes("loopback")
