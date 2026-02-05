@@ -22,23 +22,6 @@
 extern "C" fn alsa_devices_utf8() -> Bytes = "moon_cpal_alsa_devices_utf8"
 
 ///|
-#owned(device_id_utf8)
-extern "C" fn alsa_device_name_utf8_len(
-  device_id_utf8 : Bytes,
-  device_id_len : Int,
-) -> Int = "moon_cpal_alsa_device_name_utf8_len"
-
-///|
-#borrow(out)
-#owned(device_id_utf8)
-extern "C" fn alsa_device_name_utf8(
-  device_id_utf8 : Bytes,
-  device_id_len : Int,
-  out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_alsa_device_name_utf8"
-
-///|
 /// Query supported stream configs for a device.
 ///
 /// Return value is a little-endian binary blob:
@@ -65,27 +48,6 @@ extern "C" fn alsa_supported_configs_bin(
 ///|
 pub fn devices_utf8() -> Bytes {
   alsa_devices_utf8()
-}
-
-///|
-pub fn device_name_utf8(id : String) -> String? {
-  if id.length() == 0 {
-    return None
-  }
-  let b1 = @core.string_to_utf8_bytes(id)
-  let id_len = b1.length()
-  let n = alsa_device_name_utf8_len(b1, id_len)
-  if n <= 0 {
-    return None
-  }
-  let out = Bytes::make(n, (0 : Int).to_byte())
-  let b2 = @core.string_to_utf8_bytes(id)
-  let used = alsa_device_name_utf8(b2, id_len, out, out.length())
-  if used <= 0 {
-    return None
-  }
-  let need = if used > out.length() { out.length() } else { used }
-  Some(@core.utf8_bytes_to_string(out, need))
 }
 
 ///|

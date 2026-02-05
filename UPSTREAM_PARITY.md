@@ -36,7 +36,7 @@ Top-level:
 Native hosts:
 
 - `host/null/mod.rs` — **DONE** (fallback host only; no devices; stream/config APIs are unimplemented; deterministic callback-thread tests live in `internal/test_host`)
-- `host/alsa/enumerate.rs` — **PARTIAL**
+- `host/alsa/enumerate.rs` — **PARTIAL** (hints + hw/plughw physical IDs, direction+DESC metadata; still missing alsa-rs style physical probing parity)
 - `host/alsa/mod.rs` — **PARTIAL**
 - `host/jack/device.rs` — **PARTIAL**
 - `host/jack/stream.rs` — **PARTIAL**

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include "moonbit.h"
 
@@ -60,27 +61,91 @@ static int cstr_eq_n(const char *a, const char *b, size_t n) {
   return strncmp(a, b, n) == 0;
 }
 
-static int buf_has_line(const char *buf, size_t len, const char *line, size_t line_len) {
-  if (buf == NULL || len == 0 || line == NULL || line_len == 0) {
+static int buf_has_id(const char *buf, size_t len, const char *id, size_t id_len) {
+  if (buf == NULL || len == 0 || id == NULL || id_len == 0) {
     return 0;
   }
-  // Search for exact "<line>\n" matches to avoid prefix collisions.
-  for (size_t i = 0; i + line_len + 1 <= len; i++) {
-    if (buf[i + line_len] != '\n') {
-      continue;
+  // Each line is: "<id>\t<dir>\t<desc_escaped>\n" (desc may be empty).
+  // Dedupe on <id> only.
+  size_t i = 0;
+  while (i < len) {
+    size_t line_start = i;
+    // Find end-of-line.
+    size_t line_end = i;
+    while (line_end < len && buf[line_end] != '\n') {
+      line_end++;
     }
-    if (memcmp(buf + i, line, line_len) == 0) {
-      // Ensure line boundary.
-      if (i == 0 || buf[i - 1] == '\n') {
-        return 1;
-      }
+    // Find end of id field (tab or EOL).
+    size_t field_end = line_start;
+    while (field_end < line_end && buf[field_end] != '\t') {
+      field_end++;
     }
+    size_t field_len = field_end - line_start;
+    if (field_len == id_len && memcmp(buf + line_start, id, id_len) == 0) {
+      return 1;
+    }
+    i = (line_end < len) ? (line_end + 1) : len;
   }
   return 0;
 }
 
+static void buf_append_escaped(char **buf, size_t *len, size_t *cap, const char *s) {
+  if (s == NULL) {
+    return;
+  }
+  for (const char *p = s; *p != '\0'; p++) {
+    char c = *p;
+    if (c == '\\') {
+      buf_append(buf, len, cap, "\\\\", 2);
+    } else if (c == '\n') {
+      buf_append(buf, len, cap, "\\n", 2);
+    } else if (c == '\t') {
+      buf_append(buf, len, cap, "\\t", 2);
+    } else if (c == '\r') {
+      // drop
+    } else {
+      buf_append(buf, len, cap, &c, 1);
+    }
+  }
+}
+
+static void buf_append_device_line(char **buf,
+                                   size_t *len,
+                                   size_t *cap,
+                                   const char *id,
+                                   char dir_tag,
+                                   const char *desc) {
+  if (id == NULL || id[0] == '\0') {
+    return;
+  }
+  size_t id_len = strlen(id);
+  if (buf_has_id(*buf, *len, id, id_len)) {
+    return;
+  }
+  buf_append(buf, len, cap, id, id_len);
+  buf_append(buf, len, cap, "\t", 1);
+  buf_append(buf, len, cap, &dir_tag, 1);
+  buf_append(buf, len, cap, "\t", 1);
+  buf_append_escaped(buf, len, cap, desc);
+  buf_append(buf, len, cap, "\n", 1);
+}
+
 #if defined(__linux__)
 #include <alsa/asoundlib.h>
+
+static char alsa_dir_tag_from_ioid(const char *ioid) {
+  // Per ALSA docs: NULL IOID => both input/output.
+  if (ioid == NULL) {
+    return 'd';
+  }
+  if (strcasecmp(ioid, "Input") == 0) {
+    return 'i';
+  }
+  if (strcasecmp(ioid, "Output") == 0) {
+    return 'o';
+  }
+  return 'd';
+}
 
 static void alsa_append_hint_names(char **buf, size_t *len, size_t *cap) {
   void **hints = NULL;
@@ -104,10 +169,15 @@ static void alsa_append_hint_names(char **buf, size_t *len, size_t *cap) {
       continue;
     }
 
-    size_t nlen = strlen(name);
-    if (!buf_has_line(*buf, *len, name, nlen)) {
-      buf_append(buf, len, cap, name, nlen);
-      buf_append(buf, len, cap, "\n", 1);
+    char *ioid = snd_device_name_get_hint(*p, "IOID");
+    char dir_tag = alsa_dir_tag_from_ioid(ioid);
+    char *desc = snd_device_name_get_hint(*p, "DESC");
+    buf_append_device_line(buf, len, cap, name, dir_tag, desc);
+    if (ioid != NULL) {
+      free(ioid);
+    }
+    if (desc != NULL) {
+      free(desc);
     }
     free(name);
   }
@@ -115,6 +185,50 @@ static void alsa_append_hint_names(char **buf, size_t *len, size_t *cap) {
   snd_device_name_free_hint(hints);
 }
 #endif
+
+static void copy_trimmed_field(const char *start,
+                               const char *end,
+                               char *out,
+                               size_t out_len) {
+  if (out == NULL || out_len == 0) {
+    return;
+  }
+  out[0] = '\0';
+  if (start == NULL || end == NULL || end <= start) {
+    return;
+  }
+  while (start < end && (*start == ' ' || *start == '\t')) {
+    start++;
+  }
+  while (end > start && (end[-1] == ' ' || end[-1] == '\t')) {
+    end--;
+  }
+  size_t n = (size_t)(end - start);
+  if (n >= out_len) {
+    n = out_len - 1;
+  }
+  memcpy(out, start, n);
+  out[n] = '\0';
+}
+
+static int parse_count_after_keyword(const char *line, const char *kw) {
+  if (line == NULL || kw == NULL) {
+    return 0;
+  }
+  const char *p = strstr(line, kw);
+  if (p == NULL) {
+    return 0;
+  }
+  p += strlen(kw);
+  while (*p == ' ' || *p == '\t') {
+    p++;
+  }
+  int v = 0;
+  if (sscanf(p, "%d", &v) == 1) {
+    return v;
+  }
+  return 0;
+}
 
 static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
 #if defined(__linux__)
@@ -129,16 +243,54 @@ static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
       // Parse leading "<card>-<device>:" token.
       unsigned int card = 0, dev = 0;
       if (sscanf(line, "%u-%u:", &card, &dev) == 2) {
+        // Parse "Card Name : Device Name" fields when present.
+        const char *first_colon = strchr(line, ':');
+        const char *second_colon = first_colon ? strchr(first_colon + 1, ':') : NULL;
+        const char *third_colon = second_colon ? strchr(second_colon + 1, ':') : NULL;
+        char card_name[256];
+        char device_name[256];
+        card_name[0] = '\0';
+        device_name[0] = '\0';
+        if (first_colon && second_colon) {
+          copy_trimmed_field(first_colon + 1, second_colon, card_name, sizeof(card_name));
+        }
+        if (second_colon && third_colon) {
+          copy_trimmed_field(second_colon + 1, third_colon, device_name, sizeof(device_name));
+        }
+
+        int playback = parse_count_after_keyword(line, "playback");
+        int capture = parse_count_after_keyword(line, "capture");
+        char dir_tag = '?';
+        if (playback > 0 && capture > 0) {
+          dir_tag = 'd';
+        } else if (playback > 0) {
+          dir_tag = 'o';
+        } else if (capture > 0) {
+          dir_tag = 'i';
+        }
+
+        char first_line[512];
+        if (card_name[0] != '\0' && device_name[0] != '\0') {
+          snprintf(first_line, sizeof(first_line), "%s, %s", card_name, device_name);
+        } else if (card_name[0] != '\0') {
+          snprintf(first_line, sizeof(first_line), "%s", card_name);
+        } else if (device_name[0] != '\0') {
+          snprintf(first_line, sizeof(first_line), "%s", device_name);
+        } else {
+          snprintf(first_line, sizeof(first_line), "Card %u", card);
+        }
+
         for (int i = 0; i < 2; i++) {
           const char *prefix = (i == 0) ? "hw" : "plughw";
           char id[64];
           // Match upstream CPAL style (hw:CARD=0,DEV=0).
           snprintf(id, sizeof(id), "%s:CARD=%u,DEV=%u", prefix, card, dev);
-          size_t id_len = strlen(id);
-          if (!buf_has_line(*buf, *len, id, id_len)) {
-            buf_append(buf, len, cap, id, id_len);
-            buf_append(buf, len, cap, "\n", 1);
-          }
+          const char *second_line = (i == 0)
+                                        ? "Direct hardware device without any conversions"
+                                        : "Hardware device with all software conversions";
+          char desc[1024];
+          snprintf(desc, sizeof(desc), "%s\n%s", first_line, second_line);
+          buf_append_device_line(buf, len, cap, id, dir_tag, desc);
         }
       }
     }
@@ -159,7 +311,7 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
   size_t cap = 0;
 
   // Always include a "default" device first.
-  buf_append_cstr(&buf, &len, &cap, "default\n");
+  buf_append_device_line(&buf, &len, &cap, "default", 'd', NULL);
 
   // Mirror upstream CPAL style: include both hint devices (virtual/plugins) and physical devices
   // (hw:/plughw:) and dedupe by exact line match.
@@ -178,181 +330,6 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
   return out;
 #else
   return moonbit_make_bytes_raw(0);
-#endif
-}
-
-// -----------------------------------------------------------------------------
-// ALSA device name lookup
-// -----------------------------------------------------------------------------
-//
-// Given a device id (UTF-8), return a human-readable name (UTF-8).
-// Currently best-effort: uses `DESC` from snd_device_name_hint and falls back to the id itself.
-
-static int alsa_is_default_id(const char *id, size_t len) {
-  static const char *k = "default";
-  size_t klen = 7;
-  if (len != klen) {
-    return 0;
-  }
-  return cstr_eq_n(id, k, klen);
-}
-
-static int alsa_copy_first_line(const char *desc, char *out, size_t out_len) {
-  if (desc == NULL || out == NULL || out_len == 0) {
-    return 0;
-  }
-  // DESC often contains multiple lines, e.g. "Built-in Audio\n..." - keep the first line only.
-  size_t n = 0;
-  while (desc[n] != '\0' && desc[n] != '\n' && n + 1 < out_len) {
-    out[n] = desc[n];
-    n++;
-  }
-  out[n] = '\0';
-  return (int)n;
-}
-
-static int alsa_device_desc_utf8(const char *id, size_t id_len, char **out_desc) {
-  if (out_desc == NULL) {
-    return -1;
-  }
-  *out_desc = NULL;
-#if defined(__linux__)
-  void **hints = NULL;
-  int err = snd_device_name_hint(-1, "pcm", &hints);
-  if (err != 0 || hints == NULL) {
-    return -1;
-  }
-
-  for (void **p = hints; *p != NULL; p++) {
-    char *name = snd_device_name_get_hint(*p, "NAME");
-    if (name == NULL) {
-      continue;
-    }
-    if (strlen(name) == id_len && memcmp(name, id, id_len) == 0) {
-      free(name);
-      char *desc = snd_device_name_get_hint(*p, "DESC");
-      if (desc == NULL || desc[0] == '\0') {
-        if (desc != NULL) {
-          free(desc);
-        }
-        snd_device_name_free_hint(hints);
-        return -1;
-      }
-      *out_desc = desc; // caller frees
-      snd_device_name_free_hint(hints);
-      return 0;
-    }
-    free(name);
-  }
-
-  snd_device_name_free_hint(hints);
-  return -1;
-#else
-  (void)id;
-  (void)id_len;
-  return -1;
-#endif
-}
-
-int32_t moon_cpal_alsa_device_name_utf8_len(uint8_t *device_id_utf8, int32_t device_id_len) {
-#if defined(__linux__)
-  if (device_id_utf8 == NULL || device_id_len <= 0) {
-    return -1;
-  }
-  // Copy before decref: `device_id_utf8` is owned by this function.
-  char id_buf[256];
-  size_t id_len = (size_t)device_id_len;
-  if (id_len >= sizeof(id_buf)) {
-    id_len = sizeof(id_buf) - 1;
-  }
-  memcpy(id_buf, device_id_utf8, id_len);
-  id_buf[id_len] = '\0';
-
-  // Callee owns the bytes on the MoonBit side for convenience.
-  moonbit_decref(device_id_utf8);
-
-  if (alsa_is_default_id(id_buf, id_len)) {
-    // Keep it stable and readable.
-    return (int32_t)strlen("default");
-  }
-
-  char *desc = NULL;
-  if (alsa_device_desc_utf8(id_buf, id_len, &desc) == 0 && desc != NULL) {
-    char tmp[512];
-    int n = alsa_copy_first_line(desc, tmp, sizeof(tmp));
-    free(desc);
-    if (n > 0) {
-      return (int32_t)n;
-    }
-  }
-
-  // Fallback: use the id.
-  return (int32_t)id_len;
-#else
-  (void)device_id_len;
-  moonbit_decref(device_id_utf8);
-  return -1;
-#endif
-}
-
-int32_t moon_cpal_alsa_device_name_utf8(uint8_t *device_id_utf8,
-                                       int32_t device_id_len,
-                                       uint8_t *out,
-                                       int32_t out_len) {
-#if defined(__linux__)
-  if (out == NULL || out_len <= 0) {
-    moonbit_decref(device_id_utf8);
-    return 0;
-  }
-  if (device_id_utf8 == NULL || device_id_len <= 0) {
-    moonbit_decref(device_id_utf8);
-    return -1;
-  }
-  // Copy before decref: `device_id_utf8` is owned by this function.
-  char id_buf[256];
-  size_t id_len = (size_t)device_id_len;
-  if (id_len >= sizeof(id_buf)) {
-    id_len = sizeof(id_buf) - 1;
-  }
-  memcpy(id_buf, device_id_utf8, id_len);
-  id_buf[id_len] = '\0';
-
-  moonbit_decref(device_id_utf8);
-
-  const char *fallback = id_buf;
-  size_t fallback_len = id_len;
-
-  char name_buf[512];
-  name_buf[0] = '\0';
-  size_t name_len = 0;
-
-  if (alsa_is_default_id(id_buf, id_len)) {
-    fallback = "default";
-    fallback_len = strlen(fallback);
-  } else {
-    char *desc = NULL;
-    if (alsa_device_desc_utf8(id_buf, id_len, &desc) == 0 && desc != NULL) {
-      int n = alsa_copy_first_line(desc, name_buf, sizeof(name_buf));
-      free(desc);
-      if (n > 0) {
-        name_len = (size_t)n;
-        fallback = name_buf;
-        fallback_len = name_len;
-      }
-    }
-  }
-
-  if ((int32_t)fallback_len > out_len) {
-    return (int32_t)fallback_len;
-  }
-  memcpy(out, fallback, fallback_len);
-  return (int32_t)fallback_len;
-#else
-  (void)device_id_len;
-  (void)out;
-  (void)out_len;
-  moonbit_decref(device_id_utf8);
-  return -1;
 #endif
 }
 

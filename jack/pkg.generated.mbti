@@ -28,6 +28,8 @@ pub fn Device::id(Self) -> @core.DeviceId
 pub fn Device::name(Self) -> String
 pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange]
 pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub fn Device::supports_input(Self) -> Bool
+pub fn Device::supports_output(Self) -> Bool
 pub impl Eq for Device
 pub impl Show for Device
 

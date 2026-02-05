@@ -342,15 +342,25 @@ pub fn Device::description(
 
 ///|
 pub fn Device::supports_input(self : Device) -> Bool {
-  try Device::supported_input_configs(self).length() > 0 catch {
-    _ => false
+  match self {
+    Alsa(d) => d.supports_input()
+    Jack(d) => d.supports_input()
+    _ =>
+      try Device::supported_input_configs(self).length() > 0 catch {
+        _ => false
+      }
   }
 }
 
 ///|
 pub fn Device::supports_output(self : Device) -> Bool {
-  try Device::supported_output_configs(self).length() > 0 catch {
-    _ => false
+  match self {
+    Alsa(d) => d.supports_output()
+    Jack(d) => d.supports_output()
+    _ =>
+      try Device::supported_output_configs(self).length() > 0 catch {
+        _ => false
+      }
   }
 }
 

@@ -46,3 +46,39 @@ test "alsa: default devices are always Some (linux-only)" {
     Some(d) => inspect(d.id == "default", content="true")
   }
 }
+
+///|
+test "alsa: name + description fields (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  let h = default_host()
+  let ds = h.devices()
+  if ds.length() == 0 {
+    inspect(true, content="true")
+    return
+  }
+  let d = ds[0]
+  inspect(d.name() == d.id, content="true")
+  let desc = try d.description() catch {
+    _ => {
+      inspect(true, content="true")
+      return
+    }
+  } noraise {
+    x => x
+  }
+  inspect(desc.driver() == Some(d.id), content="true")
+  // Direction must be stable and never contradict itself.
+  match desc.direction() {
+    @core.DeviceDirection::Input => inspect(d.supports_input(), content="true")
+    @core.DeviceDirection::Output =>
+      inspect(d.supports_output(), content="true")
+    @core.DeviceDirection::Duplex => {
+      inspect(d.supports_input(), content="true")
+      inspect(d.supports_output(), content="true")
+    }
+    @core.DeviceDirection::Unknown => inspect(true, content="true")
+  }
+}

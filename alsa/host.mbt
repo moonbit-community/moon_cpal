@@ -25,6 +25,8 @@ pub struct Host {
 ///|
 pub struct Device {
   id : String
+  desc : String?
+  direction : @core.DeviceDirection
 } derive(Show, Eq)
 
 ///|
@@ -35,7 +37,7 @@ pub fn default_host() -> Host {
 ///|
 fn default_device() -> Device {
   // Mirrors typical ALSA "default" PCM.
-  { id: "default" }
+  { id: "default", desc: None, direction: @core.DeviceDirection::duplex() }
 }
 
 ///|
@@ -47,7 +49,41 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
     for v in s[:].split("\n"[:]) {
       let id = v.trim().to_string()
       if id.length() > 0 {
-        out.push({ id, })
+        // Each line is: "<id>\t<dir>\t<desc_escaped>".
+        let fields = Array::new()
+        for p in id.split("\t") {
+          fields.push(p)
+        }
+        let pcm_id = if fields.length() > 0 {
+          fields[0].trim().to_string()
+        } else {
+          "".to_string()
+        }
+        if pcm_id.length() == 0 {
+          continue
+        }
+        let dir_tag = if fields.length() > 1 {
+          fields[1].trim().to_string()
+        } else {
+          "?".to_string()
+        }
+        let desc_esc = if fields.length() > 2 {
+          fields[2].to_string()
+        } else {
+          ""
+        }
+        let dir = match dir_tag {
+          "i" => @core.DeviceDirection::input()
+          "o" => @core.DeviceDirection::output()
+          "d" => @core.DeviceDirection::duplex()
+          _ => @core.DeviceDirection::unknown()
+        }
+        let desc = if desc_esc.length() == 0 {
+          None
+        } else {
+          Some(unescape(desc_esc))
+        }
+        out.push({ id: pcm_id, desc, direction: dir })
       }
     }
     if out.length() == 0 {
@@ -85,56 +121,52 @@ pub fn Device::name(_self : Device) -> String {
   if @core.native_os() != @core.NativeOs::Linux {
     return _self.id
   }
-  match device_name_utf8(_self.id) {
-    None => _self.id
-    Some(s) => s
-  }
+  // Match upstream ALSA: `name()` returns the PCM id.
+  _self.id
 }
 
 ///|
 pub fn Device::description(
   _self : Device,
 ) -> @core.DeviceDescription raise @core.DeviceNameError {
-  let name = Device::name(_self)
+  let name = match _self.desc {
+    None => _self.id
+    Some(desc) => {
+      let mut first = _self.id
+      for line in desc[:].split("\n"[:]) {
+        let s = line.trim().to_string()
+        if s.length() > 0 {
+          first = s
+          break
+        }
+      }
+      first
+    }
+  }
   if name.length() == 0 {
     raise @core.device_name_error_backend_specific(
       "alsa device description: empty name",
     )
   }
-  let has_in = (try _self.supported_input_configs().length() catch {
-      _ => 0
-    } noraise {
-      x => x
-    }) >
-    0
-  let has_out = (try _self.supported_output_configs().length() catch {
-      _ => 0
-    } noraise {
-      x => x
-    }) >
-    0
-  let direction = if has_in && has_out {
-    @core.DeviceDirection::duplex()
-  } else if has_in {
-    @core.DeviceDirection::input()
-  } else if has_out {
-    @core.DeviceDirection::output()
-  } else {
-    @core.DeviceDirection::unknown()
-  }
-  let device_type = match direction {
-    @core.DeviceDirection::Input => @core.DeviceType::microphone()
-    @core.DeviceDirection::Output => @core.DeviceType::speaker()
-    _ => @core.DeviceType::unknown()
+  let extended : Array[String] = []
+  match _self.desc {
+    None => ()
+    Some(desc) =>
+      for line in desc[:].split("\n"[:]) {
+        let t = line.trim().to_string()
+        if t.length() > 0 {
+          extended.push(t)
+        }
+      }
   }
   @core.DeviceDescription::new(
     name,
-    driver=Some("ALSA"),
-    device_type~,
+    driver=Some(_self.id),
+    device_type=@core.DeviceType::unknown(),
     interface_type=@core.InterfaceType::unknown(),
-    direction~,
-    address=Some(_self.id),
-    extended=["alsa_id=\{_self.id}"],
+    direction=_self.direction,
+    address=None,
+    extended~,
   )
 }
 
@@ -144,10 +176,63 @@ pub fn Device::id(_self : Device) -> @core.DeviceId {
 }
 
 ///|
+pub fn Device::supports_input(_self : Device) -> Bool {
+  match _self.direction {
+    @core.DeviceDirection::Input => true
+    @core.DeviceDirection::Duplex => true
+    @core.DeviceDirection::Unknown => true
+    _ => false
+  }
+}
+
+///|
+pub fn Device::supports_output(_self : Device) -> Bool {
+  match _self.direction {
+    @core.DeviceDirection::Output => true
+    @core.DeviceDirection::Duplex => true
+    @core.DeviceDirection::Unknown => true
+    _ => false
+  }
+}
+
+///|
+fn unescape(s : String) -> String {
+  let sb = StringBuilder::new()
+  let mut i = 0
+  while i < s.length() {
+    let cu = s.code_unit_at(i).to_int()
+    if cu == 92 && i + 1 < s.length() {
+      let n = s.code_unit_at(i + 1).to_int()
+      if n == 110 {
+        sb.write_char((10 : Int).unsafe_to_char())
+        i = i + 2
+        continue
+      }
+      if n == 116 {
+        sb.write_char((9 : Int).unsafe_to_char())
+        i = i + 2
+        continue
+      }
+      if n == 92 {
+        sb.write_char((92 : Int).unsafe_to_char())
+        i = i + 2
+        continue
+      }
+    }
+    sb.write_char(cu.unsafe_to_char())
+    i = i + 1
+  }
+  sb.to_string()
+}
+
+///|
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   if @core.native_os() != @core.NativeOs::Linux {
+    return []
+  }
+  if !_self.supports_input() {
     return []
   }
   supported_configs(_self, true)
@@ -158,6 +243,9 @@ pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   if @core.native_os() != @core.NativeOs::Linux {
+    return []
+  }
+  if !_self.supports_output() {
     return []
   }
   supported_configs(_self, false)
@@ -172,6 +260,9 @@ pub fn Device::default_input_config(
       "alsa default_input_config: not available on this OS",
     )
   }
+  if !_self.supports_input() {
+    raise @core.default_stream_config_error_stream_type_not_supported()
+  }
   default_config(_self, true)
 }
 
@@ -183,6 +274,9 @@ pub fn Device::default_output_config(
     raise @core.default_stream_config_error_backend_specific(
       "alsa default_output_config: not available on this OS",
     )
+  }
+  if !_self.supports_output() {
+    raise @core.default_stream_config_error_stream_type_not_supported()
   }
   default_config(_self, false)
 }

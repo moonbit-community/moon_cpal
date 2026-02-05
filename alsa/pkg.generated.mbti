@@ -8,8 +8,6 @@ import {
 // Values
 pub fn default_host() -> Host
 
-pub fn device_name_utf8(String) -> String?
-
 pub fn devices_utf8() -> Bytes
 
 pub fn supported_configs_bin(String, Bool) -> Bytes
@@ -19,6 +17,8 @@ pub fn supported_configs_bin(String, Bool) -> Bytes
 // Types and methods
 pub struct Device {
   id : String
+  desc : String?
+  direction : @core.DeviceDirection
 }
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -31,6 +31,8 @@ pub fn Device::id(Self) -> @core.DeviceId
 pub fn Device::name(Self) -> String
 pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
 pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+pub fn Device::supports_input(Self) -> Bool
+pub fn Device::supports_output(Self) -> Bool
 pub impl Eq for Device
 pub impl Show for Device
 
