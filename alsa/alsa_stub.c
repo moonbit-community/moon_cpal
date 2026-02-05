@@ -129,12 +129,16 @@ static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
       // Parse leading "<card>-<device>:" token.
       unsigned int card = 0, dev = 0;
       if (sscanf(line, "%u-%u:", &card, &dev) == 2) {
-        char id[64];
-        snprintf(id, sizeof(id), "hw:%u,%u", card, dev);
-        size_t id_len = strlen(id);
-        if (!buf_has_line(*buf, *len, id, id_len)) {
-          buf_append(buf, len, cap, id, id_len);
-          buf_append(buf, len, cap, "\n", 1);
+        for (int i = 0; i < 2; i++) {
+          const char *prefix = (i == 0) ? "hw" : "plughw";
+          char id[64];
+          // Match upstream CPAL style (hw:CARD=0,DEV=0).
+          snprintf(id, sizeof(id), "%s:CARD=%u,DEV=%u", prefix, card, dev);
+          size_t id_len = strlen(id);
+          if (!buf_has_line(*buf, *len, id, id_len)) {
+            buf_append(buf, len, cap, id, id_len);
+            buf_append(buf, len, cap, "\n", 1);
+          }
         }
       }
     }
@@ -157,15 +161,10 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
   // Always include a "default" device first.
   buf_append_cstr(&buf, &len, &cap, "default\n");
 
-  // Prefer libasound enumeration. If it fails, fall back to /proc parsing.
-  size_t before = len;
-#if defined(__linux__)
+  // Mirror upstream CPAL style: include both hint devices (virtual/plugins) and physical devices
+  // (hw:/plughw:) and dedupe by exact line match.
   alsa_append_hint_names(&buf, &len, &cap);
-#endif
-  if (len == before) {
-    // No additional devices found; try the /proc fallback.
-    alsa_append_proc_pcm(&buf, &len, &cap);
-  }
+  alsa_append_proc_pcm(&buf, &len, &cap);
 
   if (len == 0) {
     return moonbit_make_bytes_raw(0);
@@ -362,6 +361,7 @@ int32_t moon_cpal_alsa_device_name_utf8(uint8_t *device_id_utf8,
 // -----------------------------------------------------------------------------
 //
 // Exported format (little-endian):
+// - i32 status (0 on success, negative errno-style on failure)
 // - u32 record_count
 // - repeated records of 6 u32 values:
 //   (sample_format_tag, channels, min_rate, max_rate, buffer_min, buffer_max)
@@ -370,7 +370,8 @@ int32_t moon_cpal_alsa_device_name_utf8(uint8_t *device_id_utf8,
 // - 1 => F32 (SND_PCM_FORMAT_FLOAT_LE)
 // - 2 => I16 (SND_PCM_FORMAT_S16_LE)
 //
-// On non-Linux platforms, or on error, returns an empty bytes value.
+// On non-Linux platforms, returns an empty bytes value.
+// On Linux, always returns at least 8 bytes. On error, `record_count` is 0 and `status` is set.
 
 static void write_u32_le(uint8_t *dst, uint32_t v) {
   dst[0] = (uint8_t)(v & 0xFFu);
@@ -379,13 +380,26 @@ static void write_u32_le(uint8_t *dst, uint32_t v) {
   dst[3] = (uint8_t)((v >> 24) & 0xFFu);
 }
 
+static void write_i32_le(uint8_t *dst, int32_t v) { write_u32_le(dst, (uint32_t)v); }
+
+static moonbit_bytes_t alsa_status_only(int32_t status) {
+  moonbit_bytes_t out = moonbit_make_bytes_raw(8);
+  if (out == NULL) {
+    return moonbit_make_bytes_raw(0);
+  }
+  uint8_t *p = (uint8_t *)out;
+  write_i32_le(p + 0, status);
+  write_u32_le(p + 4, 0u);
+  return out;
+}
+
 moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
                                                     int32_t device_id_len,
                                                     uint32_t is_input) {
 #if defined(__linux__)
   if (device_id_utf8 == NULL || device_id_len <= 0) {
     moonbit_decref(device_id_utf8);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-22 /* EINVAL */);
   }
 
   // Copy before decref: `device_id_utf8` is owned by this function.
@@ -405,18 +419,19 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
     if (pcm != NULL) {
       snd_pcm_close(pcm);
     }
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only((int32_t)err);
   }
 
   snd_pcm_hw_params_t *hw = NULL;
   if (snd_pcm_hw_params_malloc(&hw) < 0 || hw == NULL) {
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-12 /* ENOMEM */);
   }
-  if (snd_pcm_hw_params_any(pcm, hw) < 0) {
+  err = snd_pcm_hw_params_any(pcm, hw);
+  if (err < 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only((int32_t)err);
   }
 
   // Supported formats: keep in sync with the MoonBit stream builder.
@@ -431,7 +446,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   if (fmt_count == 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-22 /* EINVAL */);
   }
 
   unsigned int min_rate = 0, max_rate = 0;
@@ -440,7 +455,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
       snd_pcm_hw_params_get_rate_max(hw, &max_rate, &dir) < 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-5 /* EIO */);
   }
   // `min_rate`/`max_rate` may be reported as very large values by some virtual devices
   // (e.g. "null" plugin). We serialize as u32 but decode into signed Int on the MoonBit
@@ -490,7 +505,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
       snd_pcm_hw_params_get_channels_max(hw, &max_ch) < 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-5 /* EIO */);
   }
   if (max_ch > 32) {
     max_ch = 32;
@@ -506,7 +521,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   if (ch_count == 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-22 /* EINVAL */);
   }
 
   snd_pcm_uframes_t min_buf = 0, max_buf = 0;
@@ -514,7 +529,7 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
       snd_pcm_hw_params_get_buffer_size_max(hw, &max_buf) < 0) {
     snd_pcm_hw_params_free(hw);
     snd_pcm_close(pcm);
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-5 /* EIO */);
   }
   // Clamp into i32 range and avoid a zero-length buffer range (see note above).
   uint32_t buf_min = (min_buf == 0) ? 1u
@@ -531,19 +546,20 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
 
   uint64_t rec_count64 = (uint64_t)fmt_count * (uint64_t)ch_count * (uint64_t)rate_count;
   if (rec_count64 == 0 || rec_count64 > 1000000u) {
-    return moonbit_make_bytes_raw(0);
+    return alsa_status_only(-22 /* EINVAL */);
   }
   uint32_t rec_count = (uint32_t)rec_count64;
 
-  size_t out_len = 4u + (size_t)rec_count * 24u;
+  size_t out_len = 8u + (size_t)rec_count * 24u;
   moonbit_bytes_t out = moonbit_make_bytes_raw((int32_t)out_len);
   if (out == NULL) {
     return moonbit_make_bytes_raw(0);
   }
 
   uint8_t *p = (uint8_t *)out;
-  write_u32_le(p, rec_count);
-  p += 4;
+  write_i32_le(p + 0, 0);
+  write_u32_le(p + 4, rec_count);
+  p += 8;
   for (size_t fi = 0; fi < fmt_count; fi++) {
     uint32_t fmt_tag = fmt_tags[fi];
     for (size_t ci = 0; ci < ch_count; ci++) {

@@ -28,6 +28,7 @@ extern "C" fn alsa_device_name_utf8(
 /// Query supported stream configs for a device.
 ///
 /// Return value is a little-endian binary blob:
+/// - i32 status (0 on success, negative errno-style on failure)
 /// - u32 record_count
 /// - repeated records of 6 u32 values:
 ///   (sample_format_tag, channels, min_rate, max_rate, buffer_min, buffer_max)
@@ -37,7 +38,7 @@ extern "C" fn alsa_device_name_utf8(
 /// - 2 => I16
 ///
 /// On non-Linux platforms this returns an empty bytes value.
-/// On errors (device not available, stream type not supported, etc.) this returns empty.
+/// On Linux this always returns at least 8 bytes; on error, `record_count` is 0 and `status` is set.
 
 ///|
 #owned(device_id_utf8)

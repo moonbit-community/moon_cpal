@@ -17,7 +17,14 @@ test "alsa default config matches supported configs (best-effort)" {
       } noraise {
         x => x
       }
-      let ranges = dev.supported_output_configs()
+      let ranges = try dev.supported_output_configs() catch {
+        _ => {
+          inspect(true, content="true")
+          return
+        }
+      } noraise {
+        xs => xs
+      }
       inspect(ranges.length() > 0, content="true")
 
       // Ensure `cfg` is representable by at least one returned range.
@@ -45,7 +52,14 @@ test "alsa supported configs include sane buffer size ranges (best-effort)" {
   match host.default_output_device() {
     None => inspect(true, content="true")
     Some(dev) => {
-      let ranges = dev.supported_output_configs()
+      let ranges = try dev.supported_output_configs() catch {
+        _ => {
+          inspect(true, content="true")
+          return
+        }
+      } noraise {
+        xs => xs
+      }
       if ranges.length() == 0 {
         inspect(true, content="true")
         return

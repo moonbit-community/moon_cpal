@@ -29,8 +29,8 @@ pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig r
 pub fn Device::description(Self) -> @moon_cpal.DeviceDescription raise @moon_cpal.DeviceNameError
 pub fn Device::id(Self) -> @moon_cpal.DeviceId
 pub fn Device::name(Self) -> String
-pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange]
-pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange]
+pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
+pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
 pub impl Eq for Device
 pub impl Show for Device
 

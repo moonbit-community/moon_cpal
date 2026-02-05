@@ -111,17 +111,33 @@ fn alsa_build_error_from_errno(
   op : String,
 ) -> @moon_cpal.BuildStreamError {
   // Best-effort errno mapping (Linux).
-  if status == -19 {
-    // ENODEV
+  if status == -2 || status == -1 || status == -13 || status == -19 || status == -524 {
+    // ENOENT / EPERM / EACCES / ENODEV / ENOTSUPP
     @moon_cpal.build_stream_error_device_not_available()
-  } else if status == -16 {
-    // EBUSY
+  } else if status == -16 || status == -11 {
+    // EBUSY / EAGAIN
     @moon_cpal.build_stream_error_device_busy()
   } else if status == -22 {
     // EINVAL
-    @moon_cpal.build_stream_error_stream_config_not_supported()
+    @moon_cpal.build_stream_error_invalid_argument()
   } else {
     @moon_cpal.build_stream_error_backend_specific("\{op} (errno \{status})")
+  }
+}
+
+///|
+fn build_error_from_supported_configs_error(
+  e : @moon_cpal.SupportedStreamConfigsError,
+) -> @moon_cpal.BuildStreamError {
+  match e {
+    @moon_cpal.SupportedStreamConfigsError::DeviceNotAvailable =>
+      @moon_cpal.build_stream_error_device_not_available()
+    @moon_cpal.SupportedStreamConfigsError::DeviceBusy =>
+      @moon_cpal.build_stream_error_device_busy()
+    @moon_cpal.SupportedStreamConfigsError::InvalidArgument =>
+      @moon_cpal.build_stream_error_invalid_argument()
+    @moon_cpal.SupportedStreamConfigsError::BackendSpecific(err) =>
+      @moon_cpal.build_stream_error_backend_specific(err.description())
   }
 }
 
@@ -130,7 +146,7 @@ fn alsa_play_error_from_errno(
   status : Int,
   op : String,
 ) -> @moon_cpal.PlayStreamError {
-  if status == -19 {
+  if status == -2 || status == -1 || status == -13 || status == -19 {
     @moon_cpal.play_stream_error_device_not_available()
   } else {
     @moon_cpal.play_stream_error_backend_specific("\{op} (errno \{status})")
@@ -142,7 +158,7 @@ fn alsa_pause_error_from_errno(
   status : Int,
   op : String,
 ) -> @moon_cpal.PauseStreamError {
-  if status == -19 {
+  if status == -2 || status == -1 || status == -13 || status == -19 {
     @moon_cpal.pause_stream_error_device_not_available()
   } else {
     @moon_cpal.pause_stream_error_backend_specific("\{op} (errno \{status})")
@@ -253,7 +269,11 @@ pub fn Device::build_output_stream_raw(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  let ranges = self.supported_output_configs()
+  let ranges = try self.supported_output_configs() catch {
+    e => raise build_error_from_supported_configs_error(e)
+  } noraise {
+    xs => xs
+  }
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -296,7 +316,11 @@ pub fn Device::build_output_stream(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @moon_cpal.build_stream_error_invalid_argument()
   }
-  let ranges = self.supported_output_configs()
+  let ranges = try self.supported_output_configs() catch {
+    e => raise build_error_from_supported_configs_error(e)
+  } noraise {
+    xs => xs
+  }
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -330,7 +354,11 @@ pub fn Device::build_input_stream_raw(
     Some(t) => t
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  let ranges = self.supported_input_configs()
+  let ranges = try self.supported_input_configs() catch {
+    e => raise build_error_from_supported_configs_error(e)
+  } noraise {
+    xs => xs
+  }
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()
@@ -373,7 +401,11 @@ pub fn Device::build_input_stream(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @moon_cpal.build_stream_error_invalid_argument()
   }
-  let ranges = self.supported_input_configs()
+  let ranges = try self.supported_input_configs() catch {
+    e => raise build_error_from_supported_configs_error(e)
+  } noraise {
+    xs => xs
+  }
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
     None => raise @moon_cpal.build_stream_error_stream_config_not_supported()

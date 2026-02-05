@@ -31,6 +31,6 @@ test "alsa errno mapping (unit)" {
   )
   inspect(
     alsa_build_error_from_errno(-22, "snd_pcm_hw_params"),
-    content="StreamConfigNotSupported",
+    content="InvalidArgument",
   )
 }
