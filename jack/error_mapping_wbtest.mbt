@@ -72,4 +72,15 @@ test "jack stream error mapping (unit)" {
   inspect(slot[0], content="DeviceNotAvailable")
   call_stream_error_callback(fn(e) { slot[0] = e }, 0, -32)
   inspect(slot[0], content="StreamInvalidated")
+
+  // JACK notifications.
+  call_stream_error_callback(fn(e) { slot[0] = e }, 5, 0)
+  inspect(slot[0], content="BufferUnderrun")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 6, 48000)
+  inspect(slot[0], content="StreamInvalidated")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 7, 0)
+  match slot[0] {
+    @core.StreamError::BackendSpecific(_) => inspect(true, content="true")
+    _ => inspect(false, content="true")
+  }
 }

@@ -124,9 +124,18 @@ fn call_stream_error_callback(
     2 => "jack_activate"
     3 => "jack_port_register"
     4 => "jack_set_process_callback"
+    5 => "jack_xrun"
+    6 => "jack_sample_rate"
+    7 => "jack_shutdown"
     _ => "JackStream"
   }
-  let err = if op_tag == 1 && status != 0 {
+  let err = if op_tag == 5 {
+    @core.stream_error_buffer_underrun()
+  } else if op_tag == 6 {
+    @core.stream_error_stream_invalidated()
+  } else if op_tag == 7 {
+    @core.stream_error_backend_specific("JACK was shut down")
+  } else if op_tag == 1 && status != 0 {
     // Opening a JACK client failed; most commonly the server is not running or unreachable.
     @core.stream_error_device_not_available()
   } else if op_tag == 0 {

@@ -40,6 +40,11 @@ typedef struct moon_cpal_jack_stream_t {
 
   atomic_int running;
   atomic_int closed;
+  atomic_int xrun_pending;
+  atomic_int shutdown_pending;
+  atomic_int sample_rate_init_seen;
+  atomic_int sample_rate_changed_pending;
+  atomic_uint pending_sample_rate;
 } moon_cpal_jack_stream_t;
 
 static void jack_now(int64_t *out_secs, int32_t *out_nanos) {
@@ -62,6 +67,41 @@ static void jack_invoke_error(moon_cpal_jack_stream_t *s, int32_t op_tag, int32_
   }
   moonbit_incref(s->mb_error_callback);
   s->call_error_callback(s->mb_error_callback, op_tag, status);
+}
+
+static int jack_xrun_cb(void *arg) {
+  moon_cpal_jack_stream_t *s = (moon_cpal_jack_stream_t *)arg;
+  if (s != NULL) {
+    atomic_store(&s->xrun_pending, 1);
+  }
+  return 0;
+}
+
+static int jack_sample_rate_cb(jack_nframes_t nframes, void *arg) {
+  moon_cpal_jack_stream_t *s = (moon_cpal_jack_stream_t *)arg;
+  if (s == NULL) {
+    return 0;
+  }
+  // JACK fires one sample-rate callback when a client starts. Mirror upstream behavior:
+  // ignore the first call, then treat subsequent calls as stream invalidation.
+  if (atomic_exchange(&s->sample_rate_init_seen, 1) == 0) {
+    return 0;
+  }
+  atomic_store(&s->pending_sample_rate, (unsigned)nframes);
+  atomic_store(&s->sample_rate_changed_pending, 1);
+  return 0;
+}
+
+static void jack_shutdown_cb(void *arg) {
+  moon_cpal_jack_stream_t *s = (moon_cpal_jack_stream_t *)arg;
+  if (s == NULL) {
+    return;
+  }
+  atomic_store(&s->shutdown_pending, 1);
+  atomic_store(&s->closed, 1);
+  pthread_mutex_lock(&s->mu);
+  pthread_cond_broadcast(&s->cv);
+  pthread_mutex_unlock(&s->mu);
 }
 
 static uint32_t jack_rb_size_bytes(uint32_t frames_per_cb) {
@@ -215,7 +255,22 @@ static void *jack_thread_main(void *p) {
     }
     pthread_mutex_unlock(&s->mu);
 
+    if (atomic_exchange(&s->shutdown_pending, 0) != 0) {
+      jack_invoke_error(s, 7, 0);
+      break;
+    }
     if (atomic_load(&s->closed) != 0) {
+      break;
+    }
+
+    if (atomic_exchange(&s->xrun_pending, 0) != 0) {
+      // Mirror upstream: report xrun as BufferUnderrun.
+      jack_invoke_error(s, 5, 0);
+    }
+    if (atomic_exchange(&s->sample_rate_changed_pending, 0) != 0) {
+      // Mirror upstream: changing sample rate invalidates the stream.
+      jack_invoke_error(s, 6, (int32_t)atomic_load(&s->pending_sample_rate));
+      atomic_store(&s->closed, 1);
       break;
     }
 
@@ -384,6 +439,11 @@ static int jack_stream_new(int is_input,
   s->mb_error_callback = error_callback;
   atomic_store(&s->running, 0);
   atomic_store(&s->closed, 0);
+  atomic_store(&s->xrun_pending, 0);
+  atomic_store(&s->shutdown_pending, 0);
+  atomic_store(&s->sample_rate_init_seen, 0);
+  atomic_store(&s->sample_rate_changed_pending, 0);
+  atomic_store(&s->pending_sample_rate, 0U);
 
   pthread_mutex_init(&s->mu, NULL);
   pthread_cond_init(&s->cv, NULL);
@@ -396,6 +456,10 @@ static int jack_stream_new(int is_input,
     jack_stream_destroy(s);
     return -ENODEV;
   }
+
+  (void)jack_set_xrun_callback(s->client, jack_xrun_cb, s);
+  (void)jack_set_sample_rate_callback(s->client, jack_sample_rate_cb, s);
+  jack_on_shutdown(s->client, jack_shutdown_cb, s);
 
   s->sample_rate = (double)jack_get_sample_rate(s->client);
   uint32_t period = (uint32_t)jack_get_buffer_size(s->client);
