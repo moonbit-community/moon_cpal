@@ -30,10 +30,20 @@ pub fn default_host() -> Host {
 }
 
 ///|
+pub fn available_hosts() -> Array[@moon_cpal.HostId] {
+  @platform.available_hosts()
+}
+
+///|
 pub fn host_from_id(
   id : @moon_cpal.HostId,
 ) -> Host raise @moon_cpal.HostUnavailable {
   { inner: @platform.host_from_id(id) }
+}
+
+///|
+pub fn try_host_from_id(id : @moon_cpal.HostId) -> Host? {
+  @platform.try_host_from_id(id).map(fn(h) { { inner: h } })
 }
 
 ///|

@@ -29,9 +29,21 @@ pub fn default_host() -> Host {
 
 ///|
 #declaration_only
+pub fn available_hosts() -> Array[@moon_cpal.HostId] {
+  ...
+}
+
+///|
+#declaration_only
 pub fn host_from_id(
   id : @moon_cpal.HostId,
 ) -> Host raise @moon_cpal.HostUnavailable {
+  ...
+}
+
+///|
+#declaration_only
+pub fn try_host_from_id(id : @moon_cpal.HostId) -> Host? {
   ...
 }
 

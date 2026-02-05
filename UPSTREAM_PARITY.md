@@ -25,12 +25,13 @@ MoonBit port.
 
 Top-level:
 
-- `lib.rs` — **PARTIAL** (core types + some heuristics/tests exist; full trait surface pending)
+- `lib.rs` — **PARTIAL** (core types + some heuristics/tests exist; high-level host API lives in `spec`)
+- `traits.rs` — **PARTIAL** (MoonBit `traits` package exists; iterator-associated types pending)
 - `error.rs` — **DONE** (Display-equivalent `to_string` parity + tests)
 - `device_description.rs` — **DONE** (`direction_from_counts` parity + tests)
 - `samples_formats.rs` — **DONE** (`SampleFormat::to_string` parity)
 - `platform/mod.rs` — **PARTIAL**
-- `host/mod.rs` — **PARTIAL**
+- `host/mod.rs` — **DONE** (native-only backend module structure + trait surface lives in `traits`)
 
 Native hosts:
 

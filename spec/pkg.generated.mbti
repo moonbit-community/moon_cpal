@@ -7,9 +7,13 @@ import {
 }
 
 // Values
+pub fn available_hosts() -> Array[@moon_cpal.HostId]
+
 pub fn default_host() -> Host
 
 pub fn host_from_id(@moon_cpal.HostId) -> Host raise @moon_cpal.HostUnavailable
+
+pub fn try_host_from_id(@moon_cpal.HostId) -> Host?
 
 // Errors
 
