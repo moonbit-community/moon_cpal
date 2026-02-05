@@ -15,8 +15,9 @@
 ///|
 fn print_supported_ranges(
   kind : String,
-  ranges : Array[@moon_cpal.SupportedStreamConfigRange],
+  ranges : Iter[@moon_cpal.SupportedStreamConfigRange],
 ) -> Unit {
+  let ranges = ranges.to_array()
   println("  \{kind} supported ranges: \{ranges.length()}")
   let n = if ranges.length() > 5 { 5 } else { ranges.length() }
   for i in 0..<n {
@@ -70,7 +71,7 @@ fn main {
         []
       }
     } noraise {
-      xs => xs
+      it => it.to_array()
     }
     println("  devices: \{devs.length()}")
     let m = if devs.length() > 5 { 5 } else { devs.length() }
@@ -133,10 +134,10 @@ fn main {
         let ranges = try d.supported_output_configs() catch {
           e => {
             println("  supported_output_configs error: \{e}")
-            []
+            [].iter()
           }
         } noraise {
-          xs => xs
+          it => it
         }
         print_supported_ranges("output", ranges)
         print_default_config("output", fn() { d.default_output_config() })
@@ -174,10 +175,10 @@ fn main {
         let ranges = try d.supported_input_configs() catch {
           e => {
             println("  supported_input_configs error: \{e}")
-            []
+            [].iter()
           }
         } noraise {
-          xs => xs
+          it => it
         }
         print_supported_ranges("input", ranges)
         print_default_config("input", fn() { d.default_input_config() })

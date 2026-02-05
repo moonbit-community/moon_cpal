@@ -20,12 +20,12 @@
 
 ///|
 pub trait HostTrait {
-  devices(Self) -> Array[@spec.Device] raise @core.DevicesError
+  devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
   device_by_id(Self, @core.DeviceId) -> @spec.Device?
   default_input_device(Self) -> @spec.Device?
   default_output_device(Self) -> @spec.Device?
-  input_devices(Self) -> Array[@spec.Device] raise @core.DevicesError
-  output_devices(Self) -> Array[@spec.Device] raise @core.DevicesError
+  input_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  output_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
 }
 
 ///|
@@ -35,8 +35,8 @@ pub trait DeviceTrait {
   description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
   supports_input(Self) -> Bool
   supports_output(Self) -> Bool
-  supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-  supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
   default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
   default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
   build_input_stream(

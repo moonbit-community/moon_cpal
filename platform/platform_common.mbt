@@ -204,9 +204,12 @@ pub fn Host::default_input_device(self : Host) -> Device? {
 }
 
 ///|
-pub fn Host::devices(self : Host) -> Array[Device] raise @core.DevicesError {
+pub fn Host::devices(self : Host) -> Iter[Device] raise @core.DevicesError {
   match self {
-    Null(h) => h.devices().map(fn(d) { Device::Null(d) })
+    Null(h) => {
+      let ds = h.devices()
+      ds.iter().map(fn(d) { Device::Null(d) })
+    }
     CoreAudio(h) =>
       try h.devices() catch {
         @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
@@ -218,61 +221,51 @@ pub fn Host::devices(self : Host) -> Array[Device] raise @core.DevicesError {
             "\{op} (OSStatus \{status})",
           )
       } noraise {
-        ds => ds.map(fn(d) { Device::CoreAudio(d) })
+        ds => ds.iter().map(fn(d) { Device::CoreAudio(d) })
       }
-    Alsa(h) => h.devices().map(fn(d) { Device::Alsa(d) })
-    Jack(h) => h.devices().map(fn(d) { Device::Jack(d) })
-    Wasapi(h) => h.devices().map(fn(d) { Device::Wasapi(d) })
+    Alsa(h) => {
+      let ds = h.devices()
+      ds.iter().map(fn(d) { Device::Alsa(d) })
+    }
+    Jack(h) => {
+      let ds = h.devices()
+      ds.iter().map(fn(d) { Device::Jack(d) })
+    }
+    Wasapi(h) => {
+      let ds = h.devices()
+      ds.iter().map(fn(d) { Device::Wasapi(d) })
+    }
   }
 }
 
 ///|
 pub fn Host::device_by_id(self : Host, id : @core.DeviceId) -> Device? {
   let ds = try Host::devices(self) catch {
-    _ => []
+    _ => return None
   } noraise {
     xs => xs
   }
-  for d in ds {
-    let did = try d.id() catch {
-      _ => None
+  ds.find_first(fn(d) {
+    try d.id() catch {
+      _ => false
     } noraise {
-      x => Some(x)
+      did => did == id
     }
-    match did {
-      None => ()
-      Some(did) => if did == id { return Some(d) }
-    }
-  }
-  None
+  })
 }
 
 ///|
 pub fn Host::input_devices(
   self : Host,
-) -> Array[Device] raise @core.DevicesError {
-  let ds = Host::devices(self)
-  let out : Array[Device] = []
-  for d in ds {
-    if d.supports_input() {
-      out.push(d)
-    }
-  }
-  out
+) -> Iter[Device] raise @core.DevicesError {
+  Host::devices(self).filter(fn(d) { d.supports_input() })
 }
 
 ///|
 pub fn Host::output_devices(
   self : Host,
-) -> Array[Device] raise @core.DevicesError {
-  let ds = Host::devices(self)
-  let out : Array[Device] = []
-  for d in ds {
-    if d.supports_output() {
-      out.push(d)
-    }
-  }
-  out
+) -> Iter[Device] raise @core.DevicesError {
+  Host::devices(self).filter(fn(d) { d.supports_output() })
 }
 
 ///|
@@ -346,7 +339,7 @@ pub fn Device::supports_input(self : Device) -> Bool {
     Alsa(d) => d.supports_input()
     Jack(d) => d.supports_input()
     _ =>
-      try Device::supported_input_configs(self).length() > 0 catch {
+      try (Device::supported_input_configs(self).next() is Some(_)) catch {
         _ => false
       }
   }
@@ -358,7 +351,7 @@ pub fn Device::supports_output(self : Device) -> Bool {
     Alsa(d) => d.supports_output()
     Jack(d) => d.supports_output()
     _ =>
-      try Device::supported_output_configs(self).length() > 0 catch {
+      try (Device::supported_output_configs(self).next() is Some(_)) catch {
         _ => false
       }
   }
@@ -367,9 +360,12 @@ pub fn Device::supports_output(self : Device) -> Bool {
 ///|
 pub fn Device::supported_output_configs(
   self : Device,
-) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   match self {
-    Null(d) => d.supported_output_configs()
+    Null(d) => {
+      let xs = d.supported_output_configs()
+      xs.iter()
+    }
     CoreAudio(d) =>
       try d.supported_output_configs() catch {
         @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
@@ -379,20 +375,32 @@ pub fn Device::supported_output_configs(
             "\{op} (OSStatus \{status})",
           )
       } noraise {
-        xs => xs
+        xs => xs.iter()
       }
-    Alsa(d) => d.supported_output_configs()
-    Jack(d) => d.supported_output_configs()
-    Wasapi(d) => d.supported_output_configs()
+    Alsa(d) => {
+      let xs = d.supported_output_configs()
+      xs.iter()
+    }
+    Jack(d) => {
+      let xs = d.supported_output_configs()
+      xs.iter()
+    }
+    Wasapi(d) => {
+      let xs = d.supported_output_configs()
+      xs.iter()
+    }
   }
 }
 
 ///|
 pub fn Device::supported_input_configs(
   self : Device,
-) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   match self {
-    Null(d) => d.supported_input_configs()
+    Null(d) => {
+      let xs = d.supported_input_configs()
+      xs.iter()
+    }
     CoreAudio(d) =>
       try d.supported_input_configs() catch {
         @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
@@ -402,11 +410,20 @@ pub fn Device::supported_input_configs(
             "\{op} (OSStatus \{status})",
           )
       } noraise {
-        xs => xs
+        xs => xs.iter()
       }
-    Alsa(d) => d.supported_input_configs()
-    Jack(d) => d.supported_input_configs()
-    Wasapi(d) => d.supported_input_configs()
+    Alsa(d) => {
+      let xs = d.supported_input_configs()
+      xs.iter()
+    }
+    Jack(d) => {
+      let xs = d.supported_input_configs()
+      xs.iter()
+    }
+    Wasapi(d) => {
+      let xs = d.supported_input_configs()
+      xs.iter()
+    }
   }
 }
 

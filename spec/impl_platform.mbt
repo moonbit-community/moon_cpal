@@ -69,7 +69,7 @@ pub fn Host::id(self : Host) -> @core.HostId {
 }
 
 ///|
-pub fn Host::devices(self : Host) -> Array[Device] raise @core.DevicesError {
+pub fn Host::devices(self : Host) -> Iter[Device] raise @core.DevicesError {
   @platform.Host::devices(self.inner).map(fn(d) { { inner: d } })
 }
 
@@ -84,14 +84,14 @@ pub fn Host::device_by_id(self : Host, id : @core.DeviceId) -> Device? {
 ///|
 pub fn Host::input_devices(
   self : Host,
-) -> Array[Device] raise @core.DevicesError {
+) -> Iter[Device] raise @core.DevicesError {
   @platform.Host::input_devices(self.inner).map(fn(d) { { inner: d } })
 }
 
 ///|
 pub fn Host::output_devices(
   self : Host,
-) -> Array[Device] raise @core.DevicesError {
+) -> Iter[Device] raise @core.DevicesError {
   @platform.Host::output_devices(self.inner).map(fn(d) { { inner: d } })
 }
 
@@ -141,14 +141,14 @@ pub fn Device::supports_output(self : Device) -> Bool {
 ///|
 pub fn Device::supported_output_configs(
   self : Device,
-) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   @platform.Device::supported_output_configs(self.inner)
 }
 
 ///|
 pub fn Device::supported_input_configs(
   self : Device,
-) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   @platform.Device::supported_input_configs(self.inner)
 }
 

@@ -102,7 +102,7 @@ test "platform device_by_id + supports + in/out device filters" {
     let ds = try host.devices() catch {
       _ => []
     } noraise {
-      xs => xs
+      it => it.to_array()
     }
 
     // device_by_id roundtrip (best-effort)
@@ -129,12 +129,12 @@ test "platform device_by_id + supports + in/out device filters" {
       }
 
       // supports_* should match "supported_*_configs non-empty" (errors => false)
-      let in_len = try d.supported_input_configs().length() catch {
+      let in_len = try d.supported_input_configs().count() catch {
         _ => 0
       } noraise {
         x => x
       }
-      let out_len = try d.supported_output_configs().length() catch {
+      let out_len = try d.supported_output_configs().count() catch {
         _ => 0
       } noraise {
         x => x
@@ -157,12 +157,12 @@ test "platform device_by_id + supports + in/out device filters" {
     let got_in = try host.input_devices() catch {
       _ => []
     } noraise {
-      x => x
+      it => it.to_array()
     }
     let got_out = try host.output_devices() catch {
       _ => []
     } noraise {
-      x => x
+      it => it.to_array()
     }
     inspect(got_in.length() == expected_in.length(), content="true")
     inspect(got_out.length() == expected_out.length(), content="true")
@@ -180,7 +180,7 @@ test "platform default devices are present in devices() (best-effort)" {
     let ds = try host.devices() catch {
       _ => []
     } noraise {
-      xs => xs
+      it => it.to_array()
     }
     let out = host.default_output_device()
     match out {

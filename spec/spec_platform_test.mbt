@@ -66,7 +66,7 @@ test "spec device id + supports + device_by_id (best-effort)" {
     let ds = try host.devices() catch {
       _ => []
     } noraise {
-      xs => xs
+      it => it.to_array()
     }
     for d in ds {
       let did = try d.id() catch {
@@ -85,12 +85,12 @@ test "spec device id + supports + device_by_id (best-effort)" {
           inspect(fid == did, content="true")
         }
       }
-      let in_len = try d.supported_input_configs().length() catch {
+      let in_len = try d.supported_input_configs().count() catch {
         _ => 0
       } noraise {
         x => x
       }
-      let out_len = try d.supported_output_configs().length() catch {
+      let out_len = try d.supported_output_configs().count() catch {
         _ => 0
       } noraise {
         x => x
