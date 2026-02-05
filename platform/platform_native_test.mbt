@@ -52,11 +52,15 @@ test "platform device_by_id + supports + in/out device filters" {
 
     // device_by_id roundtrip (best-effort)
     for d in ds {
-      let did = d.id()
+      let did = try d.id() catch { _ => None } noraise { x => Some(x) }
+      let did = match did {
+        None => continue
+        Some(x) => x
+      }
       match host.device_by_id(did) {
         None => inspect(true, content="true")
         Some(found) => {
-          let found_id = found.id()
+          let found_id = try found.id() catch { _ => did } noraise { x => x }
           inspect(found_id == did, content="true")
         }
       }
@@ -120,14 +124,27 @@ test "platform default devices are present in devices() (best-effort)" {
       None => ()
       Some(d) => {
         // device_by_id roundtrip should work if devices() worked.
-        match host.device_by_id(d.id()) {
+        let did = try d.id() catch { _ => None } noraise { x => Some(x) }
+        let did = match did {
+          None => continue
+          Some(x) => x
+        }
+        match host.device_by_id(did) {
           None => inspect(true, content="true")
-          Some(found) => inspect(found.id() == d.id(), content="true")
+          Some(found) => {
+            let fid = try found.id() catch { _ => did } noraise { x => x }
+            inspect(fid == did, content="true")
+          }
         }
         if ds.length() > 0 {
           let mut ok = false
           for x in ds {
-            if x.id() == d.id() {
+            let xid = try x.id() catch { _ => None } noraise { y => Some(y) }
+            let xid = match xid {
+              None => continue
+              Some(v) => v
+            }
+            if xid == did {
               ok = true
               break
             }
@@ -140,14 +157,27 @@ test "platform default devices are present in devices() (best-effort)" {
     match inp {
       None => ()
       Some(d) => {
-        match host.device_by_id(d.id()) {
+        let did = try d.id() catch { _ => None } noraise { x => Some(x) }
+        let did = match did {
+          None => continue
+          Some(x) => x
+        }
+        match host.device_by_id(did) {
           None => inspect(true, content="true")
-          Some(found) => inspect(found.id() == d.id(), content="true")
+          Some(found) => {
+            let fid = try found.id() catch { _ => did } noraise { x => x }
+            inspect(fid == did, content="true")
+          }
         }
         if ds.length() > 0 {
           let mut ok = false
           for x in ds {
-            if x.id() == d.id() {
+            let xid = try x.id() catch { _ => None } noraise { y => Some(y) }
+            let xid = match xid {
+              None => continue
+              Some(v) => v
+            }
+            if xid == did {
               ok = true
               break
             }

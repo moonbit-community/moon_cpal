@@ -91,7 +91,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 
 ///|
 #declaration_only
-pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError {
   ...
 }
 

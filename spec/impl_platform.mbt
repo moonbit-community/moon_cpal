@@ -92,7 +92,9 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
-pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError {
   @platform.Device::id(self.inner)
 }
 

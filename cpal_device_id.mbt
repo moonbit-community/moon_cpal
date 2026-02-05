@@ -10,6 +10,16 @@ pub suberror DeviceIdError {
 } derive(Show, Eq)
 
 ///|
+pub fn device_id_error_unsupported_platform() -> DeviceIdError {
+  DeviceIdError::UnsupportedPlatform
+}
+
+///|
+pub fn device_id_error_backend_specific(description : String) -> DeviceIdError {
+  DeviceIdError::BackendSpecific(BackendSpecificError::new(description))
+}
+
+///|
 pub fn DeviceIdError::to_string(self : DeviceIdError) -> String {
   match self {
     DeviceIdError::BackendSpecific(err) => err.to_string()

@@ -181,8 +181,10 @@ pub fn Host::device_by_id(self : Host, id : @moon_cpal.DeviceId) -> Device? {
     xs => xs
   }
   for d in ds {
-    if d.id() == id {
-      return Some(d)
+    let did = try d.id() catch { _ => None } noraise { x => Some(x) }
+    match did {
+      None => ()
+      Some(did) => if did == id { return Some(d) }
     }
   }
   None
@@ -240,14 +242,21 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
-pub fn Device::id(self : Device) -> @moon_cpal.DeviceId {
-  match self {
+pub fn Device::id(self : Device) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError {
+  let did =
+    match self {
     Null(d) => d.id()
     CoreAudio(d) => d.id()
     Alsa(d) => d.id()
     Jack(d) => d.id()
     Wasapi(d) => d.id()
   }
+  if did.device_id().is_empty() {
+    raise @moon_cpal.device_id_error_backend_specific(
+      "Device returned an empty device_id",
+    )
+  }
+  did
 }
 
 ///|
