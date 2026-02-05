@@ -32,6 +32,24 @@ pub(all) enum HostId {
 } derive(Show, Eq)
 
 ///|
+/// Upstream `HostId::name()` returns the variant name (before lowercase display).
+pub fn HostId::name(self : HostId) -> String {
+  match self {
+    AAudio => "AAudio"
+    Alsa => "Alsa"
+    Asio => "Asio"
+    CoreAudio => "CoreAudio"
+    Custom => "Custom"
+    Emscripten => "Emscripten"
+    Jack => "Jack"
+    Null => "Null"
+    Wasapi => "Wasapi"
+    WebAudio => "WebAudio"
+    AudioWorklet => "AudioWorklet"
+  }
+}
+
+///|
 fn ascii_lower(c : Char) -> Int {
   let x = c.to_int()
   if 65 <= x && x <= 90 {

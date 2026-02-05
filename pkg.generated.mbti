@@ -342,6 +342,7 @@ pub(all) enum HostId {
 }
 pub fn HostId::from_string(String) -> Self?
 pub fn HostId::from_view(StringView) -> Self?
+pub fn HostId::name(Self) -> String
 pub fn HostId::parse(String) -> Self raise HostUnavailable
 pub fn HostId::to_string(Self) -> String
 pub impl Eq for HostId

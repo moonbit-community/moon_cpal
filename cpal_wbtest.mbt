@@ -234,6 +234,7 @@ test "callback timestamp types" {
 test "host_id parsing and available_hosts" {
   inspect(HostId::from_string("coreaudio"), content="Some(CoreAudio)")
   inspect(HostId::from_string("CoReAuDiO"), content="Some(CoreAudio)")
+  inspect(HostId::name(CoreAudio), content="CoreAudio")
   inspect(HostId::from_string("unknown"), content="None")
   try HostId::parse("unknown") catch {
     HostUnavailable => inspect(true, content="true")
