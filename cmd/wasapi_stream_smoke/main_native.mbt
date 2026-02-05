@@ -324,99 +324,148 @@ fn main {
         panic()
       }
       Some(dev) => {
-        let cfg = try dev.default_output_config() catch {
+        let supported = try dev.default_output_config() catch {
           e => {
             println("default output config failed: \{e}")
             panic()
           }
         } noraise {
-          supported => supported.config()
+          x => x
         }
+        let cfg = supported.config()
+        let fmt = supported.sample_format()
         let calls : Array[Int] = [0]
         let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
         let first_frames : Array[Int] = [0]
-        try
-          dev.build_loopback_input_stream(
+        fn on_loopback_data(
+          data : @core.Data,
+          info : @moon_cpal.InputCallbackInfo,
+        ) -> Unit {
+          calls[0] = calls[0] + 1
+          if first_frames[0] == 0 {
+            let n = data.len()
+            let ch = cfg.channels
+            if ch > 0 {
+              first_frames[0] = n / ch
+            }
+          }
+          let now = info.timestamp().callback()
+          match last_cb[0] {
+            None => last_cb[0] = Some(now)
+            Some(prev) => {
+              if now.duration_since(prev) is None {
+                println("non-monotonic loopback callback timestamp")
+                panic()
+              }
+              last_cb[0] = Some(now)
+            }
+          }
+          if calls[0] == 1 {
+            println("loopback ts: \{info.timestamp()}")
+            match data.try_as_f32() {
+              None => println("loopback first buffer: (not f32)")
+              Some(xs) =>
+                if xs.is_empty() {
+                  println("loopback first buffer: empty")
+                } else {
+                  println("loopback first sample: \{xs[0]}")
+                }
+            }
+          }
+        }
+
+        let stream = try
+          dev.build_input_stream_raw(
             cfg,
-            fn(data, info) {
-              calls[0] = calls[0] + 1
-              if first_frames[0] == 0 {
-                let n = data.len()
-                let ch = cfg.channels
-                if ch > 0 {
-                  first_frames[0] = n / ch
-                }
-              }
-              let now = info.timestamp().callback()
-              match last_cb[0] {
-                None => last_cb[0] = Some(now)
-                Some(prev) => {
-                  if now.duration_since(prev) is None {
-                    println("non-monotonic loopback callback timestamp")
-                    panic()
-                  }
-                  last_cb[0] = Some(now)
-                }
-              }
-              if calls[0] == 1 {
-                println("loopback ts: \{info.timestamp()}")
-                match data.try_as_f32() {
-                  None => println("loopback first buffer: (not f32)")
-                  Some(xs) =>
-                    if xs.is_empty() {
-                      println("loopback first buffer: empty")
-                    } else {
-                      println("loopback first sample: \{xs[0]}")
-                    }
-                }
-              }
-            },
+            fmt,
+            on_loopback_data,
             fn(err) { println("stream error: \{err}") },
             None,
           )
         catch {
           e => {
-            println("loopback stream build failed: \{e}")
-            panic()
-          }
-        } noraise {
-          stream => {
-            try stream.play() catch {
+            println(
+              "loopback input stream build failed (raw on output dev): \{e}",
+            )
+            println("falling back to explicit loopback sentinel")
+            let s = try
+              dev.build_loopback_input_stream(
+                cfg,
+                on_loopback_data,
+                fn(err) { println("stream error: \{err}") },
+                None,
+              )
+            catch {
               e => {
-                println("loopback stream play failed: \{e}")
-                stream.close()
+                println("loopback stream build failed: \{e}")
                 panic()
               }
             } noraise {
-              _ => ()
+              x => x
             }
-            sleep_ms(1000)
-            try stream.pause() catch {
-              e => println("loopback stream pause failed: \{e}")
-            } noraise {
-              _ => ()
-            }
-            let paused = calls[0]
-            sleep_ms(200)
-            if calls[0] > paused + 1 {
-              println(
-                "loopback callbacks continued after pause (before=\{paused} after=\{calls[0]})",
-              )
-              stream.close()
-              panic()
-            }
+            s
+          }
+        } noraise {
+          s => s
+        }
+        try stream.play() catch {
+          e => {
+            println("loopback stream play failed: \{e}")
             stream.close()
-            println("loopback stream ok (callbacks=\{calls[0]})")
+            panic()
+          }
+        } noraise {
+          _ => ()
+        }
+        sleep_ms(1000)
+        try stream.pause() catch {
+          e => println("loopback stream pause failed: \{e}")
+        } noraise {
+          _ => ()
+        }
+        let paused = calls[0]
+        sleep_ms(200)
+        if calls[0] > paused + 1 {
+          println(
+            "loopback callbacks continued after pause (before=\{paused} after=\{calls[0]})",
+          )
+          stream.close()
+          panic()
+        }
+        stream.close()
+        println("loopback stream ok (callbacks=\{calls[0]})")
 
-            // Validate fixed sizing using the observed loopback callback size.
-            if first_frames[0] > 0 && cfg.channels > 0 {
-              let fixed_cfg = @moon_cpal.StreamConfig::new(
-                cfg.channels,
-                cfg.sample_rate,
-                @moon_cpal.BufferSize::fixed(first_frames[0]),
+        // Validate fixed sizing using the observed loopback callback size.
+        if first_frames[0] > 0 && cfg.channels > 0 {
+          let fixed_cfg = @moon_cpal.StreamConfig::new(
+            cfg.channels,
+            cfg.sample_rate,
+            @moon_cpal.BufferSize::fixed(first_frames[0]),
+          )
+          let fixed_calls : Array[Int] = [0]
+          let fixed_stream = try
+            dev.build_input_stream_raw(
+              fixed_cfg,
+              fmt,
+              fn(data, _info) {
+                fixed_calls[0] = fixed_calls[0] + 1
+                if data.len() != first_frames[0] * cfg.channels {
+                  println(
+                    "fixed loopback len mismatch: got=\{data.len()} expected=\{first_frames[0] * cfg.channels}",
+                  )
+                  panic()
+                }
+              },
+              fn(err) { println("stream error: \{err}") },
+              None,
+            )
+          catch {
+            e => {
+              println(
+                "fixed loopback stream build failed (raw on output dev): \{e}",
               )
-              let fixed_calls : Array[Int] = [0]
-              let fixed_stream = try
+              println("falling back to explicit loopback sentinel")
+              let s = try
                 dev.build_loopback_input_stream(
                   fixed_cfg,
                   fn(data, _info) {
@@ -437,22 +486,25 @@ fn main {
                   panic()
                 }
               } noraise {
-                s => s
+                x => x
               }
-              try fixed_stream.play() catch {
-                e => {
-                  println("fixed loopback stream play failed: \{e}")
-                  fixed_stream.close()
-                  panic()
-                }
-              } noraise {
-                _ => ()
-              }
-              sleep_ms(200)
-              fixed_stream.close()
-              println("fixed loopback stream ok (callbacks=\{fixed_calls[0]})")
+              s
             }
+          } noraise {
+            s => s
           }
+          try fixed_stream.play() catch {
+            e => {
+              println("fixed loopback stream play failed: \{e}")
+              fixed_stream.close()
+              panic()
+            }
+          } noraise {
+            _ => ()
+          }
+          sleep_ms(200)
+          fixed_stream.close()
+          println("fixed loopback stream ok (callbacks=\{fixed_calls[0]})")
         }
       }
     }

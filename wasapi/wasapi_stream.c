@@ -113,6 +113,68 @@ static uint32_t wasapi_guess_sample_format_tag_from_wfx(const WAVEFORMATEX *wfx)
   return 0;
 }
 
+static int wasapi_endpoint_is_render(const wchar_t *endpoint_id_w) {
+  if (endpoint_id_w == NULL) {
+    return 0;
+  }
+
+  HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+  int did_uninit = 0;
+  if (SUCCEEDED(hr)) {
+    did_uninit = 1;
+  } else if (hr == RPC_E_CHANGED_MODE) {
+    // COM already initialized on this thread with a different model.
+    did_uninit = 0;
+  } else {
+    return 0;
+  }
+
+  IMMDeviceEnumerator *enumerator = NULL;
+  IMMDevice *device = NULL;
+  IMMEndpoint *endpoint = NULL;
+  int is_render = 0;
+
+  hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator,
+                        (void **)&enumerator);
+  if (FAILED(hr) || enumerator == NULL) {
+    goto done;
+  }
+
+  hr = IMMDeviceEnumerator_GetDevice(enumerator, endpoint_id_w, &device);
+  if (FAILED(hr) || device == NULL) {
+    goto done;
+  }
+
+  hr = IMMDevice_QueryInterface(device, &IID_IMMEndpoint, (void **)&endpoint);
+  if (FAILED(hr) || endpoint == NULL) {
+    goto done;
+  }
+
+  EDataFlow flow = eAll;
+  hr = IMMEndpoint_GetDataFlow(endpoint, &flow);
+  if (SUCCEEDED(hr) && flow == eRender) {
+    is_render = 1;
+  }
+
+done:
+  if (endpoint) {
+    IMMEndpoint_Release(endpoint);
+    endpoint = NULL;
+  }
+  if (device) {
+    IMMDevice_Release(device);
+    device = NULL;
+  }
+  if (enumerator) {
+    IMMDeviceEnumerator_Release(enumerator);
+    enumerator = NULL;
+  }
+  if (did_uninit) {
+    CoUninitialize();
+  }
+  return is_render;
+}
+
 static void wasapi_now(int64_t *out_secs, int32_t *out_nanos) {
   if (out_secs == NULL || out_nanos == NULL) {
     return;
@@ -731,13 +793,21 @@ int32_t moon_cpal_wasapi_stream_build_input(uint8_t *device_id_utf8,
     }
     memcpy(tmp, device_id_utf8, n);
     tmp[n] = '\0';
-    if (wasapi_utf8_is_loopback(tmp)) {
-      is_loopback = 1;
-    }
+  if (wasapi_utf8_is_loopback(tmp)) {
+    is_loopback = 1;
+  }
   }
 
   wchar_t *endpoint_id_w = is_loopback ? NULL : wasapi_endpoint_id_from_utf8_bytes(device_id_utf8, device_id_len);
   moonbit_decref(device_id_utf8);
+
+  // Match upstream WASAPI: if a render endpoint is used to build an input stream, enable
+  // loopback capture transparently.
+  if (!is_loopback && endpoint_id_w != NULL) {
+    if (wasapi_endpoint_is_render(endpoint_id_w)) {
+      is_loopback = 1;
+    }
+  }
 
   if (out_handles == NULL || out_len <= 0) {
     moonbit_decref(data_callback);

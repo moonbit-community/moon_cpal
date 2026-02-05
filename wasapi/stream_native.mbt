@@ -163,28 +163,6 @@ fn wasapi_pause_error_from_hresult(
 }
 
 ///|
-fn choose_format_tag(
-  ranges : Array[@core.SupportedStreamConfigRange],
-  config : @core.StreamConfig,
-) -> UInt? {
-  let sr = config.sample_rate
-  let ch = config.channels
-  for r in ranges {
-    if r.channels() == ch &&
-      r.min_sample_rate() <= sr &&
-      sr <= r.max_sample_rate() {
-      return match r.sample_format() {
-        @core.SampleFormat::F32 => Some((1 : UInt))
-        @core.SampleFormat::I16 => Some((2 : UInt))
-        @core.SampleFormat::U8 => Some((4 : UInt))
-        _ => None
-      }
-    }
-  }
-  None
-}
-
-///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
     @core.SampleFormat::F32 => Some((1 : UInt))
@@ -378,7 +356,13 @@ pub fn Device::build_input_stream_raw(
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  let ranges = self.supported_input_configs()
+  // Match upstream WASAPI semantics: building an input stream on a render endpoint enables
+  // loopback capture. Supported input configs are still empty for render endpoints, so we must
+  // validate against supported output configs when data_flow indicates render.
+  let ranges = match data_flow_tag(self.id) {
+    Some(2) => self.supported_output_configs()
+    _ => self.supported_input_configs()
+  }
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
@@ -447,13 +431,39 @@ pub fn Device::build_loopback_input_stream(
   if @core.native_os() != @core.NativeOs::Windows {
     raise_build_hresult("wasapi build_loopback_input_stream", -1)
   }
-  // We pass a special sentinel id to the C layer to enable loopback.
-  let dev = @core.string_to_utf8_bytes("loopback")
-  let ranges = _self.supported_input_configs()
-  let fmt_tag = match choose_format_tag(ranges, config) {
+  if config.channels <= 0 || config.sample_rate <= 0 {
+    raise @core.build_stream_error_invalid_argument()
+  }
+  match config.buffer_size {
+    Default => ()
+    Fixed(n) => {
+      if n < 0 {
+        raise @core.build_stream_error_invalid_argument()
+      }
+      if n == 0 {
+        raise @core.build_stream_error_stream_config_not_supported()
+      }
+    }
+  }
+
+  // Loopback capture uses a render endpoint; validate using output configs.
+  let ranges = _self.supported_output_configs()
+  let fmt = match choose_default_sample_format(ranges, config) {
+    Some(f) => f
+    None => raise @core.build_stream_error_stream_config_not_supported()
+  }
+  let fmt_tag = match format_tag_from_sample_format(fmt) {
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
+  let r = match find_matching_range_for_format(ranges, config, fmt) {
+    Some(r) => r
+    None => raise @core.build_stream_error_stream_config_not_supported()
+  }
+  validate_buffer_size_or_raise(r, config)
+
+  // We pass a special sentinel id to the C layer to enable loopback on the default render endpoint.
+  let dev = @core.string_to_utf8_bytes("loopback")
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(
     dev,
