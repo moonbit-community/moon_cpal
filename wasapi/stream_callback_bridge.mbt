@@ -22,6 +22,14 @@ fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
     2 => @core.SampleFormat::I16
     3 => @core.SampleFormat::U16
     4 => @core.SampleFormat::U8
+    5 => @core.SampleFormat::I8
+    6 => @core.SampleFormat::I24
+    7 => @core.SampleFormat::U24
+    8 => @core.SampleFormat::I32
+    9 => @core.SampleFormat::U32
+    10 => @core.SampleFormat::I64
+    11 => @core.SampleFormat::U64
+    12 => @core.SampleFormat::F64
     _ => @core.SampleFormat::F32
   }
 }

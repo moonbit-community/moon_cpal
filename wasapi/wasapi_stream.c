@@ -81,6 +81,32 @@ static HRESULT wasapi_com_init(int *out_did_uninit) {
   return hr;
 }
 
+static const GUID moon_cpal_ks_subtype_pcm = {0x00000001,
+                                              0x0000,
+                                              0x0010,
+                                              {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+static const GUID moon_cpal_ks_subtype_ieee_float = {
+    0x00000003, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}};
+
+static DWORD channel_mask_from_channels(uint32_t channels) {
+  switch (channels) {
+  case 1:
+    return 0x00000004u; // SPEAKER_FRONT_CENTER
+  case 2:
+    return 0x00000001u | 0x00000002u; // FL | FR
+  case 4:
+    return 0x00000001u | 0x00000002u | 0x00000010u | 0x00000020u; // quad
+  case 6:
+    return 0x00000001u | 0x00000002u | 0x00000004u | 0x00000008u | 0x00000010u | 0x00000020u; // 5.1
+  case 8:
+    return 0x00000001u | 0x00000002u | 0x00000004u | 0x00000008u | 0x00000010u | 0x00000020u |
+           0x00000040u | 0x00000080u; // 7.1
+  default:
+    // Unknown layout; pass-through with no speaker positions.
+    return 0;
+  }
+}
+
 static int wasapi_utf8_is_loopback(const char *s) {
   if (s == NULL) {
     return 0;
@@ -123,15 +149,58 @@ static uint32_t wasapi_guess_sample_format_tag_from_wfx(const WAVEFORMATEX *wfx)
   if (wfx == NULL) {
     return 0;
   }
-  // Keep this conservative: we only surface F32/I16/U8 to MoonBit today.
-  if (wfx->wBitsPerSample == 32) {
-    return 1; // F32
+  uint16_t bits = wfx->wBitsPerSample;
+  if (wfx->wFormatTag == WAVE_FORMAT_PCM) {
+    if (bits == 8) {
+      return 4; // U8
+    }
+    if (bits == 16) {
+      return 2; // I16
+    }
+    // Note: Windows may also report PCM as 32-bit/64-bit; treat as signed int.
+    if (bits == 32) {
+      return 8; // I32
+    }
+    if (bits == 64) {
+      return 10; // I64
+    }
+    return 0;
   }
-  if (wfx->wBitsPerSample == 16) {
-    return 2; // I16
+  if (wfx->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) {
+    if (bits == 32) {
+      return 1; // F32
+    }
+    return 0;
   }
-  if (wfx->wBitsPerSample == 8) {
-    return 4; // U8
+  if (wfx->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+    const WAVEFORMATEXTENSIBLE *ext = (const WAVEFORMATEXTENSIBLE *)wfx;
+    // Prefer SubFormat to distinguish float vs PCM.
+    const GUID *sub = &ext->SubFormat;
+    if (IsEqualGUID(sub, &moon_cpal_ks_subtype_ieee_float)) {
+      if (bits == 32) {
+        return 1; // F32
+      }
+      return 0;
+    }
+    if (IsEqualGUID(sub, &moon_cpal_ks_subtype_pcm)) {
+      if (bits == 8) {
+        return 4; // U8
+      }
+      if (bits == 16) {
+        return 2; // I16
+      }
+      if (bits == 24) {
+        // 24-bit uses 32-bit storage; we surface it as I24 like upstream default_format.
+        return 6; // I24
+      }
+      if (bits == 32) {
+        return 8; // I32
+      }
+      if (bits == 64) {
+        return 10; // I64
+      }
+    }
+    return 0;
   }
   return 0;
 }
@@ -229,6 +298,15 @@ static uint32_t wasapi_bytes_per_sample_from_tag(uint32_t tag) {
     return 2;
   case 4:
     return 1;
+  case 6:  // I24 stored in u32
+  case 7:  // U24 stored in u32
+  case 8:  // I32
+  case 9:  // U32
+    return 4;
+  case 10: // I64
+  case 11: // U64
+  case 12: // F64
+    return 8;
   default:
     return 0;
   }
@@ -239,31 +317,90 @@ static HRESULT wasapi_build_wfx(double sample_rate, uint32_t channels, uint32_t 
     return E_INVALIDARG;
   }
   *out_wfx = NULL;
-  uint32_t bps = wasapi_bytes_per_sample_from_tag(sample_format_tag);
-  if (bps == 0) {
+  uint16_t bits_per_sample = 0;
+  GUID sub = moon_cpal_ks_subtype_pcm;
+  uint16_t format_tag = WAVE_FORMAT_PCM;
+
+  // Match upstream `config_to_waveformatextensible` for the formats we expose.
+  switch (sample_format_tag) {
+  case 4: // U8
+    bits_per_sample = 8;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_PCM;
+    break;
+  case 2: // I16
+    bits_per_sample = 16;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_PCM;
+    break;
+  case 6: // I24 (32-bit storage, 24 valid bits)
+  case 7: // U24 (32-bit storage, 24 valid bits)
+    bits_per_sample = 24;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 8: // I32
+  case 9: // U32
+    bits_per_sample = 32;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 10: // I64
+  case 11: // U64
+    bits_per_sample = 64;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 1: // F32
+    bits_per_sample = 32;
+    sub = moon_cpal_ks_subtype_ieee_float;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  default:
     return E_INVALIDARG;
   }
 
-  WAVEFORMATEX *wfx = (WAVEFORMATEX *)CoTaskMemAlloc(sizeof(WAVEFORMATEX));
-  if (wfx == NULL) {
+  uint32_t bytes_per_sample = wasapi_bytes_per_sample_from_tag(sample_format_tag);
+  if (bytes_per_sample == 0) {
+    return E_INVALIDARG;
+  }
+
+  if (format_tag == WAVE_FORMAT_PCM) {
+    WAVEFORMATEX *wfx = (WAVEFORMATEX *)CoTaskMemAlloc(sizeof(WAVEFORMATEX));
+    if (wfx == NULL) {
+      return E_OUTOFMEMORY;
+    }
+    memset(wfx, 0, sizeof(*wfx));
+    wfx->wFormatTag = format_tag;
+    wfx->nChannels = (WORD)channels;
+    wfx->nSamplesPerSec = (DWORD)(sample_rate <= 0.0 ? 48000.0 : sample_rate);
+    wfx->wBitsPerSample = bits_per_sample;
+    wfx->nBlockAlign = (WORD)(channels * bytes_per_sample);
+    wfx->nAvgBytesPerSec = wfx->nSamplesPerSec * wfx->nBlockAlign;
+    wfx->cbSize = 0;
+    *out_wfx = wfx;
+    return S_OK;
+  }
+
+  WAVEFORMATEXTENSIBLE *ext = (WAVEFORMATEXTENSIBLE *)CoTaskMemAlloc(sizeof(WAVEFORMATEXTENSIBLE));
+  if (ext == NULL) {
     return E_OUTOFMEMORY;
   }
-  memset(wfx, 0, sizeof(*wfx));
+  memset(ext, 0, sizeof(*ext));
 
-  wfx->nChannels = (WORD)channels;
-  wfx->nSamplesPerSec = (DWORD)(sample_rate <= 0.0 ? 48000.0 : sample_rate);
-  wfx->wBitsPerSample = (WORD)(bps * 8);
-  wfx->nBlockAlign = (WORD)(channels * bps);
-  wfx->nAvgBytesPerSec = wfx->nSamplesPerSec * wfx->nBlockAlign;
+  ext->Format.wFormatTag = format_tag;
+  ext->Format.nChannels = (WORD)channels;
+  ext->Format.nSamplesPerSec = (DWORD)(sample_rate <= 0.0 ? 48000.0 : sample_rate);
+  ext->Format.wBitsPerSample = bits_per_sample;
+  ext->Format.nBlockAlign = (WORD)(channels * bytes_per_sample);
+  ext->Format.nAvgBytesPerSec = ext->Format.nSamplesPerSec * ext->Format.nBlockAlign;
+  ext->Format.cbSize = (WORD)(sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX));
 
-  if (sample_format_tag == 1) {
-    wfx->wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
-  } else {
-    wfx->wFormatTag = WAVE_FORMAT_PCM;
-  }
-  wfx->cbSize = 0;
+  ext->Samples.wValidBitsPerSample = bits_per_sample;
+  ext->dwChannelMask = channel_mask_from_channels(channels);
+  ext->SubFormat = sub;
 
-  *out_wfx = wfx;
+  *out_wfx = (WAVEFORMATEX *)ext;
   return S_OK;
 }
 

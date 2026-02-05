@@ -151,14 +151,51 @@ static uint32_t sample_format_tag_from_mix(const WAVEFORMATEX *wfx) {
   if (wfx == NULL) {
     return 0;
   }
-  if (wfx->wBitsPerSample == 32) {
-    return 1;
+  uint16_t bits = wfx->wBitsPerSample;
+  if (wfx->wFormatTag == WAVE_FORMAT_PCM) {
+    if (bits == 8) {
+      return 4; // U8
+    }
+    if (bits == 16) {
+      return 2; // I16
+    }
+    if (bits == 24) {
+      return 6; // I24 (32-bit storage, 24 valid bits)
+    }
+    if (bits == 32) {
+      return 8; // I32
+    }
+    if (bits == 64) {
+      return 10; // I64
+    }
+    return 0;
   }
-  if (wfx->wBitsPerSample == 16) {
-    return 2;
+  if (wfx->wFormatTag == WAVE_FORMAT_IEEE_FLOAT) {
+    return bits == 32 ? 1 : 0; // F32
   }
-  if (wfx->wBitsPerSample == 8) {
-    return 4;
+  if (wfx->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
+    const WAVEFORMATEXTENSIBLE *ext = (const WAVEFORMATEXTENSIBLE *)wfx;
+    const GUID *sub = &ext->SubFormat;
+    if (IsEqualGUID(sub, &moon_cpal_ks_subtype_ieee_float)) {
+      return bits == 32 ? 1 : 0;
+    }
+    if (IsEqualGUID(sub, &moon_cpal_ks_subtype_pcm)) {
+      if (bits == 8) {
+        return 4;
+      }
+      if (bits == 16) {
+        return 2;
+      }
+      if (bits == 24) {
+        return 6;
+      }
+      if (bits == 32) {
+        return 8;
+      }
+      if (bits == 64) {
+        return 10;
+      }
+    }
   }
   return 0;
 }
@@ -206,31 +243,68 @@ static int wasapi_build_wfx_ext(uint32_t channels,
   }
   memset(out, 0, sizeof(*out));
 
-  uint16_t bits = 0;
+  uint16_t bits_per_sample = 0;
+  uint16_t format_tag = WAVE_FORMAT_PCM;
+  uint16_t sample_bytes = 0;
   GUID sub = moon_cpal_ks_subtype_pcm;
-  if (sample_format_tag == 1) {
-    bits = 32;
+  switch (sample_format_tag) {
+  case 4: // U8
+    bits_per_sample = 8;
+    sample_bytes = 1;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_PCM;
+    break;
+  case 2: // I16
+    bits_per_sample = 16;
+    sample_bytes = 2;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_PCM;
+    break;
+  case 6: // I24 (32-bit storage, 24 valid bits)
+  case 7: // U24 (32-bit storage, 24 valid bits)
+    bits_per_sample = 24;
+    sample_bytes = 4;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 8: // I32
+  case 9: // U32
+    bits_per_sample = 32;
+    sample_bytes = 4;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 10: // I64
+  case 11: // U64
+    bits_per_sample = 64;
+    sample_bytes = 8;
+    sub = moon_cpal_ks_subtype_pcm;
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  case 1: // F32
+    bits_per_sample = 32;
+    sample_bytes = 4;
     sub = moon_cpal_ks_subtype_ieee_float;
-  } else if (sample_format_tag == 2) {
-    bits = 16;
-    sub = moon_cpal_ks_subtype_pcm;
-  } else if (sample_format_tag == 4) {
-    bits = 8;
-    sub = moon_cpal_ks_subtype_pcm;
-  } else {
+    format_tag = WAVE_FORMAT_EXTENSIBLE;
+    break;
+  default:
     return 0;
   }
 
-  out->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+  out->Format.wFormatTag = format_tag;
   out->Format.nChannels = (WORD)channels;
   out->Format.nSamplesPerSec = (DWORD)sample_rate;
-  out->Format.wBitsPerSample = bits;
-  out->Format.nBlockAlign = (WORD)((channels * bits) / 8);
+  out->Format.wBitsPerSample = bits_per_sample;
+  out->Format.nBlockAlign = (WORD)(channels * sample_bytes);
   out->Format.nAvgBytesPerSec = out->Format.nSamplesPerSec * out->Format.nBlockAlign;
-  out->Format.cbSize = (WORD)(sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX));
-  out->Samples.wValidBitsPerSample = bits;
-  out->dwChannelMask = channel_mask_from_channels(channels);
-  out->SubFormat = sub;
+  if (format_tag == WAVE_FORMAT_EXTENSIBLE) {
+    out->Format.cbSize = (WORD)(sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX));
+    out->Samples.wValidBitsPerSample = bits_per_sample;
+    out->dwChannelMask = channel_mask_from_channels(channels);
+    out->SubFormat = sub;
+  } else {
+    out->Format.cbSize = 0;
+  }
   return 1;
 }
 
@@ -535,8 +609,10 @@ int32_t moon_cpal_wasapi_supported_configs_u32(uint8_t *device_id_utf8,
       192000, 352800, 384000, 705600, 768000, 1411200, 1536000,
   };
 
-  // Supported formats in this MoonBit port (today): I16 + F32 + U8.
-  static const uint32_t fmts[] = {2 /* i16 */, 1 /* f32 */, 4 /* u8 */};
+  // Mirror upstream WASAPI supported_formats: U8/I16/I24/U24/I32/I64/F32.
+  static const uint32_t fmts[] = {
+      4 /* u8 */, 2 /* i16 */, 6 /* i24 */, 7 /* u24 */, 8 /* i32 */, 10 /* i64 */, 1 /* f32 */,
+  };
 
   int32_t wrote = 0;
   for (size_t ri = 0; ri < (sizeof(rates) / sizeof(rates[0])); ri++) {

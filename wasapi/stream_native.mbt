@@ -168,6 +168,11 @@ fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
     @core.SampleFormat::F32 => Some((1 : UInt))
     @core.SampleFormat::I16 => Some((2 : UInt))
     @core.SampleFormat::U8 => Some((4 : UInt))
+    // Match upstream WASAPI supported_formats: i24/u24/i32/i64 use WAVE_FORMAT_EXTENSIBLE.
+    @core.SampleFormat::I24 => Some((6 : UInt))
+    @core.SampleFormat::U24 => Some((7 : UInt))
+    @core.SampleFormat::I32 => Some((8 : UInt))
+    @core.SampleFormat::I64 => Some((10 : UInt))
     _ => None
   }
 }

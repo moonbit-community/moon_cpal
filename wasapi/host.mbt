@@ -269,6 +269,10 @@ pub fn Device::supported_input_configs(
             2 => @core.SampleFormat::I16
             3 => @core.SampleFormat::U16
             4 => @core.SampleFormat::U8
+            6 => @core.SampleFormat::I24
+            7 => @core.SampleFormat::U24
+            8 => @core.SampleFormat::I32
+            10 => @core.SampleFormat::I64
             _ => @core.SampleFormat::F32
           }
           let buf = @core.SupportedBufferSize::Range(
@@ -302,6 +306,10 @@ pub fn Device::supported_input_configs(
           2 => @core.SampleFormat::I16
           3 => @core.SampleFormat::U16
           4 => @core.SampleFormat::U8
+          6 => @core.SampleFormat::I24
+          7 => @core.SampleFormat::U24
+          8 => @core.SampleFormat::I32
+          10 => @core.SampleFormat::I64
           _ => @core.SampleFormat::F32
         }
         let b = @core.SupportedBufferSize::Range(
@@ -344,6 +352,10 @@ pub fn Device::supported_output_configs(
             2 => @core.SampleFormat::I16
             3 => @core.SampleFormat::U16
             4 => @core.SampleFormat::U8
+            6 => @core.SampleFormat::I24
+            7 => @core.SampleFormat::U24
+            8 => @core.SampleFormat::I32
+            10 => @core.SampleFormat::I64
             _ => @core.SampleFormat::F32
           }
           let buf = @core.SupportedBufferSize::Range(
@@ -377,6 +389,10 @@ pub fn Device::supported_output_configs(
           2 => @core.SampleFormat::I16
           3 => @core.SampleFormat::U16
           4 => @core.SampleFormat::U8
+          6 => @core.SampleFormat::I24
+          7 => @core.SampleFormat::U24
+          8 => @core.SampleFormat::I32
+          10 => @core.SampleFormat::I64
           _ => @core.SampleFormat::F32
         }
         let b = @core.SupportedBufferSize::Range(
@@ -423,6 +439,10 @@ pub fn Device::default_input_config(
         2 => @core.SampleFormat::I16
         3 => @core.SampleFormat::U16
         4 => @core.SampleFormat::U8
+        6 => @core.SampleFormat::I24
+        7 => @core.SampleFormat::U24
+        8 => @core.SampleFormat::I32
+        10 => @core.SampleFormat::I64
         _ => @core.SampleFormat::F32
       }
       @core.SupportedStreamConfig::new(
@@ -463,6 +483,10 @@ pub fn Device::default_output_config(
         2 => @core.SampleFormat::I16
         3 => @core.SampleFormat::U16
         4 => @core.SampleFormat::U8
+        6 => @core.SampleFormat::I24
+        7 => @core.SampleFormat::U24
+        8 => @core.SampleFormat::I32
+        10 => @core.SampleFormat::I64
         _ => @core.SampleFormat::F32
       }
       @core.SupportedStreamConfig::new(
