@@ -65,11 +65,10 @@ fn main {
       } noraise {
         x => Some(x)
       }
-      let did =
-        match did {
-          None => continue
-          Some(x) => x
-        }
+      let did = match did {
+        None => continue
+        Some(x) => x
+      }
       let name = try d.name() catch {
         _ => "<error>".to_string()
       } noraise {

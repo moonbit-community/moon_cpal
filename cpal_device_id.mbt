@@ -23,7 +23,8 @@ pub fn device_id_error_backend_specific(description : String) -> DeviceIdError {
 pub fn DeviceIdError::to_string(self : DeviceIdError) -> String {
   match self {
     DeviceIdError::BackendSpecific(err) => err.to_string()
-    DeviceIdError::UnsupportedPlatform => "Device IDs are unsupported for this OS"
+    DeviceIdError::UnsupportedPlatform =>
+      "Device IDs are unsupported for this OS"
   }
 }
 

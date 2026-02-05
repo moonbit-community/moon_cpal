@@ -102,4 +102,3 @@ pub fn Stream::pause(_self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
 pub fn Stream::close(_self : Stream) -> Unit {
   _self.state[0] = 1
 }
-

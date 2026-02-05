@@ -111,7 +111,11 @@ fn alsa_build_error_from_errno(
   op : String,
 ) -> @moon_cpal.BuildStreamError {
   // Best-effort errno mapping (Linux).
-  if status == -2 || status == -1 || status == -13 || status == -19 || status == -524 {
+  if status == -2 ||
+    status == -1 ||
+    status == -13 ||
+    status == -19 ||
+    status == -524 {
     // ENOENT / EPERM / EACCES / ENODEV / ENOTSUPP
     @moon_cpal.build_stream_error_device_not_available()
   } else if status == -16 || status == -11 {

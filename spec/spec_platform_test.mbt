@@ -55,11 +55,19 @@ test "spec device id + supports + device_by_id (best-effort)" {
       xs => xs
     }
     for d in ds {
-      let did = try d.id() catch { _ => continue } noraise { x => x }
+      let did = try d.id() catch {
+        _ => continue
+      } noraise {
+        x => x
+      }
       match host.device_by_id(did) {
         None => inspect(true, content="true")
         Some(found) => {
-          let fid = try found.id() catch { _ => did } noraise { x => x }
+          let fid = try found.id() catch {
+            _ => did
+          } noraise {
+            x => x
+          }
           inspect(fid == did, content="true")
         }
       }
@@ -96,7 +104,6 @@ test "spec: raw + typed stream builders (best-effort)" {
     }
     Some(d) => d
   }
-
   let out_cfg = try out.default_output_config() catch {
     _ => {
       inspect(true, content="true")
@@ -113,7 +120,6 @@ test "spec: raw + typed stream builders (best-effort)" {
   } noraise {
     x => x
   }
-
   let out_sc = @moon_cpal.StreamConfig::new(
     out_cfg.channels(),
     out_cfg.sample_rate(),
@@ -126,13 +132,15 @@ test "spec: raw + typed stream builders (best-effort)" {
   )
 
   // Raw output.
-  try out.build_output_stream_raw(
-    out_sc,
-    out_cfg.sample_format(),
-    fn(_d, _info) {  },
-    fn(_e) {  },
-    None,
-  ) catch {
+  try
+    out.build_output_stream_raw(
+      out_sc,
+      out_cfg.sample_format(),
+      fn(_d, _info) {  },
+      fn(_e) {  },
+      None,
+    )
+  catch {
     _ => ()
   } noraise {
     st => {
@@ -143,12 +151,9 @@ test "spec: raw + typed stream builders (best-effort)" {
   }
 
   // Typed output (best-effort; may fail if the device doesn't support the requested format).
-  try out.build_output_stream_f32(
-    out_sc,
-    fn(_xs, _info) {  },
-    fn(_e) {  },
-    None,
-  ) catch {
+  try
+    out.build_output_stream_f32(out_sc, fn(_xs, _info) {  }, fn(_e) {  }, None)
+  catch {
     _ => ()
   } noraise {
     st => {
@@ -157,12 +162,9 @@ test "spec: raw + typed stream builders (best-effort)" {
       st.close()
     }
   }
-  try out.build_output_stream_i16(
-    out_sc,
-    fn(_xs, _info) {  },
-    fn(_e) {  },
-    None,
-  ) catch {
+  try
+    out.build_output_stream_i16(out_sc, fn(_xs, _info) {  }, fn(_e) {  }, None)
+  catch {
     _ => ()
   } noraise {
     st => {
@@ -173,13 +175,15 @@ test "spec: raw + typed stream builders (best-effort)" {
   }
 
   // Raw input.
-  try inp.build_input_stream_raw(
-    inp_sc,
-    inp_cfg.sample_format(),
-    fn(_d, _info) {  },
-    fn(_e) {  },
-    None,
-  ) catch {
+  try
+    inp.build_input_stream_raw(
+      inp_sc,
+      inp_cfg.sample_format(),
+      fn(_d, _info) {  },
+      fn(_e) {  },
+      None,
+    )
+  catch {
     _ => ()
   } noraise {
     st => {
@@ -190,12 +194,9 @@ test "spec: raw + typed stream builders (best-effort)" {
   }
 
   // Typed input.
-  try inp.build_input_stream_f32(
-    inp_sc,
-    fn(_xs, _info) {  },
-    fn(_e) {  },
-    None,
-  ) catch {
+  try
+    inp.build_input_stream_f32(inp_sc, fn(_xs, _info) {  }, fn(_e) {  }, None)
+  catch {
     _ => ()
   } noraise {
     st => {
@@ -204,6 +205,5 @@ test "spec: raw + typed stream builders (best-effort)" {
       st.close()
     }
   }
-
   inspect(true, content="true")
 }

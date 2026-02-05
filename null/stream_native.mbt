@@ -102,23 +102,35 @@ fn[A] raise_build_status(
   if status == -22 {
     raise @moon_cpal.build_stream_error_stream_config_not_supported()
   }
-  raise @moon_cpal.build_stream_error_backend_specific("\{op} (status \{status})")
+  raise @moon_cpal.build_stream_error_backend_specific(
+    "\{op} (status \{status})",
+  )
 }
 
 ///|
-fn[A] raise_play_status(op : String, status : Int) -> A raise @moon_cpal.PlayStreamError {
+fn[A] raise_play_status(
+  op : String,
+  status : Int,
+) -> A raise @moon_cpal.PlayStreamError {
   if status != 0 {
     raise @moon_cpal.play_stream_error_device_not_available()
   }
-  raise @moon_cpal.play_stream_error_backend_specific("\{op} (status \{status})")
+  raise @moon_cpal.play_stream_error_backend_specific(
+    "\{op} (status \{status})",
+  )
 }
 
 ///|
-fn[A] raise_pause_status(op : String, status : Int) -> A raise @moon_cpal.PauseStreamError {
+fn[A] raise_pause_status(
+  op : String,
+  status : Int,
+) -> A raise @moon_cpal.PauseStreamError {
   if status != 0 {
     raise @moon_cpal.pause_stream_error_device_not_available()
   }
-  raise @moon_cpal.pause_stream_error_backend_specific("\{op} (status \{status})")
+  raise @moon_cpal.pause_stream_error_backend_specific(
+    "\{op} (status \{status})",
+  )
 }
 
 ///|
@@ -277,4 +289,3 @@ pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
 pub fn Stream::close(self : Stream) -> Unit {
   ignore(null_stream_owner_close(self.owner))
 }
-

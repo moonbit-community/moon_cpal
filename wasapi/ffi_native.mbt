@@ -5,9 +5,7 @@
 extern "C" fn wasapi_devices_utf8() -> Bytes = "moon_cpal_wasapi_devices_utf8"
 
 ///|
-extern "C" fn wasapi_default_device_id_utf8(
-  is_input : Int,
-) -> Bytes = "moon_cpal_wasapi_default_device_id_utf8"
+extern "C" fn wasapi_default_device_id_utf8(is_input : Int) -> Bytes = "moon_cpal_wasapi_default_device_id_utf8"
 
 ///|
 #owned(device_id_utf8)

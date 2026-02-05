@@ -121,7 +121,9 @@ fn call_stream_error_callback(
     2 => "stream_loop"
     _ => "NullStream"
   }
-  error_callback(@moon_cpal.stream_error_backend_specific("\{op} (status \{status})"))
+  error_callback(
+    @moon_cpal.stream_error_backend_specific("\{op} (status \{status})"),
+  )
 }
 
 ///|
@@ -130,4 +132,3 @@ let call_stream_error_callback_fr : FuncRef[
 ] = fn(error_callback, op_tag, status) {
   call_stream_error_callback(error_callback, op_tag, status)
 }
-

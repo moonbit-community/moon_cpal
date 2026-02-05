@@ -197,7 +197,11 @@ pub fn Host::device_by_id(self : Host, id : @moon_cpal.DeviceId) -> Device? {
     xs => xs
   }
   for d in ds {
-    let did = try d.id() catch { _ => None } noraise { x => Some(x) }
+    let did = try d.id() catch {
+      _ => None
+    } noraise {
+      x => Some(x)
+    }
     match did {
       None => ()
       Some(did) => if did == id { return Some(d) }
@@ -258,9 +262,10 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 }
 
 ///|
-pub fn Device::id(self : Device) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError {
-  let did =
-    match self {
+pub fn Device::id(
+  self : Device,
+) -> @moon_cpal.DeviceId raise @moon_cpal.DeviceIdError {
+  let did = match self {
     Null(d) => d.id()
     CoreAudio(d) => d.id()
     Alsa(d) => d.id()

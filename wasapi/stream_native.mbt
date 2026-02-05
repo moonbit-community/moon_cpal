@@ -137,7 +137,10 @@ fn wasapi_play_error_from_hresult(
   status : Int,
   op : String,
 ) -> @moon_cpal.PlayStreamError {
-  if status == -2004287484 || status == -2004287478 || status == -2004287474 || status == -2004287472 {
+  if status == -2004287484 ||
+    status == -2004287478 ||
+    status == -2004287474 ||
+    status == -2004287472 {
     @moon_cpal.play_stream_error_device_not_available()
   } else {
     @moon_cpal.play_stream_error_backend_specific("\{op} (HRESULT \{status})")
@@ -149,7 +152,10 @@ fn wasapi_pause_error_from_hresult(
   status : Int,
   op : String,
 ) -> @moon_cpal.PauseStreamError {
-  if status == -2004287484 || status == -2004287478 || status == -2004287474 || status == -2004287472 {
+  if status == -2004287484 ||
+    status == -2004287478 ||
+    status == -2004287474 ||
+    status == -2004287472 {
     @moon_cpal.pause_stream_error_device_not_available()
   } else {
     @moon_cpal.pause_stream_error_backend_specific("\{op} (HRESULT \{status})")

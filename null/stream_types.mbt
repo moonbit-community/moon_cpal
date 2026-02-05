@@ -29,4 +29,3 @@ pub impl Eq for Stream with equal(self : Stream, other : Stream) -> Bool {
 pub impl Show for Stream with output(self : Stream, logger : &Logger) -> Unit {
   logger.write_string("\{self.kind}(\{self.handle})")
 }
-

@@ -33,4 +33,3 @@ test "jack build error mapping (unit)" {
     content="InvalidArgument",
   )
 }
-

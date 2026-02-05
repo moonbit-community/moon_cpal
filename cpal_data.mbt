@@ -91,7 +91,16 @@ fn read_u64_le(bytes : FixedArray[Byte], offset : Int) -> UInt64? {
       bytes.get(offset + 6),
       bytes.get(offset + 7),
     ) {
-    (Some(b0), Some(b1), Some(b2), Some(b3), Some(b4), Some(b5), Some(b6), Some(b7)) => {
+    (
+      Some(b0),
+      Some(b1),
+      Some(b2),
+      Some(b3),
+      Some(b4),
+      Some(b5),
+      Some(b6),
+      Some(b7),
+    ) => {
       let lo : UInt64 = b0.to_uint64() |
         (b1.to_uint64() << 8) |
         (b2.to_uint64() << 16) |
@@ -253,12 +262,11 @@ pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
       None => return None
       Some(bits) => {
         let u = bits & (0x00ff_ffff : UInt)
-        let raw =
-          if (u & (0x0080_0000 : UInt)) != (0 : UInt) {
-            (u | (0xff00_0000 : UInt)).reinterpret_as_int()
-          } else {
-            u.reinterpret_as_int()
-          }
+        let raw = if (u & (0x0080_0000 : UInt)) != (0 : UInt) {
+          (u | (0xff00_0000 : UInt)).reinterpret_as_int()
+        } else {
+          u.reinterpret_as_int()
+        }
         out.push(I24::new(raw))
       }
     }
@@ -304,9 +312,7 @@ pub fn Data::try_as_i32(self : Data) -> Array[Int]? {
     let off = i * 4
     match read_u32_le(self.bytes, off) {
       None => return None
-      Some(bits) => {
-        out.push(bits.reinterpret_as_int())
-      }
+      Some(bits) => out.push(bits.reinterpret_as_int())
     }
     i = i + 1
   }

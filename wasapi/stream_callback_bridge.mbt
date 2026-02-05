@@ -132,7 +132,9 @@ fn wasapi_stream_error_from_hresult(
   // AUDCLNT_E_SERVICE_NOT_RUNNING   = 0x88890010
   if status == -2004287484 {
     @moon_cpal.stream_error_stream_invalidated()
-  } else if status == -2004287478 || status == -2004287474 || status == -2004287472 {
+  } else if status == -2004287478 ||
+    status == -2004287474 ||
+    status == -2004287472 {
     @moon_cpal.stream_error_device_not_available()
   } else {
     @moon_cpal.stream_error_backend_specific("\{op} (HRESULT \{status})")

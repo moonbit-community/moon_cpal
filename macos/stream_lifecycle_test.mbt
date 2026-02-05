@@ -20,7 +20,6 @@ test "coreaudio output stream: no callbacks before play; pause/close stops callb
     inspect(true, content="true")
     return
   }
-
   let host = default_host()
   let dev = match host.default_output_device() {
     None => {
@@ -29,7 +28,6 @@ test "coreaudio output stream: no callbacks before play; pause/close stops callb
     }
     Some(d) => d
   }
-
   let cfg = try dev.default_output_config() catch {
     _ => {
       inspect(true, content="true")
@@ -38,18 +36,19 @@ test "coreaudio output stream: no callbacks before play; pause/close stops callb
   } noraise {
     supported => supported.config()
   }
-
   let calls : Array[Int] = [0]
   let errs : Array[Int] = [0]
-  let stream = try dev.build_output_stream(
-    cfg,
-    fn(data, _info) {
-      calls[0] = calls[0] + 1
-      data.clear()
-    },
-    fn(_err) { errs[0] = errs[0] + 1 },
-    None,
-  ) catch {
+  let stream = try
+    dev.build_output_stream(
+      cfg,
+      fn(data, _info) {
+        calls[0] = calls[0] + 1
+        data.clear()
+      },
+      fn(_err) { errs[0] = errs[0] + 1 },
+      None,
+    )
+  catch {
     _ => {
       inspect(true, content="true")
       return
@@ -57,36 +56,33 @@ test "coreaudio output stream: no callbacks before play; pause/close stops callb
   } noraise {
     s => s
   }
-
   sleep_ms(50)
   inspect(calls[0] == 0, content="true")
-
   try stream.play() catch {
     _ => {
       inspect(true, content="true")
       stream.close()
       return
     }
-  } noraise { _ => () }
-
+  } noraise {
+    _ => ()
+  }
   inspect(wait_until(calls, 1, 2000), content="true")
-
   try stream.pause() catch {
     _ => {
       inspect(true, content="true")
       stream.close()
       return
     }
-  } noraise { _ => () }
-
+  } noraise {
+    _ => ()
+  }
   let paused = calls[0]
   sleep_ms(100)
   inspect(calls[0] <= paused + 1, content="true")
-
   stream.close()
   let closed = calls[0]
   sleep_ms(100)
   inspect(calls[0] <= closed + 1, content="true")
   inspect(errs[0] == 0, content="true")
 }
-

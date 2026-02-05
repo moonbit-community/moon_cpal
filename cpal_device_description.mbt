@@ -550,15 +550,13 @@ pub fn direction_from_counts(
   input_channels : ChannelCount?,
   output_channels : ChannelCount?,
 ) -> DeviceDirection {
-  let has_input =
-    match input_channels {
-      None => false
-      Some(n) => n > 0
-    }
-  let has_output =
-    match output_channels {
-      None => false
-      Some(n) => n > 0
-    }
+  let has_input = match input_channels {
+    None => false
+    Some(n) => n > 0
+  }
+  let has_output = match output_channels {
+    None => false
+    Some(n) => n > 0
+  }
   direction_from_caps(has_input, has_output)
 }
