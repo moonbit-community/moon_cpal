@@ -49,7 +49,24 @@ pub fn Host::id(self : Host) -> @moon_cpal.HostId {
 
 ///|
 pub fn available_hosts() -> Array[@moon_cpal.HostId] {
-  @moon_cpal.available_hosts()
+  // Upstream `cpal::available_hosts()` filters by runtime availability (HostTrait::is_available).
+  //
+  // We implement the runtime filtering at the `platform` layer (which can depend on backend
+  // packages without introducing cycles).
+  match @moon_cpal.native_os() {
+    @moon_cpal.NativeOs::Macos => [@moon_cpal.HostId::CoreAudio, @moon_cpal.HostId::Null]
+    @moon_cpal.NativeOs::Windows => [@moon_cpal.HostId::Wasapi, @moon_cpal.HostId::Null]
+    @moon_cpal.NativeOs::Linux => {
+      let out : Array[@moon_cpal.HostId] = [@moon_cpal.HostId::Alsa]
+      match @jack.default_server_config() {
+        None => ()
+        Some(_) => out.push(@moon_cpal.HostId::Jack)
+      }
+      out.push(@moon_cpal.HostId::Null)
+      out
+    }
+    @moon_cpal.NativeOs::Unknown => [@moon_cpal.HostId::Null]
+  }
 }
 
 ///|

@@ -23,7 +23,10 @@ test "platform available_hosts + host_from_id (native)" {
 
   // Linux should now include JACK as well.
   if @moon_cpal.native_os() == @moon_cpal.NativeOs::Linux {
-    inspect(hs.contains(@moon_cpal.HostId::Jack), content="true")
+    match @jack.default_server_config() {
+      None => inspect(!hs.contains(@moon_cpal.HostId::Jack), content="true")
+      Some(_) => inspect(hs.contains(@moon_cpal.HostId::Jack), content="true")
+    }
   }
 
   // All advertised hosts should be constructible.
