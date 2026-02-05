@@ -81,15 +81,26 @@ fn[A] raise_build_error(
   op : String,
   status : Int,
 ) -> A raise @moon_cpal.BuildStreamError {
+  raise jack_build_error_from_status(status, op)
+}
+
+///|
+fn jack_build_error_from_status(
+  status : Int,
+  op : String,
+) -> @moon_cpal.BuildStreamError {
   // Best-effort errno-like mapping (Linux).
-  if status == -19 {
-    // ENODEV
-    raise @moon_cpal.build_stream_error_device_not_available()
+  if status == -2 || status == -1 || status == -13 || status == -19 {
+    // ENOENT / EPERM / EACCES / ENODEV
+    @moon_cpal.build_stream_error_device_not_available()
+  } else if status == -16 || status == -11 {
+    // EBUSY / EAGAIN
+    @moon_cpal.build_stream_error_device_busy()
   } else if status == -22 {
     // EINVAL
-    raise @moon_cpal.build_stream_error_invalid_argument()
+    @moon_cpal.build_stream_error_invalid_argument()
   } else {
-    raise @moon_cpal.build_stream_error_backend_specific("\{op}: \{status}")
+    @moon_cpal.build_stream_error_backend_specific("\{op}: \{status}")
   }
 }
 

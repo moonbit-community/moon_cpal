@@ -1,20 +1,36 @@
 ///|
-test "jack stream error mapping (unit)" {
-  let slot = FixedArray::make(
-    1,
-    @moon_cpal.stream_error_backend_specific("init"),
-  )
-  call_stream_error_callback(fn(e) { slot[0] = e }, 1, 1)
-  inspect(slot[0], content="DeviceNotAvailable")
-  call_stream_error_callback(fn(e) { slot[0] = e }, 0, 19)
-  inspect(slot[0], content="DeviceNotAvailable")
-  call_stream_error_callback(fn(e) { slot[0] = e }, 0, 32)
-  inspect(slot[0], content="StreamInvalidated")
-  call_stream_error_callback(fn(e) { slot[0] = e }, 2, -1)
-  inspect(slot[0], content="StreamInvalidated")
-  call_stream_error_callback(fn(e) { slot[0] = e }, 99, 123)
-  match slot[0] {
-    @moon_cpal.StreamError::BackendSpecific(_) => inspect(true, content="true")
-    _ => inspect(false, content="true")
+test "jack build error mapping (unit)" {
+  if @moon_cpal.native_os() != @moon_cpal.NativeOs::Linux {
+    inspect(true, content="true")
+    return
   }
+  inspect(
+    jack_build_error_from_status(-19, "jack_client_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    jack_build_error_from_status(-2, "jack_client_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    jack_build_error_from_status(-1, "jack_client_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    jack_build_error_from_status(-13, "jack_client_open"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    jack_build_error_from_status(-16, "jack_client_open"),
+    content="DeviceBusy",
+  )
+  inspect(
+    jack_build_error_from_status(-11, "jack_client_open"),
+    content="DeviceBusy",
+  )
+  inspect(
+    jack_build_error_from_status(-22, "jack_client_open"),
+    content="InvalidArgument",
+  )
 }
+

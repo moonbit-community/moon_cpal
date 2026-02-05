@@ -126,8 +126,8 @@ fn alsa_stream_error_from_errno(
   // Best-effort errno mapping (Linux): match common CPAL error variants.
   //
   // Note: `status` is typically a negative errno value (e.g. -ENODEV, -EPIPE).
-  if status == -19 {
-    // ENODEV
+  if status == -2 || status == -1 || status == -13 || status == -19 {
+    // ENOENT / EPERM / EACCES / ENODEV
     @moon_cpal.stream_error_device_not_available()
   } else if status == -5 || status == -77 || status == -86 {
     // EIO / EBADFD / ESTRPIPE
