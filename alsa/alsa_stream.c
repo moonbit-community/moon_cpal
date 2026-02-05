@@ -169,27 +169,121 @@ static int alsa_configure_pcm(snd_pcm_t *pcm,
   }
 
   if (buffer_frames != 0) {
+    // Match upstream cpal ALSA strategy:
+    // - period_size = buffer_frames (callback size)
+    // - buffer_size = 2 * period (double buffering)
     snd_pcm_uframes_t period = (snd_pcm_uframes_t)buffer_frames;
     err = snd_pcm_hw_params_set_period_size_near(pcm, hw, &period, NULL);
     if (err < 0) {
       return err;
     }
-
-    snd_pcm_uframes_t buf_sz = period * 4;
+    snd_pcm_uframes_t buf_sz = period * 2;
     err = snd_pcm_hw_params_set_buffer_size_near(pcm, hw, &buf_sz);
     if (err < 0) {
       return err;
     }
-  }
 
-  err = snd_pcm_hw_params(pcm, hw);
-  if (err < 0) {
-    return err;
+    err = snd_pcm_hw_params(pcm, hw);
+    if (err < 0) {
+      return err;
+    }
+  } else {
+    // Apply base constraints first (let the device pick a good period).
+    err = snd_pcm_hw_params(pcm, hw);
+    if (err < 0) {
+      return err;
+    }
+
+    // Then constrain to 2-period buffering using the configured period size.
+    snd_pcm_hw_params_t *cur = NULL;
+    snd_pcm_hw_params_alloca(&cur);
+    if (snd_pcm_hw_params_current(pcm, cur) == 0) {
+      snd_pcm_uframes_t period = 0;
+      if (snd_pcm_hw_params_get_period_size(cur, &period, NULL) == 0 && period > 0) {
+        snd_pcm_hw_params_t *hw2 = NULL;
+        snd_pcm_hw_params_alloca(&hw2);
+        err = snd_pcm_hw_params_any(pcm, hw2);
+        if (err < 0) {
+          return err;
+        }
+        err = snd_pcm_hw_params_set_access(pcm, hw2, SND_PCM_ACCESS_RW_INTERLEAVED);
+        if (err < 0) {
+          return err;
+        }
+        err = snd_pcm_hw_params_set_format(pcm, hw2, fmt);
+        if (err < 0) {
+          return err;
+        }
+        err = snd_pcm_hw_params_set_channels(pcm, hw2, channels);
+        if (err < 0) {
+          return err;
+        }
+        unsigned int rate2 = sample_rate;
+        err = snd_pcm_hw_params_set_rate_near(pcm, hw2, &rate2, NULL);
+        if (err < 0) {
+          return err;
+        }
+        snd_pcm_uframes_t period2 = period;
+        err = snd_pcm_hw_params_set_period_size_near(pcm, hw2, &period2, NULL);
+        if (err < 0) {
+          return err;
+        }
+        snd_pcm_uframes_t buf2 = period2 * 2;
+        err = snd_pcm_hw_params_set_buffer_size_near(pcm, hw2, &buf2);
+        if (err < 0) {
+          return err;
+        }
+        err = snd_pcm_hw_params(pcm, hw2);
+        if (err < 0) {
+          return err;
+        }
+      }
+    }
   }
 
   err = snd_pcm_prepare(pcm);
   if (err < 0) {
     return err;
+  }
+  return 0;
+}
+
+static int alsa_configure_sw_params(snd_pcm_t *pcm, int is_input, uint32_t period_frames) {
+  if (pcm == NULL || period_frames == 0) {
+    return -EINVAL;
+  }
+  snd_pcm_sw_params_t *sw = NULL;
+  snd_pcm_sw_params_alloca(&sw);
+  int err = snd_pcm_sw_params_current(pcm, sw);
+  if (err < 0) {
+    return err;
+  }
+
+  // Start threshold:
+  // - playback: start when 2 periods are filled (consistent low-latency startup)
+  // - capture: start immediately
+  snd_pcm_uframes_t start_threshold = is_input ? 1 : (snd_pcm_uframes_t)period_frames * 2;
+  err = snd_pcm_sw_params_set_start_threshold(pcm, sw, start_threshold);
+  if (err < 0) {
+    return err;
+  }
+
+  // Wake at least once per period.
+  err = snd_pcm_sw_params_set_avail_min(pcm, sw, (snd_pcm_uframes_t)period_frames);
+  if (err < 0) {
+    return err;
+  }
+
+  // Prefer monotonic timestamps.
+  (void)snd_pcm_sw_params_set_tstamp_mode(pcm, sw, SND_PCM_TSTAMP_ENABLE);
+  err = snd_pcm_sw_params(pcm, sw);
+  if (err < 0) {
+    // Some setups may require explicitly setting the type.
+    (void)snd_pcm_sw_params_set_tstamp_type(pcm, sw, SND_PCM_TSTAMP_TYPE_MONOTONIC);
+    err = snd_pcm_sw_params(pcm, sw);
+    if (err < 0) {
+      return err;
+    }
   }
   return 0;
 }
@@ -426,12 +520,13 @@ static int alsa_stream_new(const char *device_id,
   if (period_frames == 0) {
     period_frames = requested_frames == 0 ? 512u : requested_frames;
   }
-  // Enforce BufferSize::Fixed semantics: if a fixed period was requested and ALSA chose a different
-  // period size, treat the config as unsupported rather than silently clamping.
-  if (requested_frames != 0 && period_frames != 0 && period_frames != requested_frames) {
-    alsa_invoke_error(s, 4 /* snd_pcm_hw_params */, -EINVAL);
+
+  // Configure software parameters using the configured period size.
+  err = alsa_configure_sw_params(s->pcm, s->is_input, period_frames);
+  if (err < 0) {
+    alsa_invoke_error(s, 4 /* snd_pcm_sw_params */, (int32_t)err);
     alsa_stream_destroy(s);
-    return -EINVAL;
+    return err;
   }
   uint32_t buffer_bytes = period_frames * channels * bps;
   if (buffer_bytes == 0) {
