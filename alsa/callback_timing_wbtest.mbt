@@ -76,4 +76,15 @@ test "alsa callback timestamps + format tags" {
     8,
   )
   inspect(got4[0], content="true")
+  let got5 = FixedArray::make(1, false)
+  call_output_data_callback(
+    fn(d, _info) { got5[0] = d.sample_format() == @core.SampleFormat::I32 },
+    5,
+    FixedArray::make(4, Int::to_byte(0)),
+    1,
+    2,
+    3,
+    4,
+  )
+  inspect(got5[0], content="true")
 }

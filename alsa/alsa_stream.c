@@ -77,6 +77,24 @@ static int alsa_sample_format_from_tag(uint32_t tag, snd_pcm_format_t *out) {
   case 4:
     *out = SND_PCM_FORMAT_U8;
     return 0;
+  case 5:
+    *out = SND_PCM_FORMAT_S32_LE;
+    return 0;
+  case 6:
+    *out = SND_PCM_FORMAT_U32_LE;
+    return 0;
+  case 7:
+    *out = SND_PCM_FORMAT_S24_LE;
+    return 0;
+  case 8:
+    *out = SND_PCM_FORMAT_U24_LE;
+    return 0;
+  case 9:
+    *out = SND_PCM_FORMAT_FLOAT64_LE;
+    return 0;
+  case 10:
+    *out = SND_PCM_FORMAT_S8;
+    return 0;
   default:
     return -1;
   }
@@ -91,6 +109,18 @@ static uint32_t alsa_bytes_per_sample_from_tag(uint32_t tag) {
   case 3:
     return 2;
   case 4:
+    return 1;
+  case 5:
+    return 4;
+  case 6:
+    return 4;
+  case 7:
+    return 4;
+  case 8:
+    return 4;
+  case 9:
+    return 8;
+  case 10:
     return 1;
   default:
     return 0;
