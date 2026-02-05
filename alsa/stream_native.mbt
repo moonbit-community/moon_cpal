@@ -184,6 +184,8 @@ fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
   match r.sample_format() {
     @core.SampleFormat::F32 => Some((1 : UInt))
     @core.SampleFormat::I16 => Some((2 : UInt))
+    @core.SampleFormat::U16 => Some((3 : UInt))
+    @core.SampleFormat::U8 => Some((4 : UInt))
     _ => None
   }
 }
@@ -193,6 +195,8 @@ fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
     @core.SampleFormat::F32 => Some((1 : UInt))
     @core.SampleFormat::I16 => Some((2 : UInt))
+    @core.SampleFormat::U16 => Some((3 : UInt))
+    @core.SampleFormat::U8 => Some((4 : UInt))
     _ => None
   }
 }

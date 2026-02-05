@@ -87,7 +87,7 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 // -----------------------------------------------------------------------------
 //
 // Returns (channels, sample_rate, sample_format_tag) via a u32 out array.
-// - sample_format_tag: 1 = f32, 2 = i16
+// - sample_format_tag: 1 = f32, 2 = i16, 4 = u8
 
 static wchar_t *utf8_bytes_to_wide(uint8_t *bytes, int32_t len) {
   if (bytes == NULL || len <= 0) {
@@ -133,6 +133,9 @@ static uint32_t sample_format_tag_from_mix(const WAVEFORMATEX *wfx) {
   }
   if (wfx->wBitsPerSample == 16) {
     return 2;
+  }
+  if (wfx->wBitsPerSample == 8) {
+    return 4;
   }
   return 0;
 }
@@ -187,6 +190,9 @@ static int wasapi_build_wfx_ext(uint32_t channels,
     sub = moon_cpal_ks_subtype_ieee_float;
   } else if (sample_format_tag == 2) {
     bits = 16;
+    sub = moon_cpal_ks_subtype_pcm;
+  } else if (sample_format_tag == 4) {
+    bits = 8;
     sub = moon_cpal_ks_subtype_pcm;
   } else {
     return 0;
@@ -500,8 +506,8 @@ int32_t moon_cpal_wasapi_supported_configs_u32(uint8_t *device_id_utf8,
       192000, 352800, 384000, 705600, 768000, 1411200, 1536000,
   };
 
-  // Supported formats in this MoonBit port (today): F32 + I16.
-  static const uint32_t fmts[] = {2 /* i16 */, 1 /* f32 */};
+  // Supported formats in this MoonBit port (today): I16 + F32 + U8.
+  static const uint32_t fmts[] = {2 /* i16 */, 1 /* f32 */, 4 /* u8 */};
 
   int32_t wrote = 0;
   for (size_t ri = 0; ri < (sizeof(rates) / sizeof(rates[0])); ri++) {

@@ -52,4 +52,28 @@ test "alsa callback timestamps + format tags" {
   inspect(got2[0], content="true")
   inspect(got2[1], content="true")
   inspect(got2[2], content="true")
+
+  // Extended format tags: U8/U16.
+  let got3 = FixedArray::make(1, false)
+  call_output_data_callback(
+    fn(d, _info) { got3[0] = d.sample_format() == @core.SampleFormat::U8 },
+    4,
+    FixedArray::make(4, Int::to_byte(0)),
+    1,
+    2,
+    3,
+    4,
+  )
+  inspect(got3[0], content="true")
+  let got4 = FixedArray::make(1, false)
+  call_input_data_callback(
+    fn(d, _info) { got4[0] = d.sample_format() == @core.SampleFormat::U16 },
+    3,
+    FixedArray::make(4, Int::to_byte(0)),
+    5,
+    6,
+    7,
+    8,
+  )
+  inspect(got4[0], content="true")
 }

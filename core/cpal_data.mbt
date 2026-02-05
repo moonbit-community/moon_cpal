@@ -422,12 +422,85 @@ pub fn Data::try_as_f64(self : Data) -> Array[Double]? {
 }
 
 ///|
-/// Fill the underlying buffer with zeros (silence for the supported formats).
+/// Fill the underlying buffer with the sample-format equilibrium value (silence).
 pub fn Data::clear(self : Data) -> Unit {
-  let mut i = 0
-  while i < self.bytes.length() {
-    self.bytes[i] = (0 : Int).to_byte()
-    i = i + 1
+  match self.sample_format {
+    SampleFormat::U8 => {
+      // U8 equilibrium is 128 (unsigned).
+      let mut i = 0
+      while i < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x80)
+        i = i + 1
+      }
+    }
+    SampleFormat::U16 => {
+      // U16 equilibrium is 0x8000 (little-endian bytes: 00 80).
+      let mut i = 0
+      while i + 1 < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i + 1] = Int::to_byte(0x80)
+        i = i + 2
+      }
+      if i < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+      }
+    }
+    SampleFormat::U24 => {
+      // U24 equilibrium is 0x800000 (little-endian bytes: 00 00 80).
+      let mut i = 0
+      while i + 2 < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i + 1] = Int::to_byte(0x00)
+        self.bytes[i + 2] = Int::to_byte(0x80)
+        i = i + 3
+      }
+      while i < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        i = i + 1
+      }
+    }
+    SampleFormat::U32 => {
+      // U32 equilibrium is 0x80000000 (little-endian bytes: 00 00 00 80).
+      let mut i = 0
+      while i + 3 < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i + 1] = Int::to_byte(0x00)
+        self.bytes[i + 2] = Int::to_byte(0x00)
+        self.bytes[i + 3] = Int::to_byte(0x80)
+        i = i + 4
+      }
+      while i < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        i = i + 1
+      }
+    }
+    SampleFormat::U64 => {
+      // U64 equilibrium is 0x8000_0000_0000_0000.
+      let mut i = 0
+      while i + 7 < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i + 1] = Int::to_byte(0x00)
+        self.bytes[i + 2] = Int::to_byte(0x00)
+        self.bytes[i + 3] = Int::to_byte(0x00)
+        self.bytes[i + 4] = Int::to_byte(0x00)
+        self.bytes[i + 5] = Int::to_byte(0x00)
+        self.bytes[i + 6] = Int::to_byte(0x00)
+        self.bytes[i + 7] = Int::to_byte(0x80)
+        i = i + 8
+      }
+      while i < self.bytes.length() {
+        self.bytes[i] = Int::to_byte(0x00)
+        i = i + 1
+      }
+    }
+    _ => {
+      // Signed integer and float equilibrium is 0.
+      let mut i = 0
+      while i < self.bytes.length() {
+        self.bytes[i] = (0 : Int).to_byte()
+        i = i + 1
+      }
+    }
   }
 }
 

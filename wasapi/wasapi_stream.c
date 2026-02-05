@@ -100,12 +100,15 @@ static uint32_t wasapi_guess_sample_format_tag_from_wfx(const WAVEFORMATEX *wfx)
   if (wfx == NULL) {
     return 0;
   }
-  // Keep this conservative: we only surface F32/I16 to MoonBit today.
+  // Keep this conservative: we only surface F32/I16/U8 to MoonBit today.
   if (wfx->wBitsPerSample == 32) {
     return 1; // F32
   }
   if (wfx->wBitsPerSample == 16) {
     return 2; // I16
+  }
+  if (wfx->wBitsPerSample == 8) {
+    return 4; // U8
   }
   return 0;
 }
@@ -144,6 +147,8 @@ static uint32_t wasapi_bytes_per_sample_from_tag(uint32_t tag) {
     return 4;
   case 2:
     return 2;
+  case 4:
+    return 1;
   default:
     return 0;
   }

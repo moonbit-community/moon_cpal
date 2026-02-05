@@ -20,6 +20,8 @@ fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
   match tag {
     1 => @core.SampleFormat::F32
     2 => @core.SampleFormat::I16
+    3 => @core.SampleFormat::U16
+    4 => @core.SampleFormat::U8
     _ => @core.SampleFormat::F32
   }
 }

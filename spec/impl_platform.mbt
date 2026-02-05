@@ -249,7 +249,7 @@ fn make_u16_zeros(n : Int) -> Array[UInt16] {
   let out : Array[UInt16] = []
   let mut i = 0
   while i < n {
-    out.push(Int::to_uint16(0))
+    out.push((0x8000 : Int).to_uint16())
     i = i + 1
   }
   out
@@ -259,7 +259,7 @@ fn make_u16_zeros(n : Int) -> Array[UInt16] {
 fn fill_u16_zeros(xs : Array[UInt16]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = Int::to_uint16(0)
+    xs[i] = (0x8000 : Int).to_uint16()
     i = i + 1
   }
 }
@@ -269,7 +269,7 @@ fn make_u8_zeros(n : Int) -> Array[Byte] {
   let out : Array[Byte] = []
   let mut i = 0
   while i < n {
-    out.push(Int::to_byte(0))
+    out.push(Int::to_byte(0x80))
     i = i + 1
   }
   out
@@ -279,7 +279,7 @@ fn make_u8_zeros(n : Int) -> Array[Byte] {
 fn fill_u8_zeros(xs : Array[Byte]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = Int::to_byte(0)
+    xs[i] = Int::to_byte(0x80)
     i = i + 1
   }
 }

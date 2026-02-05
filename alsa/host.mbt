@@ -305,6 +305,8 @@ fn sample_format_from_bin_tag(tag : Int) -> @core.SampleFormat? {
   match tag {
     1 => Some(@core.SampleFormat::F32)
     2 => Some(@core.SampleFormat::I16)
+    3 => Some(@core.SampleFormat::U16)
+    4 => Some(@core.SampleFormat::U8)
     _ => None
   }
 }

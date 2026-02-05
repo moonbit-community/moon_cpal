@@ -53,7 +53,7 @@ test "data: format mismatch returns None" {
 }
 
 ///|
-test "data: clear zeros bytes" {
+test "data: clear uses equilibrium bytes" {
   let bytes = FixedArray::from_array(
     [Int::to_byte(1), Int::to_byte(2), Int::to_byte(3), Int::to_byte(4)][:],
   )
@@ -61,7 +61,16 @@ test "data: clear zeros bytes" {
   data.clear()
   inspect(
     data.bytes().op_as_view().to_array(),
-    content="[b'\\x00', b'\\x00', b'\\x00', b'\\x00']",
+    content="[b'\\x80', b'\\x80', b'\\x80', b'\\x80']",
+  )
+  let u16_bytes = FixedArray::from_array(
+    [Int::to_byte(1), Int::to_byte(2), Int::to_byte(3), Int::to_byte(4)][:],
+  )
+  let u16 = Data::new(SampleFormat::U16, u16_bytes)
+  u16.clear()
+  inspect(
+    u16.bytes().op_as_view().to_array(),
+    content="[b'\\x00', b'\\x80', b'\\x00', b'\\x80']",
   )
 }
 

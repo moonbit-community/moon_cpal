@@ -346,6 +346,8 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
 // sample_format_tag:
 // - 1 => F32 (SND_PCM_FORMAT_FLOAT_LE)
 // - 2 => I16 (SND_PCM_FORMAT_S16_LE)
+// - 3 => U16 (SND_PCM_FORMAT_U16_LE)
+// - 4 => U8  (SND_PCM_FORMAT_U8)
 //
 // On non-Linux platforms, returns an empty bytes value.
 // On Linux, always returns at least 8 bytes. On error, `record_count` is 0 and `status` is set.
@@ -412,13 +414,19 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
   }
 
   // Supported formats: keep in sync with the MoonBit stream builder.
-  uint32_t fmt_tags[2];
+  uint32_t fmt_tags[4];
   size_t fmt_count = 0;
   if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT_LE) == 0) {
     fmt_tags[fmt_count++] = 1u;
   }
   if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S16_LE) == 0) {
     fmt_tags[fmt_count++] = 2u;
+  }
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U16_LE) == 0) {
+    fmt_tags[fmt_count++] = 3u;
+  }
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U8) == 0) {
+    fmt_tags[fmt_count++] = 4u;
   }
   if (fmt_count == 0) {
     snd_pcm_hw_params_free(hw);

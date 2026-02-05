@@ -283,6 +283,8 @@ pub fn Device::supported_input_configs(
           let fmt = match fmt_tag {
             1 => @core.SampleFormat::F32
             2 => @core.SampleFormat::I16
+            3 => @core.SampleFormat::U16
+            4 => @core.SampleFormat::U8
             _ => @core.SampleFormat::F32
           }
           let buf = @core.SupportedBufferSize::Range(
@@ -314,6 +316,8 @@ pub fn Device::supported_input_configs(
         let fmt = match fmt_tag {
           1 => @core.SampleFormat::F32
           2 => @core.SampleFormat::I16
+          3 => @core.SampleFormat::U16
+          4 => @core.SampleFormat::U8
           _ => @core.SampleFormat::F32
         }
         let b = @core.SupportedBufferSize::Range(
@@ -354,6 +358,8 @@ pub fn Device::supported_output_configs(
           let fmt = match fmt_tag {
             1 => @core.SampleFormat::F32
             2 => @core.SampleFormat::I16
+            3 => @core.SampleFormat::U16
+            4 => @core.SampleFormat::U8
             _ => @core.SampleFormat::F32
           }
           let buf = @core.SupportedBufferSize::Range(
@@ -385,6 +391,8 @@ pub fn Device::supported_output_configs(
         let fmt = match fmt_tag {
           1 => @core.SampleFormat::F32
           2 => @core.SampleFormat::I16
+          3 => @core.SampleFormat::U16
+          4 => @core.SampleFormat::U8
           _ => @core.SampleFormat::F32
         }
         let b = @core.SupportedBufferSize::Range(
@@ -429,6 +437,8 @@ pub fn Device::default_input_config(
       let fmt = match fmt_tag {
         1 => @core.SampleFormat::F32
         2 => @core.SampleFormat::I16
+        3 => @core.SampleFormat::U16
+        4 => @core.SampleFormat::U8
         _ => @core.SampleFormat::F32
       }
       @core.SupportedStreamConfig::new(
@@ -467,6 +477,8 @@ pub fn Device::default_output_config(
       let fmt = match fmt_tag {
         1 => @core.SampleFormat::F32
         2 => @core.SampleFormat::I16
+        3 => @core.SampleFormat::U16
+        4 => @core.SampleFormat::U8
         _ => @core.SampleFormat::F32
       }
       @core.SupportedStreamConfig::new(
