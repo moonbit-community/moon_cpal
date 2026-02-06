@@ -218,6 +218,32 @@ fn validate_buffer_size_or_raise(
 }
 
 ///|
+fn coreaudio_input_candidate_ranges(
+  device : Device,
+) -> Array[@core.SupportedStreamConfigRange] raise @core.BuildStreamError {
+  if device.supports_input() {
+    try device.supported_input_configs() catch {
+      CoreAudioError(op, status) => raise_build_osstatus(op, status)
+      DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
+    } noraise {
+      rs => rs
+    }
+  } else if device.supports_output() {
+    // Upstream parity direction:
+    // output-only devices may still be used for input stream construction via loopback capture.
+    // We therefore use output-side configs as the candidate set here.
+    try device.supported_output_configs() catch {
+      CoreAudioError(op, status) => raise_build_osstatus(op, status)
+      DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
+    } noraise {
+      rs => rs
+    }
+  } else {
+    []
+  }
+}
+
+///|
 fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
   match config.buffer_size {
     Default => 0
@@ -323,12 +349,7 @@ pub fn Device::build_input_stream_raw(
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  let ranges = try self.supported_input_configs() catch {
-    CoreAudioError(op, status) => raise_build_osstatus(op, status)
-    DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
-  } noraise {
-    rs => rs
-  }
+  let ranges = coreaudio_input_candidate_ranges(self)
   let r = match find_matching_range_for_format(ranges, config, sample_format) {
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
@@ -369,12 +390,7 @@ pub fn Device::build_input_stream(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @core.build_stream_error_invalid_argument()
   }
-  let ranges = try self.supported_input_configs() catch {
-    CoreAudioError(op, status) => raise_build_osstatus(op, status)
-    DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
-  } noraise {
-    rs => rs
-  }
+  let ranges = coreaudio_input_candidate_ranges(self)
   let r = match choose_default_range(ranges, config) {
     Some(r) => r
     None => raise @core.build_stream_error_stream_config_not_supported()
