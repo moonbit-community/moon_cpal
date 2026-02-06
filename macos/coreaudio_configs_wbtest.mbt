@@ -69,3 +69,24 @@ test "macos supported_input_configs basic invariants (if any)" {
       }
   }
 }
+
+///|
+test "macos supports_input/output follow channel counts" {
+  let host = default_host()
+  let devices = try host.devices() catch {
+    _ => []
+  } noraise {
+    xs => xs
+  }
+  for d in devices {
+    inspect(
+      d.supports_input() == (ca_input_channel_count(d.id) > 0),
+      content="true",
+    )
+    inspect(
+      d.supports_output() == (ca_output_channel_count(d.id) > 0),
+      content="true",
+    )
+  }
+  inspect(true, content="true")
+}

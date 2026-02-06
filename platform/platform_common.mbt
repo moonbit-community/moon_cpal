@@ -336,6 +336,7 @@ pub fn Device::description(
 ///|
 pub fn Device::supports_input(self : Device) -> Bool {
   match self {
+    CoreAudio(d) => d.supports_input()
     Alsa(d) => d.supports_input()
     Jack(d) => d.supports_input()
     Wasapi(d) => d.supports_input()
@@ -349,6 +350,7 @@ pub fn Device::supports_input(self : Device) -> Bool {
 ///|
 pub fn Device::supports_output(self : Device) -> Bool {
   match self {
+    CoreAudio(d) => d.supports_output()
     Alsa(d) => d.supports_output()
     Jack(d) => d.supports_output()
     Wasapi(d) => d.supports_output()

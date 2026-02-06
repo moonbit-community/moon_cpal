@@ -69,6 +69,16 @@ pub fn Device::id(self : Device) -> @core.DeviceId {
 }
 
 ///|
+pub fn Device::supports_input(self : Device) -> Bool {
+  ca_input_channel_count(self.id) > 0
+}
+
+///|
+pub fn Device::supports_output(self : Device) -> Bool {
+  ca_output_channel_count(self.id) > 0
+}
+
+///|
 pub fn Device::description(
   self : Device,
 ) -> @core.DeviceDescription raise CoreAudioError {
