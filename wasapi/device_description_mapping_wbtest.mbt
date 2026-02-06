@@ -51,3 +51,25 @@ test "wasapi device type: form factor mapping" {
   inspect(dt8, content="Unknown")
   inspect(it8, content="Some(Spdif)")
 }
+
+///|
+test "wasapi description name selection parity" {
+  inspect(
+    wasapi_description_name(Some("Device Desc"), Some("Friendly Name")),
+    content="Device Desc",
+  )
+  inspect(
+    wasapi_description_name(None, Some("Friendly Name")),
+    content="Friendly Name",
+  )
+  inspect(
+    wasapi_description_name(Some("   "), Some("Friendly Name")),
+    content="Friendly Name",
+  )
+  let err_desc = try wasapi_description_name(None, None) catch {
+    @core.DeviceNameError::BackendSpecific(err) => Some(err.description())
+  } noraise {
+    _ => None
+  }
+  inspect(err_desc, content="Some(\"failed to retrieve device name\")")
+}

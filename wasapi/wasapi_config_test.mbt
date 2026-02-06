@@ -65,12 +65,43 @@ test "wasapi data_flow gating (best-effort)" {
       Some(tag) =>
         if tag == 1 {
           // Capture device: output should be empty.
+          inspect(dev.supports_input(), content="true")
+          inspect(dev.supports_output(), content="false")
           inspect(dev.supported_output_configs().length() == 0, content="true")
         } else if tag == 2 {
           // Render device: input should be empty.
+          inspect(dev.supports_input(), content="false")
+          inspect(dev.supports_output(), content="true")
           inspect(dev.supported_input_configs().length() == 0, content="true")
         }
     }
   }
   inspect(true, content="true")
+}
+
+///|
+test "wasapi default devices appear in enumeration (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Windows {
+    inspect(true, content="true")
+    return
+  }
+  let devices = default_host().devices()
+  let has_id = fn(id : String) {
+    let mut found = false
+    for d in devices {
+      if d.id == id {
+        found = true
+        break
+      }
+    }
+    found
+  }
+  match default_host().default_output_device() {
+    Some(d) => inspect(has_id(d.id), content="true")
+    None => inspect(true, content="true")
+  }
+  match default_host().default_input_device() {
+    Some(d) => inspect(has_id(d.id), content="true")
+    None => inspect(true, content="true")
+  }
 }

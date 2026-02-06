@@ -162,24 +162,47 @@ fn wasapi_types_from_form_factor(
 }
 
 ///|
+fn wasapi_non_empty_trimmed(s : String?) -> String? {
+  match s {
+    Some(v) => {
+      let t = v.trim().to_string()
+      if t.length() > 0 {
+        Some(v)
+      } else {
+        None
+      }
+    }
+    None => None
+  }
+}
+
+///|
+fn wasapi_description_name(
+  dev_desc : String?,
+  friendly : String?,
+) -> String raise @core.DeviceNameError {
+  let d = wasapi_non_empty_trimmed(dev_desc)
+  let f = wasapi_non_empty_trimmed(friendly)
+  match d {
+    Some(v) => v
+    None =>
+      match f {
+        Some(v) => v
+        None =>
+          raise @core.device_name_error_backend_specific(
+            "failed to retrieve device name",
+          )
+      }
+  }
+}
+
+///|
 pub fn Device::description(
   _self : Device,
 ) -> @core.DeviceDescription raise @core.DeviceNameError {
   let dev_desc = device_property_utf8(_self.id, 2)
   let friendly = device_property_utf8(_self.id, 6)
-  let name = match dev_desc {
-    Some(s) if s.trim().length() > 0 => s
-    _ =>
-      match friendly {
-        Some(s) if s.trim().length() > 0 => s
-        _ => Device::name(_self)
-      }
-  }
-  if name.length() == 0 {
-    raise @core.device_name_error_backend_specific(
-      "wasapi device description: empty name",
-    )
-  }
+  let name = wasapi_description_name(dev_desc, friendly)
   let direction = match data_flow_tag(_self.id) {
     Some(1) => @core.DeviceDirection::input()
     Some(2) => @core.DeviceDirection::output()
@@ -234,6 +257,22 @@ pub fn Device::description(
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
   @core.DeviceId::new(@core.HostId::Wasapi, _self.id)
+}
+
+///|
+pub fn Device::supports_input(_self : Device) -> Bool {
+  match data_flow_tag(_self.id) {
+    Some(1) => true
+    _ => false
+  }
+}
+
+///|
+pub fn Device::supports_output(_self : Device) -> Bool {
+  match data_flow_tag(_self.id) {
+    Some(2) => true
+    _ => false
+  }
 }
 
 ///|

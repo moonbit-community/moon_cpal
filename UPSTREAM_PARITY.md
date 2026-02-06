@@ -42,7 +42,7 @@ Native hosts:
 - `host/jack/stream.rs` — **PARTIAL**
 - `host/jack/mod.rs` — **PARTIAL**
 - `host/wasapi/com.rs` — **DONE** (STA `CoInitializeEx` with `RPC_E_CHANGED_MODE` tolerated; COM lifetime matches upstream)
-- `host/wasapi/device.rs` — **PARTIAL**
+- `host/wasapi/device.rs` — **DONE** (endpoint ID/default-device enumeration behavior aligned; description/name selection now follows DeviceDesc→FriendlyName fallback with error on missing both; supports_input/output derive from data_flow; mix-format + supported-config range probing covered)
 - `host/wasapi/stream.rs` — **DONE** (callback-thread/event model aligned; render-endpoint loopback input semantics aligned; HRESULT mapping coverage extended for build/stream/play/pause paths)
 - `host/wasapi/mod.rs` — **DONE** (module-level HRESULT→CPAL mapping unified and reused; host availability API exposed; device enumeration no longer synthesizes fallback default device)
 - `host/coreaudio/mod.rs` — **PARTIAL**
