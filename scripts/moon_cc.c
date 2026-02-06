@@ -239,8 +239,14 @@ int main(int argc, char **argv) {
   //   .../_build/native/.../build/<pkg>/<pkg>.exe
   // (excluding `cmd/*` binaries), inject a tiny stub main object into the link.
   int need_stub_main = 0;
+  int has_build_dir = 0;
+  int is_cmd_dir = 0;
+  if (out_path != NULL) {
+    has_build_dir = path_contains(out_path, "/build/") || path_contains(out_path, "\\build\\");
+    is_cmd_dir = path_contains(out_path, "/build/cmd/") || path_contains(out_path, "\\build\\cmd\\");
+  }
   if (out_path != NULL && str_ends_with(out_path, ".exe") && find_build_marker(out_path) != NULL &&
-      path_contains(out_path, "/build/") && !path_contains(out_path, "/build/cmd/")) {
+      has_build_dir && !is_cmd_dir) {
     const char *slash = strrchr(out_path, '/');
     const char *bslash = strrchr(out_path, '\\');
     const char *sep = slash;

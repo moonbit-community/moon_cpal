@@ -147,6 +147,19 @@ static wchar_t *utf8_bytes_to_wide(uint8_t *bytes, int32_t len) {
   return ws;
 }
 
+// MinGW doesn't always provide linkable definitions for KSDATAFORMAT_SUBTYPE_* GUIDs.
+// Define the two subformats we need locally:
+// - PCM:        {00000001-0000-0010-8000-00AA00389B71}
+// - IEEE_FLOAT: {00000003-0000-0010-8000-00AA00389B71}
+static const GUID moon_cpal_ks_subtype_pcm = {0x00000001,
+                                             0x0000,
+                                             0x0010,
+                                             {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+static const GUID moon_cpal_ks_subtype_ieee_float = {0x00000003,
+                                                     0x0000,
+                                                     0x0010,
+                                                     {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
+
 static uint32_t sample_format_tag_from_mix(const WAVEFORMATEX *wfx) {
   if (wfx == NULL) {
     return 0;
@@ -220,19 +233,6 @@ static uint32_t channel_mask_from_channels(uint32_t channels) {
     return 0;
   }
 }
-
-// MinGW doesn't always provide linkable definitions for KSDATAFORMAT_SUBTYPE_* GUIDs.
-// Define the two subformats we need locally:
-// - PCM:        {00000001-0000-0010-8000-00AA00389B71}
-// - IEEE_FLOAT: {00000003-0000-0010-8000-00AA00389B71}
-static const GUID moon_cpal_ks_subtype_pcm = {0x00000001,
-                                             0x0000,
-                                             0x0010,
-                                             {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
-static const GUID moon_cpal_ks_subtype_ieee_float = {0x00000003,
-                                                     0x0000,
-                                                     0x0010,
-                                                     {0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71}};
 
 static int wasapi_build_wfx_ext(uint32_t channels,
                                 uint32_t sample_rate,
