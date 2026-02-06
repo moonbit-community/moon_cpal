@@ -392,7 +392,12 @@ pub fn Device::build_input_stream(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @core.build_stream_error_invalid_argument()
   }
-  let ranges = self.supported_input_configs()
+  // Match `build_input_stream_raw`: on render endpoints, this path should also select from
+  // output configs so non-raw input stream creation supports WASAPI loopback consistently.
+  let ranges = match data_flow_tag(self.id) {
+    Some(2) => self.supported_output_configs()
+    _ => self.supported_input_configs()
+  }
   let fmt = match choose_default_sample_format(ranges, config) {
     Some(f) => f
     None => raise @core.build_stream_error_stream_config_not_supported()
