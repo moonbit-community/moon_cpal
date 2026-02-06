@@ -47,7 +47,7 @@ Native hosts:
 - `host/wasapi/mod.rs` — **PARTIAL**
 - `host/coreaudio/mod.rs` — **PARTIAL**
 - `host/coreaudio/macos/device.rs` — **PARTIAL**
-- `host/coreaudio/macos/enumerate.rs` — **PARTIAL**
+- `host/coreaudio/macos/enumerate.rs` — **DONE** (device ordering follows `kAudioHardwarePropertyDevices`; default input/output device mapping mirrors upstream)
 - `host/coreaudio/macos/loopback.rs` — **PARTIAL**
 - `host/coreaudio/macos/property_listener.rs` — **PARTIAL**
 - `host/coreaudio/macos/mod.rs` — **PARTIAL**

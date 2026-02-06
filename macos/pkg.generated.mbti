@@ -30,6 +30,8 @@ pub fn device_transport_type_u32(UInt) -> UInt
 
 pub fn device_uid(UInt) -> String?
 
+pub fn supported_configs_error_from_osstatus(String, Int) -> @core.SupportedStreamConfigsError
+
 pub fn supported_input_configs(UInt) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
 
 pub fn supported_output_configs(UInt) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
