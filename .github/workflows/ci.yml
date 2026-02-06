@@ -53,6 +53,12 @@ jobs:
           pgrep -f "jackd .*dummy" >/dev/null
       - name: Build all packages (native)
         run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: bash
+        run: |
+          cd ci/downstream_smoke
+          moon check --target native
+          moon build --target native
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -81,6 +87,12 @@ jobs:
           chmod +x scripts/moon_cc.sh
       - name: Build all packages (native)
         run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: bash
+        run: |
+          cd ci/downstream_smoke
+          moon check --target native
+          moon build --target native
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -111,6 +123,12 @@ jobs:
       - name: Build all packages (native)
         shell: pwsh
         run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: pwsh
+        run: |
+          Set-Location ci/downstream_smoke
+          moon check --target native
+          moon build --target native
       - name: Install virtual audio device (VB-CABLE)
         shell: pwsh
         run: |
