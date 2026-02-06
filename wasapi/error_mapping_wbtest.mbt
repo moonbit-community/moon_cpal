@@ -62,3 +62,62 @@ test "wasapi HRESULT mapping (unit)" {
     content="InvalidArgument",
   )
 }
+
+///|
+test "wasapi play/pause HRESULT mapping (unit)" {
+  if @core.native_os() != @core.NativeOs::Windows {
+    inspect(true, content="true")
+    return
+  }
+  inspect(
+    wasapi_play_error_from_hresult(-2004287484, "IAudioClientStart"),
+    content="DeviceNotAvailable",
+  )
+  inspect(
+    wasapi_pause_error_from_hresult(-2004287478, "IAudioClientStop"),
+    content="DeviceNotAvailable",
+  )
+  match wasapi_play_error_from_hresult(-1, "PlayOp") {
+    @core.PlayStreamError::BackendSpecific(err) =>
+      inspect(err.description() == "PlayOp (HRESULT -1)", content="true")
+    _ => inspect(false, content="true")
+  }
+  match wasapi_pause_error_from_hresult(-2, "PauseOp") {
+    @core.PauseStreamError::BackendSpecific(err) =>
+      inspect(err.description() == "PauseOp (HRESULT -2)", content="true")
+    _ => inspect(false, content="true")
+  }
+}
+
+///|
+test "wasapi stream callback op_tag mapping (unit)" {
+  if @core.native_os() != @core.NativeOs::Windows {
+    inspect(true, content="true")
+    return
+  }
+  let slot = FixedArray::make(1, @core.stream_error_backend_specific("init"))
+  call_stream_error_callback(fn(e) { slot[0] = e }, 3, -1)
+  match slot[0] {
+    @core.StreamError::BackendSpecific(err) =>
+      inspect(
+        err.description() == "IAudioClientStart (HRESULT -1)",
+        content="true",
+      )
+    _ => inspect(false, content="true")
+  }
+  call_stream_error_callback(fn(e) { slot[0] = e }, 4, -2)
+  match slot[0] {
+    @core.StreamError::BackendSpecific(err) =>
+      inspect(
+        err.description() == "IAudioClientStop (HRESULT -2)",
+        content="true",
+      )
+    _ => inspect(false, content="true")
+  }
+  call_stream_error_callback(fn(e) { slot[0] = e }, 6, -3)
+  match slot[0] {
+    @core.StreamError::BackendSpecific(err) =>
+      inspect(err.description() == "DeviceInit (HRESULT -3)", content="true")
+    _ => inspect(false, content="true")
+  }
+}

@@ -43,7 +43,7 @@ Native hosts:
 - `host/jack/mod.rs` — **PARTIAL**
 - `host/wasapi/com.rs` — **DONE** (STA `CoInitializeEx` with `RPC_E_CHANGED_MODE` tolerated; COM lifetime matches upstream)
 - `host/wasapi/device.rs` — **PARTIAL**
-- `host/wasapi/stream.rs` — **PARTIAL**
+- `host/wasapi/stream.rs` — **DONE** (callback-thread/event model aligned; render-endpoint loopback input semantics aligned; HRESULT mapping coverage extended for build/stream/play/pause paths)
 - `host/wasapi/mod.rs` — **PARTIAL**
 - `host/coreaudio/mod.rs` — **PARTIAL**
 - `host/coreaudio/macos/device.rs` — **PARTIAL**
