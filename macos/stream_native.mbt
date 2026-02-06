@@ -345,6 +345,12 @@ pub fn Device::build_input_stream_raw(
   if config.channels <= 0 || config.sample_rate <= 0 {
     raise @core.build_stream_error_invalid_argument()
   }
+  try set_nominal_sample_rate(self.id, config.sample_rate) catch {
+    CoreAudioError(op, status) => raise_build_osstatus(op, status)
+    DeviceNotAvailable(op, status) => raise_build_osstatus(op, status)
+  } noraise {
+    _ => ()
+  }
   let fmt_tag = match format_tag_from_sample_format(sample_format) {
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()

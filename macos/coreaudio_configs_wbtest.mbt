@@ -90,3 +90,37 @@ test "macos supports_input/output follow channel counts" {
   }
   inspect(true, content="true")
 }
+
+///|
+test "macos can apply nominal sample rate from default input config (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Macos {
+    inspect(true, content="true")
+    return
+  }
+  let host = default_host()
+  match host.default_input_device() {
+    None => inspect(true, content="true")
+    Some(dev) => {
+      let cfg = try dev.default_input_config() catch {
+        _ => None
+      } noraise {
+        c => Some(c)
+      }
+      match cfg {
+        None => inspect(true, content="true")
+        Some(c) => {
+          let ok = try {
+            set_nominal_sample_rate(dev.id, c.sample_rate)
+            true
+          } catch {
+            DeviceNotAvailable(_, _) => true
+            _ => false
+          } noraise {
+            x => x
+          }
+          inspect(ok, content="true")
+        }
+      }
+    }
+  }
+}

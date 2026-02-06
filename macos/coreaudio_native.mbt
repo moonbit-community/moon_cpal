@@ -121,6 +121,12 @@ extern "C" fn ca_default_stream_config(
 ) -> Int = "moon_cpal_ca_default_stream_config"
 
 ///|
+extern "C" fn ca_set_nominal_sample_rate(
+  device_id : UInt,
+  sample_rate : Double,
+) -> Int = "moon_cpal_ca_set_nominal_sample_rate"
+
+///|
 extern "C" fn ca_osstatus_kind(status : Int) -> Int = "moon_cpal_ca_osstatus_kind"
 
 ///|
@@ -233,6 +239,20 @@ fn default_stream_config(
   @core.SupportedStreamConfig::new(
     channels, sample_rate, buffer_size, sample_format,
   )
+}
+
+///|
+fn set_nominal_sample_rate(
+  device_id : DeviceId,
+  sample_rate : Int,
+) -> Unit raise CoreAudioError {
+  if sample_rate <= 0 {
+    raise CoreAudioError("ca_set_nominal_sample_rate", -50)
+  }
+  let st = ca_set_nominal_sample_rate(device_id, sample_rate.to_double())
+  if st < 0 {
+    raise_osstatus("ca_set_nominal_sample_rate", st)
+  }
 }
 
 ///|

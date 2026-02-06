@@ -137,6 +137,12 @@ int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
   return -1;
 }
 
+int32_t moon_cpal_ca_set_nominal_sample_rate(uint32_t device_id, double sample_rate) {
+  (void)device_id;
+  (void)sample_rate;
+  return -1;
+}
+
 int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
   (void)status;
   return 0;
@@ -809,6 +815,72 @@ int32_t moon_cpal_ca_default_stream_config(uint32_t device_id,
   out[0] = (uint32_t)asbd.mSampleRate;
   out[1] = (uint32_t)asbd.mChannelsPerFrame;
   out[2] = sample_format_tag;
+  return 0;
+}
+
+int32_t moon_cpal_ca_set_nominal_sample_rate(uint32_t device_id, double sample_rate) {
+  if (sample_rate <= 0.0) {
+    return ca_err(kAudio_ParamError);
+  }
+
+  AudioObjectPropertyAddress addr = {kAudioDevicePropertyNominalSampleRate,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+
+  // Fast-path: already at the requested rate.
+  double current_rate = 0.0;
+  uint32_t current_size = (uint32_t)sizeof(current_rate);
+  int32_t st = ca_get_property_data((AudioObjectID)device_id, &addr, &current_size, &current_rate);
+  if (st != 0) {
+    return st;
+  }
+  if (current_rate == sample_rate) {
+    return 0;
+  }
+
+  // Verify the requested rate is within one of the advertised supported ranges.
+  AudioObjectPropertyAddress ranges_addr = {kAudioDevicePropertyAvailableNominalSampleRates,
+                                            kAudioObjectPropertyScopeGlobal,
+                                            kAudioObjectPropertyElementMain};
+  uint32_t ranges_size = 0;
+  st = ca_get_property_data_size((AudioObjectID)device_id, &ranges_addr, &ranges_size);
+  if (st != 0) {
+    return st;
+  }
+  if (ranges_size == 0 || (ranges_size % (uint32_t)sizeof(AudioValueRange)) != 0) {
+    return ca_err(kAudioDeviceUnsupportedFormatError);
+  }
+
+  AudioValueRange *ranges = (AudioValueRange *)malloc(ranges_size);
+  if (ranges == NULL) {
+    return -1;
+  }
+  st = ca_get_property_data((AudioObjectID)device_id, &ranges_addr, &ranges_size, ranges);
+  if (st != 0) {
+    free(ranges);
+    return st;
+  }
+
+  uint32_t count = ranges_size / (uint32_t)sizeof(AudioValueRange);
+  int supported = 0;
+  for (uint32_t i = 0; i < count; i++) {
+    if (sample_rate >= ranges[i].mMinimum && sample_rate <= ranges[i].mMaximum) {
+      supported = 1;
+      break;
+    }
+  }
+  free(ranges);
+  if (!supported) {
+    return ca_err(kAudioDeviceUnsupportedFormatError);
+  }
+
+  UInt32 set_size = (UInt32)sizeof(sample_rate);
+  OSStatus os =
+      AudioObjectSetPropertyData((AudioObjectID)device_id, &addr, 0, NULL, set_size, &sample_rate);
+  if (os != noErr) {
+    return ca_err(os);
+  }
+
   return 0;
 }
 
