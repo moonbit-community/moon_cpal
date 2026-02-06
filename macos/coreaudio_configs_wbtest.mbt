@@ -124,3 +124,29 @@ test "macos can apply nominal sample rate from default input config (best-effort
     }
   }
 }
+
+///|
+test "macos set_nominal_sample_rate rejects non-positive rates" {
+  let host = default_host()
+  let devices = try host.devices() catch {
+    _ => []
+  } noraise {
+    xs => xs
+  }
+  if devices.is_empty() {
+    inspect(true, content="true")
+    return
+  }
+  let dev = devices[0]
+  let ok = try {
+    set_nominal_sample_rate(dev.id, 0)
+    false
+  } catch {
+    CoreAudioError(op, status) =>
+      op == "ca_set_nominal_sample_rate" && status == -50
+    _ => false
+  } noraise {
+    x => x
+  }
+  inspect(ok, content="true")
+}

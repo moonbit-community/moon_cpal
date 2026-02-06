@@ -46,7 +46,7 @@ Native hosts:
 - `host/wasapi/stream.rs` — **DONE** (callback-thread/event model aligned; render-endpoint loopback input semantics aligned; HRESULT mapping coverage extended for build/stream/play/pause paths)
 - `host/wasapi/mod.rs` — **DONE** (module-level HRESULT→CPAL mapping unified and reused; host availability API exposed; device enumeration no longer synthesizes fallback default device)
 - `host/coreaudio/mod.rs` — **PARTIAL**
-- `host/coreaudio/macos/device.rs` — **PARTIAL** (DeviceId now uses UID-only semantics; missing UID now surfaces as DeviceIdError via platform wrapper; supports_input/output now map to native channel-count queries; output-device input path no longer rejects early as StreamConfigNotSupported and now follows loopback-style config selection; input stream build now applies nominal sample-rate set/check against device-supported ranges before queue creation)
+- `host/coreaudio/macos/device.rs` — **PARTIAL** (DeviceId now uses UID-only semantics; missing UID now surfaces as DeviceIdError via platform wrapper; supports_input/output now map to native channel-count queries; output-device input path no longer rejects early as StreamConfigNotSupported and now follows loopback-style config selection; input stream build now applies nominal sample-rate set/check against device-supported ranges before queue creation and waits for rate-settle with timeout)
 - `host/coreaudio/macos/enumerate.rs` — **DONE** (device ordering follows `kAudioHardwarePropertyDevices`; default input/output device mapping mirrors upstream)
 - `host/coreaudio/macos/loopback.rs` — **PARTIAL**
 - `host/coreaudio/macos/property_listener.rs` — **PARTIAL**

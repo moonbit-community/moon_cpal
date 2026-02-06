@@ -264,6 +264,7 @@ int32_t moon_cpal_ca_stream_owner_close(void *owner) {
 #include <AudioToolbox/AudioToolbox.h>
 #include <AudioToolbox/AudioQueue.h>
 #include <mach/mach_time.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -881,7 +882,29 @@ int32_t moon_cpal_ca_set_nominal_sample_rate(uint32_t device_id, double sample_r
     return ca_err(os);
   }
 
-  return 0;
+  // Mirror upstream intent in `set_sample_rate`: wait for the nominal rate update
+  // to become observable before continuing stream construction.
+  //
+  // We don't expose property-listener plumbing to MoonBit here; instead we use a
+  // short runloop-assisted poll with timeout.
+  CFAbsoluteTime deadline = CFAbsoluteTimeGetCurrent() + 1.0;
+  for (;;) {
+    current_rate = 0.0;
+    current_size = (uint32_t)sizeof(current_rate);
+    st = ca_get_property_data((AudioObjectID)device_id, &addr, &current_size, &current_rate);
+    if (st != 0) {
+      return st;
+    }
+    if (fabs(current_rate - sample_rate) < 0.5) {
+      return 0;
+    }
+    if (CFAbsoluteTimeGetCurrent() >= deadline) {
+      break;
+    }
+    (void)CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false);
+  }
+
+  return -1;
 }
 
 // Classify a CPAL stub error code (negative) into a small set of categories.
