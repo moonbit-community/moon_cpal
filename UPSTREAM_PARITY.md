@@ -44,9 +44,9 @@ Native hosts:
 - `host/wasapi/com.rs` — **DONE** (STA `CoInitializeEx` with `RPC_E_CHANGED_MODE` tolerated; COM lifetime matches upstream)
 - `host/wasapi/device.rs` — **PARTIAL**
 - `host/wasapi/stream.rs` — **DONE** (callback-thread/event model aligned; render-endpoint loopback input semantics aligned; HRESULT mapping coverage extended for build/stream/play/pause paths)
-- `host/wasapi/mod.rs` — **PARTIAL**
+- `host/wasapi/mod.rs` — **DONE** (module-level HRESULT→CPAL mapping unified and reused; host availability API exposed; device enumeration no longer synthesizes fallback default device)
 - `host/coreaudio/mod.rs` — **PARTIAL**
-- `host/coreaudio/macos/device.rs` — **PARTIAL**
+- `host/coreaudio/macos/device.rs` — **PARTIAL** (DeviceId now uses UID-only semantics; missing UID now surfaces as DeviceIdError via platform wrapper)
 - `host/coreaudio/macos/enumerate.rs` — **DONE** (device ordering follows `kAudioHardwarePropertyDevices`; default input/output device mapping mirrors upstream)
 - `host/coreaudio/macos/loopback.rs` — **PARTIAL**
 - `host/coreaudio/macos/property_listener.rs` — **PARTIAL**

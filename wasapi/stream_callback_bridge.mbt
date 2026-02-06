@@ -143,24 +143,6 @@ fn call_stream_error_callback(
 }
 
 ///|
-fn wasapi_stream_error_from_hresult(
-  status : Int,
-  op : String,
-) -> @core.StreamError {
-  // Match upstream WASAPI mapping:
-  // - AUDCLNT_E_DEVICE_INVALIDATED and AUDCLNT_E_DEVICE_IN_USE -> DeviceNotAvailable
-  //
-  // Note: we pass HRESULT as a signed 32-bit int from C.
-  // AUDCLNT_E_DEVICE_INVALIDATED = 0x88890004 (-2004287484)
-  // AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A (-2004287478)
-  if status == -2004287484 || status == -2004287478 {
-    @core.stream_error_device_not_available()
-  } else {
-    @core.stream_error_backend_specific("\{op} (HRESULT \{status})")
-  }
-}
-
-///|
 let call_stream_error_callback_fr : FuncRef[
   ((@core.StreamError) -> Unit, Int, Int) -> Unit,
 ] = fn(error_callback, op_tag, status) {

@@ -115,54 +115,6 @@ fn[A] raise_pause_hresult(
 }
 
 ///|
-fn wasapi_build_error_from_hresult(
-  status : Int,
-  op : String,
-) -> @core.BuildStreamError {
-  // Best-effort mapping. The WASAPI C layer passes HRESULT as signed 32-bit int.
-  //
-  // Known values:
-  // - AUDCLNT_E_DEVICE_INVALIDATED = 0x88890004 (-2004287484)
-  // - AUDCLNT_E_DEVICE_IN_USE     = 0x8889000A (-2004287478)
-  // - AUDCLNT_E_UNSUPPORTED_FORMAT= 0x88890008 (-2004287480)
-  // - AUDCLNT_E_BUFFER_SIZE_ERROR = 0x88890019 (-2004287463)
-  // - E_INVALIDARG                = 0x80070057 (-2147024809)
-  if status == -2004287484 || status == -2004287478 {
-    @core.build_stream_error_device_not_available()
-  } else if status == -2004287480 || status == -2004287463 {
-    @core.build_stream_error_stream_config_not_supported()
-  } else if status == -2147024809 {
-    @core.build_stream_error_invalid_argument()
-  } else {
-    @core.build_stream_error_backend_specific("\{op} (HRESULT \{status})")
-  }
-}
-
-///|
-fn wasapi_play_error_from_hresult(
-  status : Int,
-  op : String,
-) -> @core.PlayStreamError {
-  if status == -2004287484 || status == -2004287478 {
-    @core.play_stream_error_device_not_available()
-  } else {
-    @core.play_stream_error_backend_specific("\{op} (HRESULT \{status})")
-  }
-}
-
-///|
-fn wasapi_pause_error_from_hresult(
-  status : Int,
-  op : String,
-) -> @core.PauseStreamError {
-  if status == -2004287484 || status == -2004287478 {
-    @core.pause_stream_error_device_not_available()
-  } else {
-    @core.pause_stream_error_backend_specific("\{op} (HRESULT \{status})")
-  }
-}
-
-///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
     @core.SampleFormat::F32 => Some((1 : UInt))

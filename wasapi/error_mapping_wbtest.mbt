@@ -64,6 +64,15 @@ test "wasapi HRESULT mapping (unit)" {
 }
 
 ///|
+test "wasapi host availability parity (unit)" {
+  inspect(
+    Host::is_available(default_host()) ==
+    (@core.native_os() == @core.NativeOs::Windows),
+    content="true",
+  )
+}
+
+///|
 test "wasapi play/pause HRESULT mapping (unit)" {
   if @core.native_os() != @core.NativeOs::Windows {
     inspect(true, content="true")

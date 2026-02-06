@@ -53,6 +53,7 @@ pub struct Host {
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::devices(Self) -> Array[Device]
+pub fn Host::is_available(Self) -> Bool
 pub impl Eq for Host
 pub impl Show for Host
 

@@ -62,7 +62,9 @@ pub fn Device::id(self : Device) -> @core.DeviceId {
   match device_uid(self.id) {
     Some(uid) if uid.trim().length() > 0 =>
       @core.DeviceId::new(@core.HostId::CoreAudio, uid)
-    _ => @core.DeviceId::new(@core.HostId::CoreAudio, self.id.to_string())
+    // Keep backend parity with upstream: ID is the CoreAudio UID, not the numeric AudioDeviceID.
+    // An empty ID is promoted to DeviceIdError by platform.Device::id.
+    _ => @core.DeviceId::new(@core.HostId::CoreAudio, "")
   }
 }
 

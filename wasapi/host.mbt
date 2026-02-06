@@ -34,6 +34,11 @@ pub fn default_host() -> Host {
 }
 
 ///|
+pub fn Host::is_available(_self : Host) -> Bool {
+  @core.native_os() == @core.NativeOs::Windows
+}
+
+///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
   if @core.native_os() == @core.NativeOs::Windows {
     let bytes = devices_utf8()
@@ -45,14 +50,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
         out.push({ id, })
       }
     }
-    if out.length() > 0 {
-      return out
-    }
-    // Best-effort fallback: include the default endpoint id if enumeration yielded nothing.
-    match default_device_id_utf8(false) {
-      None => []
-      Some(id) => [{ id, }]
-    }
+    out
   } else {
     []
   }
