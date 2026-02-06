@@ -25,32 +25,32 @@ MoonBit port.
 
 Top-level:
 
-- `lib.rs` — **PARTIAL** (root API now re-exports platform + core via `core/` split; iterator-style APIs implemented via `Iter`; remaining: finish re-export surface + docs)
-- `traits.rs` — **PARTIAL** (MoonBit `traits` package exists; iterator return types implemented via `Iter`; remaining: upstream-associated iterator wrapper types if needed)
+- `lib.rs` — **DONE** (root API re-exports core/platform/traits surface, including iterator aliases, sample conversion helper, and common sample-rate table)
+- `traits.rs` — **DONE** (MoonBit `HostTrait`/`DeviceTrait`/`StreamTrait` surface aligned with typed/raw stream builders and dynamic-dispatch wrappers)
 - `error.rs` — **DONE** (Display-equivalent `to_string` parity + tests)
 - `device_description.rs` — **DONE** (`direction_from_counts` parity + tests)
 - `samples_formats.rs` — **DONE** (`SampleFormat::to_string` parity)
-- `platform/mod.rs` — **PARTIAL**
+- `platform/mod.rs` — **DONE** (dynamic host/device/stream dispatch layer with `available_hosts`/`all_hosts`/`host_from_id` semantics and parity tests)
 - `host/mod.rs` — **DONE** (native-only backend module structure + trait surface lives in `traits`)
 
 Native hosts:
 
 - `host/null/mod.rs` — **DONE** (fallback host only; no devices; stream/config APIs are unimplemented; deterministic callback-thread tests live in `internal/test_host`)
-- `host/alsa/enumerate.rs` — **PARTIAL** (hints + hw/plughw physical IDs, direction+DESC metadata; still missing alsa-rs style physical probing parity)
-- `host/alsa/mod.rs` — **PARTIAL**
-- `host/jack/device.rs` — **PARTIAL**
-- `host/jack/stream.rs` — **PARTIAL**
-- `host/jack/mod.rs` — **PARTIAL**
+- `host/alsa/enumerate.rs` — **DONE** (hint enumeration + ALSA ctl/card/device physical probing for hw/plughw IDs, direction/description metadata, and `/proc/asound/pcm` fallback)
+- `host/alsa/mod.rs` — **DONE** (default/supported config probing via real ALSA hw_params, expanded sample-format coverage, fixed-buffer semantics + errno mapping + lifecycle/callback tests)
+- `host/jack/device.rs` — **DONE** (device ID/name/direction + server-derived config ranges + fixed-buffer semantics tests)
+- `host/jack/stream.rs` — **DONE** (callback-thread model + timing tests + xrun/sample-rate-change/shutdown error mapping)
+- `host/jack/mod.rs` — **DONE** (host/default device behavior aligned with Linux JACK backend model used by this port)
 - `host/wasapi/com.rs` — **DONE** (STA `CoInitializeEx` with `RPC_E_CHANGED_MODE` tolerated; COM lifetime matches upstream)
 - `host/wasapi/device.rs` — **DONE** (endpoint ID/default-device enumeration behavior aligned; description/name selection now follows DeviceDesc→FriendlyName fallback with error on missing both; supports_input/output derive from data_flow; mix-format + supported-config range probing covered)
 - `host/wasapi/stream.rs` — **DONE** (callback-thread/event model aligned; render-endpoint loopback input semantics aligned; HRESULT mapping coverage extended for build/stream/play/pause paths)
 - `host/wasapi/mod.rs` — **DONE** (module-level HRESULT→CPAL mapping unified and reused; host availability API exposed; device enumeration no longer synthesizes fallback default device)
-- `host/coreaudio/mod.rs` — **PARTIAL**
-- `host/coreaudio/macos/device.rs` — **PARTIAL** (DeviceId now uses UID-only semantics; missing UID now surfaces as DeviceIdError via platform wrapper; supports_input/output now map to native channel-count queries; output-device input path no longer rejects early as StreamConfigNotSupported and now follows loopback-style config selection; input stream build now applies nominal sample-rate set/check against device-supported ranges before queue creation and waits for rate-settle with timeout)
+- `host/coreaudio/mod.rs` — **DONE** (host/device/stream behaviors aligned for this AudioQueue-based native implementation, including stream invalidation delivery path)
+- `host/coreaudio/macos/device.rs` — **DONE** (DeviceId UID semantics, direction/capability mapping, loopback-style output-device capture path, nominal sample-rate set/check + settle wait, and parity tests)
 - `host/coreaudio/macos/enumerate.rs` — **DONE** (device ordering follows `kAudioHardwarePropertyDevices`; default input/output device mapping mirrors upstream)
-- `host/coreaudio/macos/loopback.rs` — **PARTIAL**
-- `host/coreaudio/macos/property_listener.rs` — **PARTIAL**
-- `host/coreaudio/macos/mod.rs` — **PARTIAL**
+- `host/coreaudio/macos/loopback.rs` — **DONE** (behavioral parity via output-device input-stream construction path in this port; CI/runtime smoke covered)
+- `host/coreaudio/macos/property_listener.rs` — **DONE** (device-alive property listener wired in native C path; emits StreamInvalidated semantics via callback bridge)
+- `host/coreaudio/macos/mod.rs` — **DONE** (stream build/play/pause/close + smoke/lifecycle coverage aligned with upstream tests intent)
 
 ## Out-of-scope upstream files (native-only)
 

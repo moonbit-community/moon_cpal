@@ -184,88 +184,79 @@ static void alsa_append_hint_names(char **buf, size_t *len, size_t *cap) {
 
   snd_device_name_free_hint(hints);
 }
-#endif
-
-static void copy_trimmed_field(const char *start,
-                               const char *end,
-                               char *out,
-                               size_t out_len) {
-  if (out == NULL || out_len == 0) {
-    return;
-  }
-  out[0] = '\0';
-  if (start == NULL || end == NULL || end <= start) {
-    return;
-  }
-  while (start < end && (*start == ' ' || *start == '\t')) {
-    start++;
-  }
-  while (end > start && (end[-1] == ' ' || end[-1] == '\t')) {
-    end--;
-  }
-  size_t n = (size_t)(end - start);
-  if (n >= out_len) {
-    n = out_len - 1;
-  }
-  memcpy(out, start, n);
-  out[n] = '\0';
-}
-
-static int parse_count_after_keyword(const char *line, const char *kw) {
-  if (line == NULL || kw == NULL) {
-    return 0;
-  }
-  const char *p = strstr(line, kw);
-  if (p == NULL) {
-    return 0;
-  }
-  p += strlen(kw);
-  while (*p == ' ' || *p == '\t') {
-    p++;
-  }
-  int v = 0;
-  if (sscanf(p, "%d", &v) == 1) {
-    return v;
-  }
-  return 0;
-}
-
-static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
-#if defined(__linux__)
+static void alsa_append_physical_devices(char **buf, size_t *len, size_t *cap) {
   if (buf == NULL || len == NULL || cap == NULL) {
     return;
   }
 
-  FILE *f = fopen("/proc/asound/pcm", "r");
-  if (f != NULL) {
-    char line[512];
-    while (fgets(line, (int)sizeof(line), f) != NULL) {
-      // Parse leading "<card>-<device>:" token.
-      unsigned int card = 0, dev = 0;
-      if (sscanf(line, "%u-%u:", &card, &dev) == 2) {
-        // Parse "Card Name : Device Name" fields when present.
-        const char *first_colon = strchr(line, ':');
-        const char *second_colon = first_colon ? strchr(first_colon + 1, ':') : NULL;
-        const char *third_colon = second_colon ? strchr(second_colon + 1, ':') : NULL;
-        char card_name[256];
-        char device_name[256];
-        card_name[0] = '\0';
-        device_name[0] = '\0';
-        if (first_colon && second_colon) {
-          copy_trimmed_field(first_colon + 1, second_colon, card_name, sizeof(card_name));
+  int card = -1;
+  if (snd_card_next(&card) < 0) {
+    return;
+  }
+  while (card >= 0) {
+    char ctl_name[64];
+    snprintf(ctl_name, sizeof(ctl_name), "hw:%d", card);
+    snd_ctl_t *ctl = NULL;
+    if (snd_ctl_open(&ctl, ctl_name, 0) >= 0 && ctl != NULL) {
+      snd_ctl_card_info_t *card_info = NULL;
+      snd_ctl_card_info_alloca(&card_info);
+      char card_name[256];
+      card_name[0] = '\0';
+      if (snd_ctl_card_info(ctl, card_info) >= 0) {
+        const char *name = snd_ctl_card_info_get_name(card_info);
+        if (name != NULL && name[0] != '\0') {
+          snprintf(card_name, sizeof(card_name), "%s", name);
         }
-        if (second_colon && third_colon) {
-          copy_trimmed_field(second_colon + 1, third_colon, device_name, sizeof(device_name));
+      }
+
+      int device = -1;
+      while (1) {
+        if (snd_ctl_pcm_next_device(ctl, &device) < 0 || device < 0) {
+          break;
         }
 
-        int playback = parse_count_after_keyword(line, "playback");
-        int capture = parse_count_after_keyword(line, "capture");
+        int has_playback = 0;
+        int has_capture = 0;
+        char device_name[256];
+        device_name[0] = '\0';
+
+        snd_pcm_info_t *pcm_info = NULL;
+        snd_pcm_info_alloca(&pcm_info);
+        snd_pcm_info_set_device(pcm_info, (unsigned int)device);
+        snd_pcm_info_set_subdevice(pcm_info, 0);
+
+        snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_PLAYBACK);
+        if (snd_ctl_pcm_info(ctl, pcm_info) >= 0) {
+          has_playback = 1;
+          const char *name = snd_pcm_info_get_name(pcm_info);
+          if (name != NULL && name[0] != '\0') {
+            snprintf(device_name, sizeof(device_name), "%s", name);
+          }
+        }
+
+        snd_pcm_info_set_device(pcm_info, (unsigned int)device);
+        snd_pcm_info_set_subdevice(pcm_info, 0);
+        snd_pcm_info_set_stream(pcm_info, SND_PCM_STREAM_CAPTURE);
+        if (snd_ctl_pcm_info(ctl, pcm_info) >= 0) {
+          has_capture = 1;
+          if (device_name[0] == '\0') {
+            const char *name = snd_pcm_info_get_name(pcm_info);
+            if (name != NULL && name[0] != '\0') {
+              snprintf(device_name, sizeof(device_name), "%s", name);
+            }
+          }
+        }
+
+        if (!has_playback && !has_capture) {
+          continue;
+        }
+
         char dir_tag = '?';
-        if (playback > 0 && capture > 0) {
+        if (has_playback && has_capture) {
           dir_tag = 'd';
-        } else if (playback > 0) {
+        } else if (has_playback) {
           dir_tag = 'o';
-        } else if (capture > 0) {
+        } else if (has_capture) {
           dir_tag = 'i';
         }
 
@@ -277,14 +268,13 @@ static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
         } else if (device_name[0] != '\0') {
           snprintf(first_line, sizeof(first_line), "%s", device_name);
         } else {
-          snprintf(first_line, sizeof(first_line), "Card %u", card);
+          snprintf(first_line, sizeof(first_line), "Card %d", card);
         }
 
         for (int i = 0; i < 2; i++) {
           const char *prefix = (i == 0) ? "hw" : "plughw";
           char id[64];
-          // Match upstream CPAL style (hw:CARD=0,DEV=0).
-          snprintf(id, sizeof(id), "%s:CARD=%u,DEV=%u", prefix, card, dev);
+          snprintf(id, sizeof(id), "%s:CARD=%d,DEV=%d", prefix, card, device);
           const char *second_line = (i == 0)
                                         ? "Direct hardware device without any conversions"
                                         : "Hardware device with all software conversions";
@@ -293,16 +283,51 @@ static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
           buf_append_device_line(buf, len, cap, id, dir_tag, desc);
         }
       }
+      snd_ctl_close(ctl);
     }
-    fclose(f);
+
+    if (snd_card_next(&card) < 0) {
+      break;
+    }
+  }
+}
+
+static void alsa_append_proc_pcm(char **buf, size_t *len, size_t *cap) {
+  if (buf == NULL || len == NULL || cap == NULL) {
+    return;
   }
 
-#else
-  (void)buf;
-  (void)len;
-  (void)cap;
-#endif
+  FILE *f = fopen("/proc/asound/pcm", "r");
+  if (f == NULL) {
+    return;
+  }
+  char line[512];
+  while (fgets(line, (int)sizeof(line), f) != NULL) {
+    unsigned int card = 0, dev = 0;
+    if (sscanf(line, "%u-%u:", &card, &dev) != 2) {
+      continue;
+    }
+    int playback = (strstr(line, "playback") != NULL) ? 1 : 0;
+    int capture = (strstr(line, "capture") != NULL) ? 1 : 0;
+    char dir_tag = '?';
+    if (playback > 0 && capture > 0) {
+      dir_tag = 'd';
+    } else if (playback > 0) {
+      dir_tag = 'o';
+    } else if (capture > 0) {
+      dir_tag = 'i';
+    }
+
+    for (int i = 0; i < 2; i++) {
+      const char *prefix = (i == 0) ? "hw" : "plughw";
+      char id[64];
+      snprintf(id, sizeof(id), "%s:CARD=%u,DEV=%u", prefix, card, dev);
+      buf_append_device_line(buf, len, cap, id, dir_tag, NULL);
+    }
+  }
+  fclose(f);
 }
+#endif
 
 moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
 #if defined(__linux__)
@@ -314,9 +339,14 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
   buf_append_device_line(&buf, &len, &cap, "default", 'd', NULL);
 
   // Mirror upstream CPAL style: include both hint devices (virtual/plugins) and physical devices
-  // (hw:/plughw:) and dedupe by exact line match.
+  // (hw:/plughw:) and dedupe by PCM id.
   alsa_append_hint_names(&buf, &len, &cap);
-  alsa_append_proc_pcm(&buf, &len, &cap);
+  size_t before_physical = len;
+  alsa_append_physical_devices(&buf, &len, &cap);
+  // Keep `/proc/asound/pcm` as a fallback when ctl probing returns nothing.
+  if (len == before_physical) {
+    alsa_append_proc_pcm(&buf, &len, &cap);
+  }
 
   if (len == 0) {
     return moonbit_make_bytes_raw(0);

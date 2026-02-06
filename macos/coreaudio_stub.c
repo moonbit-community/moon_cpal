@@ -963,8 +963,11 @@ int32_t moon_cpal_ca_osstatus_kind(int32_t status) {
 
 typedef struct {
   AudioQueueRef queue;
+  AudioDeviceID device_id;
   int is_input;
   volatile int running;
+  volatile int listener_registered;
+  volatile int invalidated_sent;
   uint32_t buffer_bytes;
   uint32_t sample_format_tag;
   uint32_t channels;
@@ -1033,6 +1036,52 @@ static void ca_invoke_error(moon_cpal_ca_stream_t *s, int32_t op_tag, int32_t st
   // Keep the stored closure alive across the trampoline call.
   moonbit_incref(s->mb_error_callback);
   s->call_error_callback(s->mb_error_callback, op_tag, status);
+}
+
+static OSStatus ca_device_alive_listener(AudioObjectID in_object_id,
+                                         UInt32 in_number_addresses,
+                                         const AudioObjectPropertyAddress in_addresses[],
+                                         void *in_client_data) {
+  (void)in_object_id;
+  (void)in_number_addresses;
+  (void)in_addresses;
+  moon_cpal_ca_stream_t *s = (moon_cpal_ca_stream_t *)in_client_data;
+  if (s == NULL) {
+    return noErr;
+  }
+  // Keep this path one-shot to avoid duplicate stream invalidation reports.
+  if (s->invalidated_sent == 0) {
+    s->invalidated_sent = 1;
+    s->running = 0;
+    ca_invoke_error(s, 5 /* AudioObjectPropertyListener */, ca_err(kAudioQueueErr_QueueInvalidated));
+  }
+  return noErr;
+}
+
+static int32_t ca_register_device_alive_listener(moon_cpal_ca_stream_t *s) {
+  if (s == NULL || s->device_id == kAudioObjectUnknown) {
+    return -1;
+  }
+  AudioObjectPropertyAddress addr = {kAudioDevicePropertyDeviceIsAlive,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  OSStatus os = AudioObjectAddPropertyListener(s->device_id, &addr, ca_device_alive_listener, s);
+  if (os != noErr) {
+    return ca_err(os);
+  }
+  s->listener_registered = 1;
+  return 0;
+}
+
+static void ca_unregister_device_alive_listener(moon_cpal_ca_stream_t *s) {
+  if (s == NULL || s->listener_registered == 0 || s->device_id == kAudioObjectUnknown) {
+    return;
+  }
+  AudioObjectPropertyAddress addr = {kAudioDevicePropertyDeviceIsAlive,
+                                     kAudioObjectPropertyScopeGlobal,
+                                     kAudioObjectPropertyElementMain};
+  (void)AudioObjectRemovePropertyListener(s->device_id, &addr, ca_device_alive_listener, s);
+  s->listener_registered = 0;
 }
 
 static void ca_fill_output_buffer(moon_cpal_ca_stream_t *s,
@@ -1306,7 +1355,10 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 0;
+  s->device_id = (AudioDeviceID)device_id;
   s->running = 0;
+  s->listener_registered = 0;
+  s->invalidated_sent = 0;
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = sample_rate;
@@ -1330,6 +1382,14 @@ int32_t moon_cpal_ca_stream_build_output(uint32_t device_id,
   }
 
   st = ca_setup_queue_device(s->queue, device_id);
+  if (st != 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return st;
+  }
+  st = ca_register_device_alive_listener(s);
   if (st != 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
@@ -1419,7 +1479,10 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
   }
   memset(s, 0, sizeof(*s));
   s->is_input = 1;
+  s->device_id = (AudioDeviceID)device_id;
   s->running = 0;
+  s->listener_registered = 0;
+  s->invalidated_sent = 0;
   s->sample_format_tag = sample_format_tag;
   s->channels = channels;
   s->sample_rate = sample_rate;
@@ -1443,6 +1506,14 @@ int32_t moon_cpal_ca_stream_build_input(uint32_t device_id,
   }
 
   st = ca_setup_queue_device(s->queue, device_id);
+  if (st != 0) {
+    moonbit_decref(data_callback);
+    moonbit_decref(error_callback);
+    AudioQueueDispose(s->queue, true);
+    free(s);
+    return st;
+  }
+  st = ca_register_device_alive_listener(s);
   if (st != 0) {
     moonbit_decref(data_callback);
     moonbit_decref(error_callback);
@@ -1524,6 +1595,7 @@ int32_t moon_cpal_ca_stream_destroy(uint64_t handle) {
   if (s == NULL) {
     return 0;
   }
+  ca_unregister_device_alive_listener(s);
   if (s->queue != NULL) {
     AudioQueueStop(s->queue, true);
     AudioQueueDispose(s->queue, true);

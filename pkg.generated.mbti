@@ -13,9 +13,13 @@ pub fn all_hosts() -> Array[@core.HostId]
 
 pub fn available_hosts() -> Array[@core.HostId]
 
+pub fn common_sample_rates() -> Array[Int]
+
 pub fn default_host() -> @spec.Host
 
 pub fn host_from_id(@core.HostId) -> @spec.Host raise @core.HostUnavailable
+
+pub fn[A : @core.Sample, B : @core.Sample] sample_cast(A) -> B
 
 pub fn try_host_from_id(@core.HostId) -> @spec.Host?
 

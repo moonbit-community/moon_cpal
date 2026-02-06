@@ -128,6 +128,7 @@ fn call_stream_error_callback(
     2 => "AudioQueueAllocateBuffer"
     3 => "AudioQueueStart"
     4 => "AudioQueuePause"
+    5 => "AudioObjectPropertyListener"
     _ => "CoreAudioStream"
   }
   let kind = osstatus_kind(status)

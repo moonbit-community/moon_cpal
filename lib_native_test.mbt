@@ -26,3 +26,19 @@ test "root API routes to spec platform dispatch" {
     inspect(true, content="true")
   }
 }
+
+///|
+test "root API exports sample_cast helper" {
+  let zero_u16 : UInt16 = Sample::equilibrium()
+  let z : Float = sample_cast(zero_u16)
+  inspect(z, content="0")
+  let a : Int16 = sample_cast(0.5)
+  inspect(a.to_int() > 0, content="true")
+}
+
+///|
+test "root API exports common_sample_rates table" {
+  let rs = common_sample_rates()
+  inspect(rs.length() > 0, content="true")
+  inspect(rs.contains(44_100), content="true")
+}

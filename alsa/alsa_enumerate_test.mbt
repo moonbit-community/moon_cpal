@@ -82,3 +82,47 @@ test "alsa: name + description fields (best-effort)" {
     @core.DeviceDirection::Unknown => inspect(true, content="true")
   }
 }
+
+///|
+fn has_prefix(s : String, p : String) -> Bool {
+  if s.length() < p.length() {
+    return false
+  }
+  let mut i = 0
+  while i < p.length() {
+    if s.code_unit_at(i) != p.code_unit_at(i) {
+      return false
+    }
+    i = i + 1
+  }
+  true
+}
+
+///|
+test "alsa: physical hw/plughw ids come in pairs (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  let h = default_host()
+  let ds = h.devices()
+  let ids : Array[String] = []
+  for d in ds {
+    ids.push(d.id)
+  }
+  let mut hw_count = 0
+  let mut plughw_count = 0
+  for id in ids {
+    if has_prefix(id, "hw:CARD=") {
+      hw_count = hw_count + 1
+    }
+    if has_prefix(id, "plughw:CARD=") {
+      plughw_count = plughw_count + 1
+    }
+  }
+  if hw_count == 0 {
+    inspect(true, content="true")
+    return
+  }
+  inspect(plughw_count > 0, content="true")
+}

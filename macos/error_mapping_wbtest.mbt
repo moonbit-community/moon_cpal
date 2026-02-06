@@ -42,6 +42,8 @@ test "coreaudio OSStatus kind + stream error mapping (unit)" {
   inspect(slot[0], content="BufferUnderrun")
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, -66671)
   inspect(slot[0], content="StreamInvalidated")
+  call_stream_error_callback(fn(e) { slot[0] = e }, 5, -66671)
+  inspect(slot[0], content="StreamInvalidated")
   call_stream_error_callback(fn(e) { slot[0] = e }, 1, -66680)
   inspect(slot[0], content="DeviceNotAvailable")
 }

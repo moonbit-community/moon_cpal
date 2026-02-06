@@ -191,3 +191,15 @@ pub fn try_host_from_id(id : HostId) -> Host? {
 pub fn all_hosts() -> Array[HostId] {
   @spec.all_hosts()
 }
+
+///|
+/// Re-export of upstream-like sample conversion helper.
+pub fn[A : Sample, B : Sample] sample_cast(x : A) -> B {
+  @core.sample_cast(x)
+}
+
+///|
+/// Re-export of CPAL common sample rates table.
+pub fn common_sample_rates() -> Array[SampleRate] {
+  @core.common_sample_rates()
+}
