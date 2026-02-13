@@ -140,7 +140,7 @@ fn main {
           it => it
         }
         print_supported_ranges("output", ranges)
-        print_default_config("output", fn() { d.default_output_config() })
+        print_default_config("output", () => d.default_output_config())
       }
     }
     match in_dev {
@@ -181,7 +181,7 @@ fn main {
           it => it
         }
         print_supported_ranges("input", ranges)
-        print_default_config("input", fn() { d.default_input_config() })
+        print_default_config("input", () => d.default_input_config())
       }
     }
   }
