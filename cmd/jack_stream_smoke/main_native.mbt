@@ -121,7 +121,6 @@ fn main {
           panic()
         }
       }
-
     }
   }
 

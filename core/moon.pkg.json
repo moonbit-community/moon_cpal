@@ -1,9 +1,0 @@
-{
-  "import": [
-    "moonbitlang/core/bigint"
-  ],
-  "native-stub": [
-    "os_stub.c",
-    "sleep_stub.c"
-  ]
-}

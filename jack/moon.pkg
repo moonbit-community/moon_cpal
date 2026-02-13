@@ -1,0 +1,21 @@
+import {
+  "Milky2018/moon_cpal/core",
+}
+
+options(
+  link: {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -ljack",
+    },
+  },
+  "native-stub": [ "jack_stub.c", "jack_stream.c" ],
+  targets: {
+    "error_mapping_wbtest.mbt": [ "native" ],
+    "ffi_native.mbt": [ "native" ],
+    "host.mbt": [ "native" ],
+    "stream_callback_bridge.mbt": [ "native" ],
+    "stream_native.mbt": [ "native" ],
+    "stream_types.mbt": [ "native" ],
+  },
+)

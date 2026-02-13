@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/bigint",
+}
+
+options(
+  "native-stub": [ "os_stub.c", "sleep_stub.c" ],
+)

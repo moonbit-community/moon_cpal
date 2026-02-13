@@ -1,0 +1,9 @@
+import {
+  "Milky2018/moon_cpal/core",
+  "Milky2018/moon_cpal/spec",
+  "Milky2018/moon_cpal/traits",
+}
+
+options(
+  targets: { },
+)

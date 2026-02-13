@@ -1,0 +1,18 @@
+import {
+  "Milky2018/moon_cpal/macos",
+  "Milky2018/moon_cpal",
+}
+
+options(
+  is_main: true,
+  link: {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-framework CoreAudio -framework CoreFoundation -framework AudioToolbox",
+    },
+  },
+  targets: {
+    "main_native.mbt": [ "native" ],
+    "main_stub.mbt": [ "not", "native" ],
+  },
+)

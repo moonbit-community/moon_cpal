@@ -1,0 +1,19 @@
+import {
+  "Milky2018/moon_cpal/core",
+}
+
+options(
+  link: {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -lasound",
+    },
+  },
+  "native-stub": [ "alsa_stub.c", "alsa_stream.c" ],
+  targets: {
+    "ffi_native.mbt": [ "native" ],
+    "stream_callback_bridge.mbt": [ "native" ],
+    "stream_lifecycle_test.mbt": [ "native" ],
+    "stream_native.mbt": [ "native" ],
+  },
+)
