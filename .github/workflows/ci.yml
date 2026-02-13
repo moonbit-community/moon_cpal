@@ -1,14 +1,19 @@
 name: CI
 
 on:
+  # Run on every branch push so feature branches get CI without requiring a PR.
   push:
-    branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test-wasm:
-    name: moon test (wasm)
+  test-ubuntu-native:
+    name: native (ubuntu, ALSA loopback)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
@@ -17,12 +22,56 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
-      - name: Run tests
-        run: moon test --target wasm
+      - name: Install ALSA deps + loopback
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends alsa-utils libasound2-dev jackd2 libjack-jackd2-dev
+          # GitHub's Ubuntu runner kernel may not ship with the snd-aloop module.
+          # Instead, route "default" PCM to the libasound "null" plugin so our smoke test
+          # does not depend on real hardware or kernel modules.
+          cat > "$HOME/.asoundrc" <<'EOF'
+          pcm.!default {
+            type null
+          }
+          EOF
+          aplay -l || true
+          arecord -l || true
+      - name: Build cc wrapper (Windows-safe)
+        shell: bash
+        run: |
+          # On Windows runners, `moon` can't reliably execute `.sh` wrappers directly.
+          # We compile `scripts/moon_cc.c` into `scripts/moon_cc.sh` so the path stays stable.
+          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
+          chmod +x scripts/moon_cc.sh
+      - name: Start JACK dummy server (for unit tests)
+        shell: bash
+        run: |
+          # Keep a dummy JACK server running so unit tests can query JACK server config.
+          jackd -d dummy -r 48000 -p 256 &
+          sleep 2
+          pgrep -f "jackd .*dummy" >/dev/null
+      - name: Build all packages (native)
+        run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: bash
+        run: |
+          cd ci/downstream_smoke
+          moon check --target native
+          moon build --target native
+      - name: Run unit tests
+        run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        run: moon run --target native cmd/enumerate -q
+      - name: Run ALSA smoke (real I/O)
+        run: moon run --target native cmd/alsa_stream_smoke -q
+      - name: Run JACK smoke (dummy server)
+        run: moon run --target native cmd/jack_stream_smoke -q
 
   test-macos-native:
-    name: moon test (macos native)
+    name: native (macos, CoreAudio)
     runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Install MoonBit
@@ -31,5 +80,78 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
-      - name: Run tests
+      - name: Build cc wrapper (Windows-safe)
+        shell: bash
+        run: |
+          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
+          chmod +x scripts/moon_cc.sh
+      - name: Build all packages (native)
+        run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: bash
+        run: |
+          cd ci/downstream_smoke
+          moon check --target native
+          moon build --target native
+      - name: Run unit tests
         run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        run: moon run --target native cmd/enumerate -q
+      - name: Run CoreAudio smoke (real I/O)
+        run: moon run --target native cmd/macos_stream_smoke -q
+
+  test-windows-native:
+    name: native (windows, WASAPI)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MoonBit
+        shell: pwsh
+        run: |
+          iwr -useb https://cli.moonbitlang.com/install/powershell.ps1 | iex
+          $mb = "$env:USERPROFILE\.moon\bin"
+          $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $env:PATH = "$mb;$env:PATH"
+          moon version
+      - name: Build cc wrapper (Windows-safe)
+        shell: pwsh
+        run: |
+          $cc = "C:\mingw64\bin\cc.exe"
+          if (-not (Test-Path $cc)) { $cc = "cc.exe" }
+          & $cc -O2 scripts\moon_cc.c -o scripts\moon_cc.sh
+      - name: Build all packages (native)
+        shell: pwsh
+        run: moon build --target native
+      - name: Downstream dependency smoke
+        shell: pwsh
+        run: |
+          Set-Location ci/downstream_smoke
+          moon check --target native
+          moon build --target native
+      - name: Install virtual audio device (VB-CABLE)
+        shell: pwsh
+        run: |
+          $pkgs = @("vbcable", "vb-cable", "vb-audio-cable")
+          $ok = $false
+          foreach ($p in $pkgs) {
+            choco install $p -y --no-progress
+            if ($LASTEXITCODE -eq 0) {
+              $ok = $true
+              break
+            }
+            Write-Host "choco install $p failed (exit=$LASTEXITCODE); trying next..."
+          }
+          if (-not $ok) {
+            Write-Host "Warning: couldn't install a virtual audio device via chocolatey; continuing with host devices."
+          }
+          exit 0
+      - name: Run unit tests
+        shell: pwsh
+        run: moon test --target native
+      - name: Enumerate hosts/devices (non-audio)
+        shell: pwsh
+        run: moon run --target native cmd/enumerate -q
+      - name: Run WASAPI smoke (real I/O)
+        shell: pwsh
+        run: moon run --target native cmd/wasapi_stream_smoke -q

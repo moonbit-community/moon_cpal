@@ -1,8 +1,9 @@
 {
   "is_main": true,
-  "import": ["zhengyu/moon_cpal/macos", "zhengyu/moon_cpal"],
+  "import": ["Milky2018/moon_cpal/macos"],
   "link": {
     "native": {
+      "cc": "./scripts/moon_cc.sh",
       "cc-link-flags": "-framework CoreAudio -framework CoreFoundation -framework AudioToolbox"
     }
   }

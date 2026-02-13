@@ -1,0 +1,85 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Milky2018/moon_cpal/wasapi"
+
+import {
+  "Milky2018/moon_cpal/core",
+}
+
+// Values
+pub fn data_flow_tag(String) -> Int?
+
+pub fn default_config_ex_u32(String, Bool) -> (UInt, UInt, UInt, UInt, UInt)?
+
+pub fn default_config_u32(String, Bool) -> (UInt, UInt, UInt)?
+
+pub fn default_device_id_utf8(Bool) -> String?
+
+pub fn default_host() -> Host
+
+pub fn device_form_factor_u32(String) -> UInt?
+
+pub fn device_name_utf8(String) -> String?
+
+pub fn device_property_utf8(String, Int) -> String?
+
+pub fn devices_utf8() -> Bytes
+
+pub fn supported_configs_u32(String, Bool) -> (Int, FixedArray[UInt])?
+
+// Errors
+
+// Types and methods
+pub struct Device {
+  id : String
+}
+pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_loopback_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream(Self, @core.StreamConfig, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
+pub fn Device::id(Self) -> @core.DeviceId
+pub fn Device::name(Self) -> String
+pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub fn Device::supports_input(Self) -> Bool
+pub fn Device::supports_output(Self) -> Bool
+pub impl Eq for Device
+pub impl Show for Device
+
+pub struct Host {
+  _unit : Unit
+}
+pub fn Host::default_input_device(Self) -> Device?
+pub fn Host::default_output_device(Self) -> Device?
+pub fn Host::devices(Self) -> Array[Device]
+pub fn Host::is_available(Self) -> Bool
+pub impl Eq for Host
+pub impl Show for Host
+
+pub struct Stream {
+  kind : StreamKind
+  handle : UInt64
+  owner : StreamOwner
+}
+pub fn Stream::close(Self) -> Unit
+pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
+pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
+pub impl Eq for Stream
+pub impl Show for Stream
+
+pub enum StreamKind {
+  Output
+  Input
+}
+pub impl Eq for StreamKind
+pub impl Show for StreamKind
+
+type StreamOwner
+
+// Type aliases
+
+// Traits
+

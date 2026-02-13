@@ -1,9 +1,8 @@
 {
   "import": [
-    "moonbitlang/core/bigint"
+    "Milky2018/moon_cpal/core",
+    "Milky2018/moon_cpal/spec",
+    "Milky2018/moon_cpal/traits"
   ],
-  "targets": {
-    "cpal_available_hosts_native.mbt": ["native"],
-    "cpal_available_hosts_stub.mbt": ["not", "native"]
-  }
+  "targets": {}
 }

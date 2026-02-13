@@ -1,0 +1,63 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Milky2018/moon_cpal/internal/test_host"
+
+import {
+  "Milky2018/moon_cpal/core",
+}
+
+// Values
+pub fn default_host() -> Host
+
+// Errors
+
+// Types and methods
+pub struct Device {
+  _unit : Unit
+}
+pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream(Self, @core.StreamConfig, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::default_input_config(Self) -> @core.SupportedStreamConfig
+pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig
+pub fn Device::description(Self) -> @core.DeviceDescription
+pub fn Device::id(Self) -> @core.DeviceId
+pub fn Device::name(Self) -> String
+pub fn Device::new() -> Self
+pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub impl Eq for Device
+pub impl Show for Device
+
+pub struct Host {
+  _unit : Unit
+}
+pub fn Host::default_input_device(Self) -> Device?
+pub fn Host::default_output_device(Self) -> Device?
+pub fn Host::devices(Self) -> Array[Device]
+pub impl Eq for Host
+pub impl Show for Host
+
+pub struct Stream {
+  kind : StreamKind
+  owner : StreamOwner
+}
+pub fn Stream::close(Self) -> Unit
+pub fn Stream::inject_error(Self, Int, Int, Int) -> Unit
+pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
+pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
+pub impl Show for Stream
+
+pub enum StreamKind {
+  Input
+  Output
+}
+pub impl Eq for StreamKind
+pub impl Show for StreamKind
+
+type StreamOwner
+
+// Type aliases
+
+// Traits
+

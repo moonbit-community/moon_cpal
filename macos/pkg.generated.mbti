@@ -1,28 +1,40 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/macos"
+package "Milky2018/moon_cpal/macos"
 
 import {
-  "zhengyu/moon_cpal",
+  "Milky2018/moon_cpal/core",
 }
 
 // Values
 pub fn default_host() -> Host
 
-pub fn default_input_config(UInt) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+pub fn default_input_config(UInt) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
 
-pub fn default_input_device_id() -> UInt? raise CoreAudioError
+pub fn default_input_device_id() -> UInt?
 
-pub fn default_output_config(UInt) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
+pub fn default_output_config(UInt) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
 
-pub fn default_output_device_id() -> UInt? raise CoreAudioError
+pub fn default_output_device_id() -> UInt?
 
 pub fn device_ids() -> Array[UInt] raise CoreAudioError
 
+pub fn device_interface_type_tag(UInt) -> Int
+
+pub fn device_is_aggregate(UInt) -> Bool
+
+pub fn device_manufacturer(UInt) -> String?
+
 pub fn device_name(UInt) -> String raise CoreAudioError
 
-pub fn supported_input_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+pub fn device_transport_type_u32(UInt) -> UInt
 
-pub fn supported_output_configs(UInt) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+pub fn device_uid(UInt) -> String?
+
+pub fn supported_configs_error_from_osstatus(String, Int) -> @core.SupportedStreamConfigsError
+
+pub fn supported_input_configs(UInt) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
+
+pub fn supported_output_configs(UInt) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
 
 // Errors
 pub suberror CoreAudioError {
@@ -34,22 +46,27 @@ pub suberror CoreAudioError {
 pub struct Device {
   id : UInt
 }
-pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (@moon_cpal.Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
-pub fn Device::build_output_stream(Self, @moon_cpal.StreamConfig, (@moon_cpal.Data, @moon_cpal.OutputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
-pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
-pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
-pub fn Device::id(Self) -> UInt
+pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream(Self, @core.StreamConfig, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::description(Self) -> @core.DeviceDescription raise CoreAudioError
+pub fn Device::id(Self) -> @core.DeviceId
 pub fn Device::name(Self) -> String raise CoreAudioError
-pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
-pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise CoreAudioError
+pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
+pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
+pub fn Device::supports_input(Self) -> Bool
+pub fn Device::supports_output(Self) -> Bool
 pub impl Eq for Device
 pub impl Show for Device
 
 pub struct Host {
   _unit : Unit
 }
-pub fn Host::default_input_device(Self) -> Device? raise CoreAudioError
-pub fn Host::default_output_device(Self) -> Device? raise CoreAudioError
+pub fn Host::default_input_device(Self) -> Device?
+pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::devices(Self) -> Array[Device] raise CoreAudioError
 pub impl Eq for Host
 pub impl Show for Host
@@ -60,8 +77,8 @@ pub struct Stream {
   owner : StreamOwner
 }
 pub fn Stream::close(Self) -> Unit
-pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
-pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
+pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
+pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
 pub impl Eq for Stream
 pub impl Show for Stream
 

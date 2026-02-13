@@ -1,4 +1,9 @@
 {
-  "import": ["zhengyu/moon_cpal"]
+  "import": ["Milky2018/moon_cpal/core", "Milky2018/moon_cpal/platform"],
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -lasound -ljack -framework CoreAudio -framework CoreFoundation -framework AudioToolbox -lole32 -luuid -lmmdevapi -lavrt"
+    }
+  }
 }
-

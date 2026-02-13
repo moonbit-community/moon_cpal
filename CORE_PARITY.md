@@ -55,6 +55,9 @@ From `cpal-reference/src/lib.rs`:
 - `Data` (raw dynamically-typed audio buffer) and host-facing stream build APIs.
 - Sample traits (`Sample`, `FromSample`, `SizedSample`) and `I24`/`U24` sample newtypes.
 
+Note: these items are now implemented in the MoonBit port (see `cpal_data.mbt` and `cpal_samples.mbt`),
+but remain out-of-scope for the *deterministic core slice* tracked by this checklist.
+
 ## Known compatibility deltas
 
 - Integer widths differ: upstream uses `u16`/`u32` for channel/rate/frame counts; MoonBit uses `Int`.

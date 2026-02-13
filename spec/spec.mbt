@@ -1,3 +1,17 @@
+// Copyright 2025 International Digital Economy Academy
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 ///|
 /// CPAL API spec (declaration-only).
 ///
@@ -29,45 +43,103 @@ pub fn default_host() -> Host {
 
 ///|
 #declaration_only
-pub fn host_from_id(
-  id : @moon_cpal.HostId,
-) -> Host raise @moon_cpal.HostUnavailable {
+pub fn available_hosts() -> Array[@core.HostId] {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Host::id(self : Host) -> @moon_cpal.HostId {
+pub fn all_hosts() -> Array[@core.HostId] {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Host::devices(
+pub fn host_from_id(id : @core.HostId) -> Host raise @core.HostUnavailable {
+  ...
+}
+
+///|
+#declaration_only
+pub fn try_host_from_id(id : @core.HostId) -> Host? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::id(self : Host) -> @core.HostId {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::devices(self : Host) -> Iter[Device] raise @core.DevicesError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::device_by_id(self : Host, id : @core.DeviceId) -> Device? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Host::input_devices(
   self : Host,
-) -> Array[Device] raise @moon_cpal.DevicesError {
+) -> Iter[Device] raise @core.DevicesError {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Host::default_output_device(
+pub fn Host::output_devices(
   self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+) -> Iter[Device] raise @core.DevicesError {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Host::default_input_device(
-  self : Host,
-) -> Device? raise @moon_cpal.DevicesError {
+pub fn Host::default_output_device(self : Host) -> Device? {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
+pub fn Host::default_input_device(self : Host) -> Device? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::name(self : Device) -> String raise @core.DeviceNameError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::id(self : Device) -> @core.DeviceId raise @core.DeviceIdError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::description(
+  self : Device,
+) -> @core.DeviceDescription raise @core.DeviceNameError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::supports_input(self : Device) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::supports_output(self : Device) -> Bool {
   ...
 }
 
@@ -75,7 +147,7 @@ pub fn Device::name(self : Device) -> String raise @moon_cpal.DeviceNameError {
 #declaration_only
 pub fn Device::supported_output_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   ...
 }
 
@@ -83,7 +155,7 @@ pub fn Device::supported_output_configs(
 #declaration_only
 pub fn Device::supported_input_configs(
   self : Device,
-) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError {
+) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
   ...
 }
 
@@ -91,7 +163,7 @@ pub fn Device::supported_input_configs(
 #declaration_only
 pub fn Device::default_output_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   ...
 }
 
@@ -99,7 +171,7 @@ pub fn Device::default_output_config(
 #declaration_only
 pub fn Device::default_input_config(
   self : Device,
-) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError {
+) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   ...
 }
 
@@ -107,11 +179,72 @@ pub fn Device::default_input_config(
 #declaration_only
 pub fn Device::build_output_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Data, @moon_cpal.OutputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_raw(
+  self : Device,
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (Data, @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_f32(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Float], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_i16(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Int16], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_u16(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[UInt16], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_output_stream_u8(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Byte], @core.OutputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   ...
 }
 
@@ -119,29 +252,96 @@ pub fn Device::build_output_stream(
 #declaration_only
 pub fn Device::build_input_stream(
   self : Device,
-  config : @moon_cpal.StreamConfig,
-  data_callback : (Data, @moon_cpal.InputCallbackInfo) -> Unit,
-  error_callback : (@moon_cpal.StreamError) -> Unit,
-  timeout : @moon_cpal.Duration?,
-) -> Stream raise @moon_cpal.BuildStreamError {
+  config : @core.StreamConfig,
+  data_callback : (Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Stream::play(self : Stream) -> Unit raise @moon_cpal.PlayStreamError {
+pub fn Device::build_input_stream_raw(
+  self : Device,
+  config : @core.StreamConfig,
+  sample_format : @core.SampleFormat,
+  data_callback : (Data, @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Stream::pause(self : Stream) -> Unit raise @moon_cpal.PauseStreamError {
+pub fn Device::build_input_stream_f32(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Float], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Data::sample_format(self : Data) -> @moon_cpal.SampleFormat {
+pub fn Device::build_input_stream_i16(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Int16], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_u16(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[UInt16], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Device::build_input_stream_u8(
+  self : Device,
+  config : @core.StreamConfig,
+  data_callback : (Array[Byte], @core.InputCallbackInfo) -> Unit,
+  error_callback : (@core.StreamError) -> Unit,
+  timeout : @core.Duration?,
+) -> Stream raise @core.BuildStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Stream::play(self : Stream) -> Unit raise @core.PlayStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Stream::pause(self : Stream) -> Unit raise @core.PauseStreamError {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Stream::close(self : Stream) -> Unit {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::sample_format(self : Data) -> @core.SampleFormat {
   ...
 }
 
@@ -153,6 +353,60 @@ pub fn Data::len(self : Data) -> Int {
 
 ///|
 #declaration_only
-pub fn Data::bytes(self : Data) -> Bytes {
+pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_u16(self : Data) -> Array[UInt16]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_i16(self : Data) -> Array[Int16]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::clear(self : Data) -> Unit {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
   ...
 }

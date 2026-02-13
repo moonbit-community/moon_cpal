@@ -1,0 +1,10 @@
+{
+  "import": ["Milky2018/moon_cpal/core", "Milky2018/moon_cpal/spec"],
+  "targets": { "traits_test.mbt": ["native"] },
+  "link": {
+    "native": {
+      "cc": "./scripts/moon_cc.sh",
+      "cc-link-flags": "-pthread -lasound -ljack -framework CoreAudio -framework CoreFoundation -framework AudioToolbox -lole32 -luuid -lmmdevapi -lavrt"
+    }
+  }
+}

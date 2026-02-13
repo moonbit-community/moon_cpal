@@ -1,55 +1,89 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "zhengyu/moon_cpal/spec"
+package "Milky2018/moon_cpal/spec"
 
 import {
-  "zhengyu/moon_cpal",
+  "Milky2018/moon_cpal/core",
+  "Milky2018/moon_cpal/platform",
 }
 
 // Values
+pub fn all_hosts() -> Array[@core.HostId]
+
+pub fn available_hosts() -> Array[@core.HostId]
+
 pub fn default_host() -> Host
 
-pub fn host_from_id(@moon_cpal.HostId) -> Host raise @moon_cpal.HostUnavailable
+pub fn host_from_id(@core.HostId) -> Host raise @core.HostUnavailable
+
+pub fn try_host_from_id(@core.HostId) -> Host?
 
 // Errors
 
 // Types and methods
 pub struct Data {
-  _unit : Unit
+  inner : @core.Data
 }
-pub fn Data::bytes(Self) -> Bytes
+pub fn Data::bytes(Self) -> FixedArray[Byte]
+pub fn Data::clear(Self) -> Unit
 pub fn Data::len(Self) -> Int
-pub fn Data::sample_format(Self) -> @moon_cpal.SampleFormat
+pub fn Data::sample_format(Self) -> @core.SampleFormat
+pub fn Data::try_as_f32(Self) -> Array[Float]?
+pub fn Data::try_as_i16(Self) -> Array[Int16]?
+pub fn Data::try_as_u16(Self) -> Array[UInt16]?
+pub fn Data::try_as_u8(Self) -> Array[Byte]?
+pub fn Data::write_f32(Self, Array[Float]) -> Bool
+pub fn Data::write_i16(Self, Array[Int16]) -> Bool
+pub fn Data::write_u16(Self, Array[UInt16]) -> Bool
+pub fn Data::write_u8(Self, Array[Byte]) -> Bool
 pub impl Eq for Data
 pub impl Show for Data
 
 pub struct Device {
-  _unit : Unit
+  inner : @platform.Device
 }
-pub fn Device::build_input_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.InputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
-pub fn Device::build_output_stream(Self, @moon_cpal.StreamConfig, (Data, @moon_cpal.OutputCallbackInfo) -> Unit, (@moon_cpal.StreamError) -> Unit, @moon_cpal.Duration?) -> Stream raise @moon_cpal.BuildStreamError
-pub fn Device::default_input_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
-pub fn Device::default_output_config(Self) -> @moon_cpal.SupportedStreamConfig raise @moon_cpal.DefaultStreamConfigError
-pub fn Device::name(Self) -> String raise @moon_cpal.DeviceNameError
-pub fn Device::supported_input_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
-pub fn Device::supported_output_configs(Self) -> Array[@moon_cpal.SupportedStreamConfigRange] raise @moon_cpal.SupportedStreamConfigsError
+pub fn Device::build_input_stream(Self, @core.StreamConfig, (Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_input_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream(Self, @core.StreamConfig, (Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::build_output_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
+pub fn Device::default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+pub fn Device::description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
+pub fn Device::id(Self) -> @core.DeviceId raise @core.DeviceIdError
+pub fn Device::name(Self) -> String raise @core.DeviceNameError
+pub fn Device::supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+pub fn Device::supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+pub fn Device::supports_input(Self) -> Bool
+pub fn Device::supports_output(Self) -> Bool
 pub impl Eq for Device
 pub impl Show for Device
 
 pub struct Host {
-  _unit : Unit
+  inner : @platform.Host
 }
-pub fn Host::default_input_device(Self) -> Device? raise @moon_cpal.DevicesError
-pub fn Host::default_output_device(Self) -> Device? raise @moon_cpal.DevicesError
-pub fn Host::devices(Self) -> Array[Device] raise @moon_cpal.DevicesError
-pub fn Host::id(Self) -> @moon_cpal.HostId
+pub fn Host::default_input_device(Self) -> Device?
+pub fn Host::default_output_device(Self) -> Device?
+pub fn Host::device_by_id(Self, @core.DeviceId) -> Device?
+pub fn Host::devices(Self) -> Iter[Device] raise @core.DevicesError
+pub fn Host::id(Self) -> @core.HostId
+pub fn Host::input_devices(Self) -> Iter[Device] raise @core.DevicesError
+pub fn Host::output_devices(Self) -> Iter[Device] raise @core.DevicesError
 pub impl Eq for Host
 pub impl Show for Host
 
 pub struct Stream {
-  _unit : Unit
+  inner : @platform.Stream
 }
-pub fn Stream::pause(Self) -> Unit raise @moon_cpal.PauseStreamError
-pub fn Stream::play(Self) -> Unit raise @moon_cpal.PlayStreamError
+pub fn Stream::close(Self) -> Unit
+pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
+pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
 pub impl Eq for Stream
 pub impl Show for Stream
 
