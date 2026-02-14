@@ -27,6 +27,27 @@ pub fn Duration::from_secs(secs : UInt64) -> Duration {
 }
 
 ///|
+pub fn Duration::new(secs : UInt64, nanos : Int) -> Duration {
+  if nanos < 0 {
+    panic()
+  }
+  let mut secs = secs
+  let mut nanos = nanos
+  let billion = 1_000_000_000
+  if nanos >= billion {
+    let carry = nanos / billion
+    let carry_u64 = carry.to_uint64()
+    let new_secs = secs + carry_u64
+    if new_secs < secs {
+      panic()
+    }
+    secs = new_secs
+    nanos = nanos - carry * billion
+  }
+  { secs, nanos }
+}
+
+///|
 fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
   let bsecs = @bigint.BigInt::from_uint64(self.secs)
   let bnanos = @bigint.BigInt::from_int(self.nanos)

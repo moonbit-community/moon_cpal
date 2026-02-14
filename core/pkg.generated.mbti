@@ -324,6 +324,7 @@ pub struct Duration {
   nanos : Int
 }
 pub fn Duration::from_secs(UInt64) -> Self
+pub fn Duration::new(UInt64, Int) -> Self
 pub impl Eq for Duration
 pub impl Show for Duration
 

@@ -113,6 +113,12 @@ test "stream_instant duration_since (ported from upstream cpal/src/lib.rs)" {
 }
 
 ///|
+test "duration constructor supports nanos" {
+  inspect(Duration::new(2UL, 123), content="{secs: 2, nanos: 123}")
+  inspect(Duration::new(2UL, 1_000_000_123), content="{secs: 3, nanos: 123}")
+}
+
+///|
 test "sample_format properties (ported from upstream cpal/src/samples_formats.rs)" {
   let formats : Array[SampleFormat] = [
     I8,
