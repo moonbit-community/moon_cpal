@@ -3,12 +3,6 @@ import {
 }
 
 options(
-  link: {
-    "native": {
-      "cc": "./scripts/moon_cc.sh",
-      "cc-link-flags": "-pthread -lasound",
-    },
-  },
   "native-stub": [ "alsa_stub.c", "alsa_stream.c" ],
   targets: {
     "ffi_native.mbt": [ "native" ],

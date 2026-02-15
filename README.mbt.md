@@ -34,11 +34,11 @@ Pinned upstream reference: see `UPSTREAM.md`.
 
 Note: `moon.mod.json` sets `preferred-target: native`. Non-native targets are not supported.
 
-## Native Link Strategy (`moon_cc`)
+## Native Link Strategy (`build.js`)
 
-- The project uses `scripts/moon_cc.sh` (and CI-built `scripts/moon_cc.c`) as the native C/C++ wrapper.
-- Reason: current Moon package metadata cannot express OS-conditional native linker flags for one package graph (`-framework` vs `-lasound/-ljack` vs `-lole32/...`) while this module keeps all native backends available in one API surface.
-- The wrapper strips non-target linker flags and injects a stub `main` only for Moon's per-package library link checks.
+- The project uses Moon's prebuild hook (`--moonbit-unstable-prebuild`) with `build.js` to emit per-OS `link_configs`.
+- This mirrors the `tonyfettes/raylib` style: keep `moon.pkg` files free of hard-coded cross-platform linker flag unions and let `build.js` choose the active platform link set.
+- Linux/macOS/Windows now receive only their own native link requirements.
 - Downstream dependency smoke (`ci/downstream_smoke`) validates that `Milky2018/moon_cpal` compiles as a dependency across Linux/macOS/Windows with this strategy.
 
 ## Run unit tests (native)

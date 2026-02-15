@@ -3,9 +3,6 @@ import {
 }
 
 options(
-  link: {
-    "native": { "cc": "./scripts/moon_cc.sh", "cc-link-flags": "-pthread" },
-  },
   "native-stub": [ "null_stream.c" ],
   targets: {
     "host_test.mbt": [ "native" ],

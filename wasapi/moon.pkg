@@ -3,12 +3,6 @@ import {
 }
 
 options(
-  link: {
-    "native": {
-      "cc": "./scripts/moon_cc.sh",
-      "cc-link-flags": "-lole32 -luuid -lmmdevapi -lavrt",
-    },
-  },
   "native-stub": [ "wasapi_stub.c", "wasapi_stream.c", "wasapi_guids.c" ],
   targets: {
     "ffi_native.mbt": [ "native" ],

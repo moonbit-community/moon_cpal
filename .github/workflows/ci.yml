@@ -37,13 +37,6 @@ jobs:
           EOF
           aplay -l || true
           arecord -l || true
-      - name: Build cc wrapper (Windows-safe)
-        shell: bash
-        run: |
-          # On Windows runners, `moon` can't reliably execute `.sh` wrappers directly.
-          # We compile `scripts/moon_cc.c` into `scripts/moon_cc.sh` so the path stays stable.
-          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
-          chmod +x scripts/moon_cc.sh
       - name: Start JACK dummy server (for unit tests)
         shell: bash
         run: |
@@ -80,11 +73,6 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
-      - name: Build cc wrapper (Windows-safe)
-        shell: bash
-        run: |
-          cc -O2 scripts/moon_cc.c -o scripts/moon_cc.sh
-          chmod +x scripts/moon_cc.sh
       - name: Build all packages (native)
         run: moon build --target native
       - name: Downstream dependency smoke
@@ -114,12 +102,6 @@ jobs:
           $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           $env:PATH = "$mb;$env:PATH"
           moon version
-      - name: Build cc wrapper (Windows-safe)
-        shell: pwsh
-        run: |
-          $cc = "C:\mingw64\bin\cc.exe"
-          if (-not (Test-Path $cc)) { $cc = "cc.exe" }
-          & $cc -O2 scripts\moon_cc.c -o scripts\moon_cc.sh
       - name: Build all packages (native)
         shell: pwsh
         run: moon build --target native

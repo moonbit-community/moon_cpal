@@ -4,10 +4,4 @@ import {
 
 options(
   is_main: true,
-  link: {
-    "native": {
-      "cc": "./scripts/moon_cc.sh",
-      "cc-link-flags": "-framework CoreAudio -framework CoreFoundation -framework AudioToolbox",
-    },
-  },
 )
