@@ -598,6 +598,11 @@ pub fn Data::clear(self : Data) -> Unit {
 }
 
 ///|
+pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
+  @core.Data::write_i8(self.inner, samples)
+}
+
+///|
 pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
   @core.Data::write_u8(self.inner, samples)
 }
@@ -613,6 +618,41 @@ pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
 }
 
 ///|
+pub fn Data::write_u24(self : Data, samples : Array[@core.U24]) -> Bool {
+  @core.Data::write_u24(self.inner, samples)
+}
+
+///|
+pub fn Data::write_i24(self : Data, samples : Array[@core.I24]) -> Bool {
+  @core.Data::write_i24(self.inner, samples)
+}
+
+///|
+pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
+  @core.Data::write_u32(self.inner, samples)
+}
+
+///|
+pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
+  @core.Data::write_i32(self.inner, samples)
+}
+
+///|
 pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
   @core.Data::write_f32(self.inner, samples)
+}
+
+///|
+pub fn Data::write_u64(self : Data, samples : Array[UInt64]) -> Bool {
+  @core.Data::write_u64(self.inner, samples)
+}
+
+///|
+pub fn Data::write_i64(self : Data, samples : Array[Int64]) -> Bool {
+  @core.Data::write_i64(self.inner, samples)
+}
+
+///|
+pub fn Data::write_f64(self : Data, samples : Array[Double]) -> Bool {
+  @core.Data::write_f64(self.inner, samples)
 }

@@ -389,6 +389,12 @@ pub fn Data::clear(self : Data) -> Unit {
 
 ///|
 #declaration_only
+pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
   ...
 }
@@ -407,6 +413,48 @@ pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
 
 ///|
 #declaration_only
+pub fn Data::write_u24(self : Data, samples : Array[@core.U24]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_i24(self : Data, samples : Array[@core.I24]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
 pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_u64(self : Data, samples : Array[UInt64]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_i64(self : Data, samples : Array[Int64]) -> Bool {
+  ...
+}
+
+///|
+#declaration_only
+pub fn Data::write_f64(self : Data, samples : Array[Double]) -> Bool {
   ...
 }
