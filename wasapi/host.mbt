@@ -286,6 +286,21 @@ fn clamp_u32_to_frame_count(u : UInt) -> Int {
 }
 
 ///|
+fn wasapi_sample_format_from_tag(fmt_tag : UInt) -> @core.SampleFormat? {
+  match fmt_tag {
+    1 => Some(@core.SampleFormat::F32)
+    2 => Some(@core.SampleFormat::I16)
+    3 => Some(@core.SampleFormat::U16)
+    4 => Some(@core.SampleFormat::U8)
+    6 => Some(@core.SampleFormat::I24)
+    7 => Some(@core.SampleFormat::U24)
+    8 => Some(@core.SampleFormat::I32)
+    10 => Some(@core.SampleFormat::I64)
+    _ => None
+  }
+}
+
+///|
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
@@ -301,16 +316,9 @@ pub fn Device::supported_input_configs(
       match default_config_ex_u32(_self.id, true) {
         None => []
         Some((ch, sr, fmt_tag, bmin, bmax)) => {
-          let fmt = match fmt_tag {
-            1 => @core.SampleFormat::F32
-            2 => @core.SampleFormat::I16
-            3 => @core.SampleFormat::U16
-            4 => @core.SampleFormat::U8
-            6 => @core.SampleFormat::I24
-            7 => @core.SampleFormat::U24
-            8 => @core.SampleFormat::I32
-            10 => @core.SampleFormat::I64
-            _ => @core.SampleFormat::F32
+          let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+            Some(v) => v
+            None => return []
           }
           let buf = @core.SupportedBufferSize::Range(
             min=clamp_u32_to_frame_count(bmin),
@@ -338,16 +346,9 @@ pub fn Device::supported_input_configs(
         let fmt_tag = buf[off + 2]
         let bmin = buf[off + 3]
         let bmax = buf[off + 4]
-        let fmt = match fmt_tag {
-          1 => @core.SampleFormat::F32
-          2 => @core.SampleFormat::I16
-          3 => @core.SampleFormat::U16
-          4 => @core.SampleFormat::U8
-          6 => @core.SampleFormat::I24
-          7 => @core.SampleFormat::U24
-          8 => @core.SampleFormat::I32
-          10 => @core.SampleFormat::I64
-          _ => @core.SampleFormat::F32
+        let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+          Some(v) => v
+          None => continue
         }
         let b = @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
@@ -384,16 +385,9 @@ pub fn Device::supported_output_configs(
       match default_config_ex_u32(_self.id, false) {
         None => []
         Some((ch, sr, fmt_tag, bmin, bmax)) => {
-          let fmt = match fmt_tag {
-            1 => @core.SampleFormat::F32
-            2 => @core.SampleFormat::I16
-            3 => @core.SampleFormat::U16
-            4 => @core.SampleFormat::U8
-            6 => @core.SampleFormat::I24
-            7 => @core.SampleFormat::U24
-            8 => @core.SampleFormat::I32
-            10 => @core.SampleFormat::I64
-            _ => @core.SampleFormat::F32
+          let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+            Some(v) => v
+            None => return []
           }
           let buf = @core.SupportedBufferSize::Range(
             min=clamp_u32_to_frame_count(bmin),
@@ -421,16 +415,9 @@ pub fn Device::supported_output_configs(
         let fmt_tag = buf[off + 2]
         let bmin = buf[off + 3]
         let bmax = buf[off + 4]
-        let fmt = match fmt_tag {
-          1 => @core.SampleFormat::F32
-          2 => @core.SampleFormat::I16
-          3 => @core.SampleFormat::U16
-          4 => @core.SampleFormat::U8
-          6 => @core.SampleFormat::I24
-          7 => @core.SampleFormat::U24
-          8 => @core.SampleFormat::I32
-          10 => @core.SampleFormat::I64
-          _ => @core.SampleFormat::F32
+        let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+          Some(v) => v
+          None => continue
         }
         let b = @core.SupportedBufferSize::Range(
           min=clamp_u32_to_frame_count(bmin),
@@ -471,16 +458,12 @@ pub fn Device::default_input_config(
         "wasapi default_input_config: query failed",
       )
     Some((ch, sr, fmt_tag, bmin, bmax)) => {
-      let fmt = match fmt_tag {
-        1 => @core.SampleFormat::F32
-        2 => @core.SampleFormat::I16
-        3 => @core.SampleFormat::U16
-        4 => @core.SampleFormat::U8
-        6 => @core.SampleFormat::I24
-        7 => @core.SampleFormat::U24
-        8 => @core.SampleFormat::I32
-        10 => @core.SampleFormat::I64
-        _ => @core.SampleFormat::F32
+      let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+        Some(v) => v
+        None =>
+          raise @core.default_stream_config_error_backend_specific(
+            "wasapi default_input_config: unsupported format tag",
+          )
       }
       @core.SupportedStreamConfig::new(
         ch.reinterpret_as_int(),
@@ -515,16 +498,12 @@ pub fn Device::default_output_config(
         "wasapi default_output_config: query failed",
       )
     Some((ch, sr, fmt_tag, bmin, bmax)) => {
-      let fmt = match fmt_tag {
-        1 => @core.SampleFormat::F32
-        2 => @core.SampleFormat::I16
-        3 => @core.SampleFormat::U16
-        4 => @core.SampleFormat::U8
-        6 => @core.SampleFormat::I24
-        7 => @core.SampleFormat::U24
-        8 => @core.SampleFormat::I32
-        10 => @core.SampleFormat::I64
-        _ => @core.SampleFormat::F32
+      let fmt = match wasapi_sample_format_from_tag(fmt_tag) {
+        Some(v) => v
+        None =>
+          raise @core.default_stream_config_error_backend_specific(
+            "wasapi default_output_config: unsupported format tag",
+          )
       }
       @core.SupportedStreamConfig::new(
         ch.reinterpret_as_int(),
