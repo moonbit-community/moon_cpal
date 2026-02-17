@@ -34,6 +34,14 @@ Pinned upstream reference: see `UPSTREAM.md`.
 
 Note: `moon.mod.json` sets `preferred-target: native`. Non-native targets are not supported.
 
+## Latest Changes
+
+- `0.11.1`: `spec.Data` now exposes the full numeric write API for raw output callbacks:
+  - `write_i8`, `write_u8`, `write_u16`, `write_i16`
+  - `write_u24`, `write_i24`, `write_u32`, `write_i32`
+  - `write_f32`, `write_u64`, `write_i64`, `write_f64`
+- This matches the `core.Data` write surface and unblocks downstream handling of more `SampleFormat` values in `build_output_stream_raw`.
+
 ## Native Link Strategy (`build.js`)
 
 - The project uses Moon's prebuild hook (`--moonbit-unstable-prebuild`) with `build.js` to emit per-OS `link_configs`.
