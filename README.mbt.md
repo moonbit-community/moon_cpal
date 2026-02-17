@@ -16,64 +16,74 @@
 
 # moon_cpal
 
-MoonBit port of RustAudio `cpal` (native-only).
+CPAL-like audio I/O for MoonBit (native-only).
 
-Pinned upstream reference: see `UPSTREAM.md`.
+## Install
 
-## Status
+Add dependency in `moon.mod.json`:
 
-- `Milky2018/moon_cpal`: public CPAL-like API (native-only): host/device/stream + core type re-exports.
-- `Milky2018/moon_cpal/core`: pure core types/errors (configs, heuristics, timestamps, sample helpers).
-- `Milky2018/moon_cpal/platform`: dynamic dispatch host/device/stream (backend selection).
-- `Milky2018/moon_cpal/spec`: root API implementation backed by `platform`.
-- `Milky2018/moon_cpal/traits`: CPAL-like `HostTrait`/`DeviceTrait`/`StreamTrait` implemented for the root types.
-- Native backends (real I/O, callback-thread model):
-  - macOS: CoreAudio (AudioQueue)
-  - Linux: ALSA + JACK
-  - Windows: WASAPI
-
-Note: `moon.mod.json` sets `preferred-target: native`. Non-native targets are not supported.
-
-## Native Link Strategy (`build.js`)
-
-- The project uses Moon's prebuild hook (`--moonbit-unstable-prebuild`) with `build.js` to emit per-OS `link_configs`.
-- This mirrors the `tonyfettes/raylib` style: keep `moon.pkg` files free of hard-coded cross-platform linker flag unions and let `build.js` choose the active platform link set.
-- Linux/macOS/Windows now receive only their own native link requirements.
-- Downstream dependency smoke (`ci/downstream_smoke`) validates that `Milky2018/moon_cpal` compiles as a dependency across Linux/macOS/Windows with this strategy.
-
-## Run unit tests (native)
-
-```
-moon test --target native
+```json
+{
+  "deps": {
+    "Milky2018/moon_cpal": "0.11.1"
+  }
+}
 ```
 
-## Enumerate hosts/devices (native)
+`moon_cpal` supports `native` target only.
 
-```
-moon run --target native cmd/enumerate
+## Quick Start (Typed Output Stream)
+
+```moonbit
+let host = @moon_cpal.default_host()
+let device = match host.default_output_device() {
+  Some(d) => d
+  None => fail!("no output device")
+}
+let cfg = try! device.default_output_config()
+let stream_cfg = cfg.config()
+let stream = try! device.build_output_stream_f32(
+  stream_cfg,
+  fn(samples, _info) {
+    for i = 0; i < samples.length(); i = i + 1 {
+      samples[i] = 0.0
+    }
+  },
+  fn(err) { println("stream error: \{err}") },
+  None,
+)
+try! stream.play()
 ```
 
-## Stream smoke tests (native)
+## Quick Start (Raw Output Stream)
 
-macOS:
+Use `build_output_stream_raw` when you need format-specific writes:
 
-```
-moon run --target native cmd/macos_smoke
+```moonbit
+let stream = try! device.build_output_stream_raw(
+  stream_cfg,
+  cfg.sample_format(),
+  fn(data, _info) {
+    match data.sample_format() {
+      @moon_cpal.SampleFormat::F32 =>
+        ignore(data.write_f32(Array::make(data.len(), 0.0)))
+      @moon_cpal.SampleFormat::I16 =>
+        ignore(data.write_i16(Array::make(data.len(), 0)))
+      @moon_cpal.SampleFormat::I24 =>
+        ignore(data.write_i24(Array::make(data.len(), @moon_cpal.I24::new(0))))
+      _ => data.clear()
+    }
+  },
+  fn(_err) {  },
+  None,
+)
 ```
 
-```
-moon run --target native cmd/macos_stream_smoke
-```
+`Data` exposes full numeric write APIs:
+`write_i8`, `write_u8`, `write_u16`, `write_i16`, `write_u24`, `write_i24`,
+`write_u32`, `write_i32`, `write_f32`, `write_u64`, `write_i64`, `write_f64`.
 
-Linux:
+## Notes
 
-```
-moon run --target native cmd/alsa_stream_smoke
-moon run --target native cmd/jack_stream_smoke
-```
-
-Windows:
-
-```
-moon run --target native cmd/wasapi_stream_smoke
-```
+- Use `stream.pause()` / `stream.close()` to control lifecycle.
+- Use `default_input_device()` + `build_input_stream_*` for capture.
