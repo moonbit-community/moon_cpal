@@ -130,25 +130,6 @@ fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
 }
 
 ///|
-fn find_matching_range_for_format(
-  ranges : Array[@core.SupportedStreamConfigRange],
-  config : @core.StreamConfig,
-  fmt : @core.SampleFormat,
-) -> @core.SupportedStreamConfigRange? {
-  let sr = config.sample_rate
-  let ch = config.channels
-  for r in ranges {
-    if r.channels() == ch &&
-      r.sample_format() == fmt &&
-      r.min_sample_rate() <= sr &&
-      sr <= r.max_sample_rate() {
-      return Some(r)
-    }
-  }
-  None
-}
-
-///|
 fn choose_default_sample_format(
   ranges : Array[@core.SupportedStreamConfigRange],
   config : @core.StreamConfig,
@@ -212,12 +193,6 @@ pub fn Device::build_output_stream_raw(
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  let ranges = self.supported_output_configs()
-  let r = match find_matching_range_for_format(ranges, config, sample_format) {
-    Some(r) => r
-    None => raise @core.build_stream_error_stream_config_not_supported()
-  }
-  ignore(r)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_output(
@@ -295,18 +270,6 @@ pub fn Device::build_input_stream_raw(
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  // Match upstream WASAPI semantics: building an input stream on a render endpoint enables
-  // loopback capture. Supported input configs are still empty for render endpoints, so we must
-  // validate against supported output configs when data_flow indicates render.
-  let ranges = match data_flow_tag(self.id) {
-    Some(2) => self.supported_output_configs()
-    _ => self.supported_input_configs()
-  }
-  let r = match find_matching_range_for_format(ranges, config, sample_format) {
-    Some(r) => r
-    None => raise @core.build_stream_error_stream_config_not_supported()
-  }
-  ignore(r)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = wasapi_stream_build_input(
@@ -400,11 +363,6 @@ pub fn Device::build_loopback_input_stream(
     Some(t) => t
     None => raise @core.build_stream_error_stream_config_not_supported()
   }
-  let r = match find_matching_range_for_format(ranges, config, fmt) {
-    Some(r) => r
-    None => raise @core.build_stream_error_stream_config_not_supported()
-  }
-  ignore(r)
 
   // We pass a special sentinel id to the C layer to enable loopback on the default render endpoint.
   let dev = @core.string_to_utf8_bytes("loopback")
