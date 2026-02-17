@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "moonbit.h"
 
@@ -59,6 +58,27 @@ static int cstr_eq_n(const char *a, const char *b, size_t n) {
     return 0;
   }
   return strncmp(a, b, n) == 0;
+}
+
+static int ascii_lower(int ch) {
+  if (ch >= 'A' && ch <= 'Z') {
+    return ch + ('a' - 'A');
+  }
+  return ch;
+}
+
+static int cstr_case_eq(const char *a, const char *b) {
+  if (a == NULL || b == NULL) {
+    return 0;
+  }
+  while (*a != '\0' && *b != '\0') {
+    if (ascii_lower((unsigned char)*a) != ascii_lower((unsigned char)*b)) {
+      return 0;
+    }
+    a++;
+    b++;
+  }
+  return *a == '\0' && *b == '\0';
 }
 
 static int buf_has_id(const char *buf, size_t len, const char *id, size_t id_len) {
@@ -138,10 +158,10 @@ static char alsa_dir_tag_from_ioid(const char *ioid) {
   if (ioid == NULL) {
     return 'd';
   }
-  if (strcasecmp(ioid, "Input") == 0) {
+  if (cstr_case_eq(ioid, "Input")) {
     return 'i';
   }
-  if (strcasecmp(ioid, "Output") == 0) {
+  if (cstr_case_eq(ioid, "Output")) {
     return 'o';
   }
   return 'd';
