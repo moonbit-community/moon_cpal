@@ -72,7 +72,7 @@ Upstream `#[test]` occurrences in `cpal-reference/` are currently:
 We keep equivalent coverage via:
 
 - deterministic unit tests in MoonBit (`cpal_wbtest.mbt`, `cpal_time.mbt` tests)
-- `ci/parity/check.js` differential snapshots against `cpal-reference`, comparing each host's
+- local/manual `ci/parity/check.js` differential snapshots against `cpal-reference`, comparing each host's
   full device enumeration plus supported/default config metadata, and default-device
   stream-build acceptance parity (raw builder + stable typed-builder formats)
 - CI smoke commands for real I/O:

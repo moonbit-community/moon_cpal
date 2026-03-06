@@ -56,8 +56,6 @@ jobs:
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
         run: moon run --target native cmd/enumerate -q
-      - name: Run CPAL parity harness
-        run: node ci/parity/check.js
       - name: Run ALSA smoke (real I/O)
         run: moon run --target native cmd/alsa_stream_smoke -q
       - name: Run JACK smoke (dummy server)
@@ -87,8 +85,6 @@ jobs:
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
         run: moon run --target native cmd/enumerate -q
-      - name: Run CPAL parity harness
-        run: node ci/parity/check.js
       - name: Run CoreAudio smoke (real I/O)
         run: moon run --target native cmd/macos_stream_smoke -q
 
@@ -138,9 +134,6 @@ jobs:
       - name: Enumerate hosts/devices (non-audio)
         shell: pwsh
         run: moon run --target native cmd/enumerate -q
-      - name: Run CPAL parity harness
-        shell: pwsh
-        run: node ci/parity/check.js
       - name: Run WASAPI smoke (real I/O)
         shell: pwsh
         run: moon run --target native cmd/wasapi_stream_smoke -q

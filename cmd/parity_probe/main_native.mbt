@@ -99,12 +99,7 @@ fn empty_config() -> ProbeConfig {
 
 ///|
 fn empty_build() -> ProbeBuild {
-  {
-    raw_ok: false,
-    has_typed_probe: false,
-    typed_kind: "",
-    typed_ok: false,
-  }
+  { raw_ok: false, has_typed_probe: false, typed_kind: "", typed_ok: false }
 }
 
 ///|
@@ -185,9 +180,7 @@ fn fill_output_u8_silence(xs : Array[Byte]) -> Unit {
 }
 
 ///|
-fn typed_probe_kind(
-  sample_format : @moon_cpal.SampleFormat,
-) -> (Bool, String) {
+fn typed_probe_kind(sample_format : @moon_cpal.SampleFormat) -> (Bool, String) {
   match sample_format {
     @moon_cpal.SampleFormat::F32 => (true, "f32")
     @moon_cpal.SampleFormat::I16 => (true, "i16")
@@ -398,19 +391,9 @@ fn probe_default_output_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
           let sample_format = supported.sample_format()
           let raw_ok = probe_raw_output_build(dev, cfg, sample_format)
           let (has_typed_probe, typed_kind, typed_ok) = probe_typed_output_build(
-            dev,
-            cfg,
-            sample_format,
+            dev, cfg, sample_format,
           )
-          (
-            true,
-            {
-              raw_ok,
-              has_typed_probe,
-              typed_kind,
-              typed_ok,
-            },
-          )
+          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok })
         }
       }
   }
@@ -429,19 +412,9 @@ fn probe_default_input_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
           let sample_format = supported.sample_format()
           let raw_ok = probe_raw_input_build(dev, cfg, sample_format)
           let (has_typed_probe, typed_kind, typed_ok) = probe_typed_input_build(
-            dev,
-            cfg,
-            sample_format,
+            dev, cfg, sample_format,
           )
-          (
-            true,
-            {
-              raw_ok,
-              has_typed_probe,
-              typed_kind,
-              typed_ok,
-            },
-          )
+          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok })
         }
       }
   }
@@ -527,19 +500,17 @@ fn probe_host(id : @moon_cpal.HostId) -> ProbeHost {
     default_input_device_id_ok,
     default_input_device_id,
   ) = probe_host_default_device(host.default_input_device())
-  let (
-    has_default_input_build_probe,
-    default_input_build,
-  ) = probe_default_input_build(host.default_input_device())
+  let (has_default_input_build_probe, default_input_build) = probe_default_input_build(
+    host.default_input_device(),
+  )
   let (
     has_default_output_device,
     default_output_device_id_ok,
     default_output_device_id,
   ) = probe_host_default_device(host.default_output_device())
-  let (
-    has_default_output_build_probe,
-    default_output_build,
-  ) = probe_default_output_build(host.default_output_device())
+  let (has_default_output_build_probe, default_output_build) = probe_default_output_build(
+    host.default_output_device(),
+  )
   {
     id: id.to_string(),
     devices_ok,

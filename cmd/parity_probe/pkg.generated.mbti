@@ -9,6 +9,9 @@ package "Milky2018/moon_cpal/cmd/parity_probe"
 type ProbeBuffer
 pub impl ToJson for ProbeBuffer
 
+type ProbeBuild
+pub impl ToJson for ProbeBuild
+
 type ProbeConfig
 pub impl ToJson for ProbeConfig
 
