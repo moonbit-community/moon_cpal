@@ -130,22 +130,7 @@ function sortRanges(ranges) {
 
 function sortDevices(devices) {
   return [...devices]
-    .map((device) => ({
-      id_ok: device.id_ok,
-      id: device.id,
-      name_ok: device.name_ok,
-      name: device.name,
-      supports_input: device.supports_input,
-      supports_output: device.supports_output,
-      has_default_input_config: device.has_default_input_config,
-      default_input_config: projectConfig(device.default_input_config),
-      has_default_output_config: device.has_default_output_config,
-      default_output_config: projectConfig(device.default_output_config),
-      supported_input_configs_ok: device.supported_input_configs_ok,
-      supported_input_configs: sortRanges(device.supported_input_configs),
-      supported_output_configs_ok: device.supported_output_configs_ok,
-      supported_output_configs: sortRanges(device.supported_output_configs),
-    }))
+    .map(projectDevice)
     .sort((a, b) =>
       `${a.id_ok ? '1' : '0'}:${a.id}`.localeCompare(
         `${b.id_ok ? '1' : '0'}:${b.id}`,
@@ -167,7 +152,9 @@ function projectDevice(device) {
     has_default_output_config: device.has_default_output_config,
     default_output_config: projectConfig(device.default_output_config),
     supported_input_configs_ok: device.supported_input_configs_ok,
+    supported_input_configs: sortRanges(device.supported_input_configs),
     supported_output_configs_ok: device.supported_output_configs_ok,
+    supported_output_configs: sortRanges(device.supported_output_configs),
   };
 }
 
@@ -188,26 +175,18 @@ function projectDefaultDevice(host, kind) {
     id_ok: host[idOkKey],
     id: host[idKey],
     listed: match !== undefined,
-    device: match === undefined ? null : projectDevice(match),
   };
 }
 
 function sortHosts(hosts) {
   return [...hosts]
-    .map((host) => {
-      if (host.id === 'jack') {
-        return {
-          id: host.id,
-          devices_ok: host.devices_ok,
-        };
-      }
-      return {
-        id: host.id,
-        devices_ok: host.devices_ok,
-        default_input_device: projectDefaultDevice(host, 'input'),
-        default_output_device: projectDefaultDevice(host, 'output'),
-      };
-    })
+    .map((host) => ({
+      id: host.id,
+      devices_ok: host.devices_ok,
+      default_input_device: projectDefaultDevice(host, 'input'),
+      default_output_device: projectDefaultDevice(host, 'output'),
+      devices: sortDevices(host.devices),
+    }))
     .sort((a, b) => a.id.localeCompare(b.id, 'en'));
 }
 

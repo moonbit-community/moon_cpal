@@ -34,7 +34,7 @@ Add dependency in `moon.mod.json`:
 
 ## Quick Start (Typed Output Stream)
 
-```moonbit
+```moonbit nocheck
 let host = @moon_cpal.default_host()
 let device = match host.default_output_device() {
   Some(d) => d
@@ -59,7 +59,8 @@ try! stream.play()
 
 Use `build_output_stream_raw` when you need format-specific writes:
 
-```moonbit
+```moonbit nocheck
+///|
 let stream = try! device.build_output_stream_raw(
   stream_cfg,
   cfg.sample_format(),

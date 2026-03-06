@@ -63,3 +63,35 @@ test "jack supported configs reflect server sample rate/buffer size (best-effort
     }
   }
 }
+
+///|
+test "jack default devices expose config queries for both stream types (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  let host = default_host()
+  let devs = host.devices()
+  if devs.length() == 0 {
+    inspect(true, content="true")
+    return
+  }
+  for dev in devs {
+    inspect(dev.supports_input(), content="true")
+    inspect(dev.supports_output(), content="true")
+    let in_ok = try {
+      ignore(dev.default_input_config())
+      true
+    } catch {
+      _ => false
+    }
+    let out_ok = try {
+      ignore(dev.default_output_config())
+      true
+    } catch {
+      _ => false
+    }
+    inspect(in_ok, content="true")
+    inspect(out_ok, content="true")
+  }
+}

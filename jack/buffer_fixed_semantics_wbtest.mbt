@@ -19,7 +19,7 @@ test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
     return
   }
   let dev : Device = {
-    id: "moon_cpal_out",
+    id: "cpal_client_out",
     direction: @core.DeviceDirection::output(),
   }
   let sc = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(0))
@@ -59,7 +59,7 @@ test "jack fixed buffer mismatch fails when server config known (best-effort)" {
     }
     Some((_sr, buf)) => {
       let dev : Device = {
-        id: "moon_cpal_out",
+        id: "cpal_client_out",
         direction: @core.DeviceDirection::output(),
       }
       let want = buf + 1

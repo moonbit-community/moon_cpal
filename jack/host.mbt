@@ -39,12 +39,12 @@ pub fn default_host() -> Host {
 
 ///|
 fn default_output_device() -> Device {
-  { id: "moon_cpal_out", direction: @core.DeviceDirection::output() }
+  { id: "cpal_client_out", direction: @core.DeviceDirection::output() }
 }
 
 ///|
 fn default_input_device() -> Device {
-  { id: "moon_cpal_in", direction: @core.DeviceDirection::input() }
+  { id: "cpal_client_in", direction: @core.DeviceDirection::input() }
 }
 
 ///|
@@ -113,21 +113,25 @@ pub fn Device::id(_self : Device) -> @core.DeviceId {
 
 ///|
 pub fn Device::supports_input(_self : Device) -> Bool {
-  match _self.direction {
-    @core.DeviceDirection::Input => true
-    @core.DeviceDirection::Duplex => true
-    @core.DeviceDirection::Unknown => true
-    _ => false
+  if @core.native_os() != @core.NativeOs::Linux {
+    false
+  } else {
+    match default_server_config() {
+      None => false
+      Some(_) => true
+    }
   }
 }
 
 ///|
 pub fn Device::supports_output(_self : Device) -> Bool {
-  match _self.direction {
-    @core.DeviceDirection::Output => true
-    @core.DeviceDirection::Duplex => true
-    @core.DeviceDirection::Unknown => true
-    _ => false
+  if @core.native_os() != @core.NativeOs::Linux {
+    false
+  } else {
+    match default_server_config() {
+      None => false
+      Some(_) => true
+    }
   }
 }
 
@@ -138,9 +142,6 @@ pub fn Device::supported_input_configs(
   if @core.native_os() != @core.NativeOs::Linux {
     return []
   }
-  if !_self.supports_input() {
-    return []
-  }
   supported_configs(_self)
 }
 
@@ -149,9 +150,6 @@ pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
   if @core.native_os() != @core.NativeOs::Linux {
-    return []
-  }
-  if !_self.supports_output() {
     return []
   }
   supported_configs(_self)
@@ -166,9 +164,6 @@ pub fn Device::default_input_config(
       "jack default_input_config: not available on this OS",
     )
   }
-  if !_self.supports_input() {
-    raise @core.default_stream_config_error_stream_type_not_supported()
-  }
   default_config(_self)
 }
 
@@ -180,9 +175,6 @@ pub fn Device::default_output_config(
     raise @core.default_stream_config_error_backend_specific(
       "jack default_output_config: not available on this OS",
     )
-  }
-  if !_self.supports_output() {
-    raise @core.default_stream_config_error_stream_type_not_supported()
   }
   default_config(_self)
 }

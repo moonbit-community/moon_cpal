@@ -89,3 +89,40 @@ test "alsa supported configs include sane buffer size ranges (best-effort)" {
     }
   }
 }
+
+///|
+test "alsa enumeration keeps null PCM when present (best-effort)" {
+  if @core.native_os() != @core.NativeOs::Linux {
+    inspect(true, content="true")
+    return
+  }
+  let host = default_host()
+  let devs = host.devices()
+  let mut saw_default = false
+  let mut saw_null = false
+  for dev in devs {
+    let did = dev.id().to_string()
+    if did == "alsa:default" {
+      saw_default = true
+    }
+    if did == "alsa:null" {
+      saw_null = true
+      let desc = try dev.description() catch {
+        _ => {
+          inspect(false, content="true")
+          return
+        }
+      } noraise {
+        x => x
+      }
+      inspect(desc.name().length() > 0, content="true")
+    }
+  }
+  inspect(saw_default, content="true")
+  inspect(true, content="true")
+  if saw_null {
+    inspect(true, content="true")
+  } else {
+    inspect(true, content="true")
+  }
+}

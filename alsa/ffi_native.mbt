@@ -31,8 +31,19 @@ extern "C" fn alsa_devices_utf8() -> Bytes = "moon_cpal_alsa_devices_utf8"
 ///   (sample_format_tag, channels, min_rate, max_rate, buffer_min, buffer_max)
 ///
 /// sample_format_tag:
-/// - 1 => F32
-/// - 2 => I16
+/// - 1 => I8
+/// - 2 => U8
+/// - 3 => I16
+/// - 4 => U16
+/// - 5 => I24
+/// - 6 => U24
+/// - 7 => I32
+/// - 8 => U32
+/// - 9 => F32
+/// - 10 => F64
+/// - 11 => DsdU8
+/// - 12 => DsdU16
+/// - 13 => DsdU32
 ///
 /// On non-Linux platforms this returns an empty bytes value.
 /// On Linux this always returns at least 8 bytes; on error, `record_count` is 0 and `status` is set.

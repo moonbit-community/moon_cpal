@@ -303,16 +303,19 @@ fn i32_le_to_int(b : Bytes, off : Int) -> Int {
 ///|
 fn sample_format_from_bin_tag(tag : Int) -> @core.SampleFormat? {
   match tag {
-    1 => Some(@core.SampleFormat::F32)
-    2 => Some(@core.SampleFormat::I16)
-    3 => Some(@core.SampleFormat::U16)
-    4 => Some(@core.SampleFormat::U8)
-    5 => Some(@core.SampleFormat::I32)
-    6 => Some(@core.SampleFormat::U32)
-    7 => Some(@core.SampleFormat::I24)
-    8 => Some(@core.SampleFormat::U24)
-    9 => Some(@core.SampleFormat::F64)
-    10 => Some(@core.SampleFormat::I8)
+    1 => Some(@core.SampleFormat::I8)
+    2 => Some(@core.SampleFormat::U8)
+    3 => Some(@core.SampleFormat::I16)
+    4 => Some(@core.SampleFormat::U16)
+    5 => Some(@core.SampleFormat::I24)
+    6 => Some(@core.SampleFormat::U24)
+    7 => Some(@core.SampleFormat::I32)
+    8 => Some(@core.SampleFormat::U32)
+    9 => Some(@core.SampleFormat::F32)
+    10 => Some(@core.SampleFormat::F64)
+    11 => Some(@core.SampleFormat::DsdU8)
+    12 => Some(@core.SampleFormat::DsdU16)
+    13 => Some(@core.SampleFormat::DsdU32)
     _ => None
   }
 }

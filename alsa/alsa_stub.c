@@ -183,12 +183,6 @@ static void alsa_append_hint_names(char **buf, size_t *len, size_t *cap) {
       continue;
     }
 
-    // Skip a few pseudo entries that are not useful as device IDs.
-    if (strcmp(name, "null") == 0) {
-      free(name);
-      continue;
-    }
-
     char *ioid = snd_device_name_get_hint(*p, "IOID");
     char dir_tag = alsa_dir_tag_from_ioid(ioid);
     char *desc = snd_device_name_get_hint(*p, "DESC");
@@ -394,16 +388,19 @@ moonbit_bytes_t moon_cpal_alsa_devices_utf8(void) {
 //   (sample_format_tag, channels, min_rate, max_rate, buffer_min, buffer_max)
 //
 // sample_format_tag:
-// - 1 => F32 (SND_PCM_FORMAT_FLOAT_LE)
-// - 2 => I16 (SND_PCM_FORMAT_S16_LE)
-// - 3 => U16 (SND_PCM_FORMAT_U16_LE)
-// - 4 => U8  (SND_PCM_FORMAT_U8)
-// - 5 => I32 (SND_PCM_FORMAT_S32_LE)
-// - 6 => U32 (SND_PCM_FORMAT_U32_LE)
-// - 7 => I24 (SND_PCM_FORMAT_S24_LE)
-// - 8 => U24 (SND_PCM_FORMAT_U24_LE)
-// - 9 => F64 (SND_PCM_FORMAT_FLOAT64_LE)
-// - 10 => I8 (SND_PCM_FORMAT_S8)
+// - 1 => I8       (SND_PCM_FORMAT_S8)
+// - 2 => U8       (SND_PCM_FORMAT_U8)
+// - 3 => I16      (SND_PCM_FORMAT_S16_LE/BE)
+// - 4 => U16      (SND_PCM_FORMAT_U16_LE/BE)
+// - 5 => I24      (SND_PCM_FORMAT_S24_LE/BE)
+// - 6 => U24      (SND_PCM_FORMAT_U24_LE/BE)
+// - 7 => I32      (SND_PCM_FORMAT_S32_LE/BE)
+// - 8 => U32      (SND_PCM_FORMAT_U32_LE/BE)
+// - 9 => F32      (SND_PCM_FORMAT_FLOAT_LE/BE)
+// - 10 => F64     (SND_PCM_FORMAT_FLOAT64_LE/BE)
+// - 11 => DsdU8   (SND_PCM_FORMAT_DSD_U8)
+// - 12 => DsdU16  (SND_PCM_FORMAT_DSD_U16_LE/BE)
+// - 13 => DsdU32  (SND_PCM_FORMAT_DSD_U32_LE/BE)
 //
 // On non-Linux platforms, returns an empty bytes value.
 // On Linux, always returns at least 8 bytes. On error, `record_count` is 0 and `status` is set.
@@ -469,38 +466,57 @@ moonbit_bytes_t moon_cpal_alsa_supported_configs_bin(uint8_t *device_id_utf8,
     return alsa_status_only((int32_t)err);
   }
 
-  // Supported formats: keep in sync with the MoonBit stream builder.
-  uint32_t fmt_tags[10];
+  // Supported formats: keep in sync with upstream CPAL ALSA ordering.
+  uint32_t fmt_tags[13];
   size_t fmt_count = 0;
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S8) == 0) {
     fmt_tags[fmt_count++] = 1u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S16_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U8) == 0) {
     fmt_tags[fmt_count++] = 2u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U16_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S16_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S16_BE) == 0) {
     fmt_tags[fmt_count++] = 3u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U8) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U16_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U16_BE) == 0) {
     fmt_tags[fmt_count++] = 4u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S32_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S24_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S24_BE) == 0) {
     fmt_tags[fmt_count++] = 5u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U32_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U24_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U24_BE) == 0) {
     fmt_tags[fmt_count++] = 6u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S24_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S32_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S32_BE) == 0) {
     fmt_tags[fmt_count++] = 7u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U24_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U32_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_U32_BE) == 0) {
     fmt_tags[fmt_count++] = 8u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT64_LE) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT_BE) == 0) {
     fmt_tags[fmt_count++] = 9u;
   }
-  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_S8) == 0) {
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT64_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_FLOAT64_BE) == 0) {
     fmt_tags[fmt_count++] = 10u;
+  }
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_DSD_U8) == 0) {
+    fmt_tags[fmt_count++] = 11u;
+  }
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_DSD_U16_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_DSD_U16_BE) == 0) {
+    fmt_tags[fmt_count++] = 12u;
+  }
+  if (snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_DSD_U32_LE) == 0 ||
+      snd_pcm_hw_params_test_format(pcm, hw, SND_PCM_FORMAT_DSD_U32_BE) == 0) {
+    fmt_tags[fmt_count++] = 13u;
   }
   if (fmt_count == 0) {
     snd_pcm_hw_params_free(hw);
