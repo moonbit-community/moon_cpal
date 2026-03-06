@@ -25,6 +25,7 @@ if (platform === 'darwin') {
     'spec',
     'traits',
     'cmd/enumerate',
+    'cmd/parity_probe',
     'cmd/macos_smoke',
     'cmd/macos_stream_smoke',
   ].forEach((path) => {
@@ -50,6 +51,10 @@ if (platform === 'darwin') {
     link_flags: '-pthread',
     link_libs: ['asound', 'jack'],
   });
+  addLinkConfig('cmd/parity_probe', {
+    link_flags: '-pthread',
+    link_libs: ['asound', 'jack'],
+  });
   addLinkConfig('cmd/alsa_stream_smoke', {
     link_flags: '-pthread',
     link_libs: ['asound'],
@@ -60,7 +65,7 @@ if (platform === 'darwin') {
   });
 } else if (platform === 'win32') {
   const winLibs = ['ole32', 'uuid', 'mmdevapi', 'avrt'];
-  ['wasapi', 'platform', 'spec', 'traits', 'cmd/enumerate', 'cmd/wasapi_stream_smoke'].forEach(
+  ['wasapi', 'platform', 'spec', 'traits', 'cmd/enumerate', 'cmd/parity_probe', 'cmd/wasapi_stream_smoke'].forEach(
     (path) => {
       addLinkConfig(path, { link_libs: winLibs });
     },

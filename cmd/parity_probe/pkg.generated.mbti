@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Milky2018/moon_cpal/cmd/parity_probe"
+
+// Values
+
+// Errors
+
+// Types and methods
+type ProbeBuffer
+pub impl ToJson for ProbeBuffer
+
+type ProbeConfig
+pub impl ToJson for ProbeConfig
+
+type ProbeConfigRange
+pub impl ToJson for ProbeConfigRange
+
+type ProbeDevice
+pub impl ToJson for ProbeDevice
+
+type ProbeHost
+pub impl ToJson for ProbeHost
+
+type ProbeSnapshot
+pub impl ToJson for ProbeSnapshot
+
+// Type aliases
+
+// Traits
+
