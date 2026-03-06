@@ -37,6 +37,14 @@ struct ProbeConfigRange {
 } derive(ToJson)
 
 ///|
+struct ProbeBuild {
+  raw_ok : Bool
+  has_typed_probe : Bool
+  typed_kind : String
+  typed_ok : Bool
+} derive(ToJson)
+
+///|
 struct ProbeDevice {
   id_ok : Bool
   id : String
@@ -62,9 +70,13 @@ struct ProbeHost {
   has_default_input_device : Bool
   default_input_device_id_ok : Bool
   default_input_device_id : String
+  has_default_input_build_probe : Bool
+  default_input_build : ProbeBuild
   has_default_output_device : Bool
   default_output_device_id_ok : Bool
   default_output_device_id : String
+  has_default_output_build_probe : Bool
+  default_output_build : ProbeBuild
 } derive(ToJson)
 
 ///|
@@ -83,6 +95,16 @@ fn empty_buffer() -> ProbeBuffer {
 ///|
 fn empty_config() -> ProbeConfig {
   { channels: 0, sample_rate: 0, sample_format: "", buffer: empty_buffer() }
+}
+
+///|
+fn empty_build() -> ProbeBuild {
+  {
+    raw_ok: false,
+    has_typed_probe: false,
+    typed_kind: "",
+    typed_ok: false,
+  }
 }
 
 ///|
@@ -123,6 +145,305 @@ fn probe_device_id(d : @moon_cpal.Device) -> (Bool, String) {
     _ => (false, "")
   } noraise {
     did => (true, did.to_string())
+  }
+}
+
+///|
+fn fill_output_f32_silence(xs : Array[Float]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = 0.0
+    i = i + 1
+  }
+}
+
+///|
+fn fill_output_i16_silence(xs : Array[Int16]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = Int16::from_int(0)
+    i = i + 1
+  }
+}
+
+///|
+fn fill_output_u16_silence(xs : Array[UInt16]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = (0x8000 : Int).to_uint16()
+    i = i + 1
+  }
+}
+
+///|
+fn fill_output_u8_silence(xs : Array[Byte]) -> Unit {
+  let mut i = 0
+  while i < xs.length() {
+    xs[i] = Int::to_byte(0x80)
+    i = i + 1
+  }
+}
+
+///|
+fn typed_probe_kind(
+  sample_format : @moon_cpal.SampleFormat,
+) -> (Bool, String) {
+  match sample_format {
+    @moon_cpal.SampleFormat::F32 => (true, "f32")
+    @moon_cpal.SampleFormat::I16 => (true, "i16")
+    @moon_cpal.SampleFormat::U16 => (true, "u16")
+    @moon_cpal.SampleFormat::U8 => (true, "u8")
+    _ => (false, "")
+  }
+}
+
+///|
+fn probe_raw_output_build(
+  d : @moon_cpal.Device,
+  cfg : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+) -> Bool {
+  try
+    d.build_output_stream_raw(
+      cfg,
+      sample_format,
+      fn(data, _info) { data.clear() },
+      fn(_err) {  },
+      None,
+    )
+  catch {
+    _ => false
+  } noraise {
+    st => {
+      st.close()
+      true
+    }
+  }
+}
+
+///|
+fn probe_raw_input_build(
+  d : @moon_cpal.Device,
+  cfg : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+) -> Bool {
+  try
+    d.build_input_stream_raw(
+      cfg,
+      sample_format,
+      fn(_data, _info) {  },
+      fn(_err) {  },
+      None,
+    )
+  catch {
+    _ => false
+  } noraise {
+    st => {
+      st.close()
+      true
+    }
+  }
+}
+
+///|
+fn probe_typed_output_build(
+  d : @moon_cpal.Device,
+  cfg : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+) -> (Bool, String, Bool) {
+  let (has_typed_probe, typed_kind) = typed_probe_kind(sample_format)
+  if !has_typed_probe {
+    return (false, "", false)
+  }
+  let typed_ok = match sample_format {
+    @moon_cpal.SampleFormat::F32 =>
+      try
+        d.build_output_stream_f32(
+          cfg,
+          fn(xs, _info) { fill_output_f32_silence(xs) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::I16 =>
+      try
+        d.build_output_stream_i16(
+          cfg,
+          fn(xs, _info) { fill_output_i16_silence(xs) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::U16 =>
+      try
+        d.build_output_stream_u16(
+          cfg,
+          fn(xs, _info) { fill_output_u16_silence(xs) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::U8 =>
+      try
+        d.build_output_stream_u8(
+          cfg,
+          fn(xs, _info) { fill_output_u8_silence(xs) },
+          fn(_err) {  },
+          None,
+        )
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    _ => false
+  }
+  (true, typed_kind, typed_ok)
+}
+
+///|
+fn probe_typed_input_build(
+  d : @moon_cpal.Device,
+  cfg : @moon_cpal.StreamConfig,
+  sample_format : @moon_cpal.SampleFormat,
+) -> (Bool, String, Bool) {
+  let (has_typed_probe, typed_kind) = typed_probe_kind(sample_format)
+  if !has_typed_probe {
+    return (false, "", false)
+  }
+  let typed_ok = match sample_format {
+    @moon_cpal.SampleFormat::F32 =>
+      try
+        d.build_input_stream_f32(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::I16 =>
+      try
+        d.build_input_stream_i16(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::U16 =>
+      try
+        d.build_input_stream_u16(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    @moon_cpal.SampleFormat::U8 =>
+      try
+        d.build_input_stream_u8(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
+      catch {
+        _ => false
+      } noraise {
+        st => {
+          st.close()
+          true
+        }
+      }
+    _ => false
+  }
+  (true, typed_kind, typed_ok)
+}
+
+///|
+fn probe_default_output_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
+  match d {
+    None => (false, empty_build())
+    Some(dev) =>
+      try dev.default_output_config() catch {
+        _ => (false, empty_build())
+      } noraise {
+        supported => {
+          let cfg = supported.config()
+          let sample_format = supported.sample_format()
+          let raw_ok = probe_raw_output_build(dev, cfg, sample_format)
+          let (has_typed_probe, typed_kind, typed_ok) = probe_typed_output_build(
+            dev,
+            cfg,
+            sample_format,
+          )
+          (
+            true,
+            {
+              raw_ok,
+              has_typed_probe,
+              typed_kind,
+              typed_ok,
+            },
+          )
+        }
+      }
+  }
+}
+
+///|
+fn probe_default_input_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
+  match d {
+    None => (false, empty_build())
+    Some(dev) =>
+      try dev.default_input_config() catch {
+        _ => (false, empty_build())
+      } noraise {
+        supported => {
+          let cfg = supported.config()
+          let sample_format = supported.sample_format()
+          let raw_ok = probe_raw_input_build(dev, cfg, sample_format)
+          let (has_typed_probe, typed_kind, typed_ok) = probe_typed_input_build(
+            dev,
+            cfg,
+            sample_format,
+          )
+          (
+            true,
+            {
+              raw_ok,
+              has_typed_probe,
+              typed_kind,
+              typed_ok,
+            },
+          )
+        }
+      }
   }
 }
 
@@ -207,10 +528,18 @@ fn probe_host(id : @moon_cpal.HostId) -> ProbeHost {
     default_input_device_id,
   ) = probe_host_default_device(host.default_input_device())
   let (
+    has_default_input_build_probe,
+    default_input_build,
+  ) = probe_default_input_build(host.default_input_device())
+  let (
     has_default_output_device,
     default_output_device_id_ok,
     default_output_device_id,
   ) = probe_host_default_device(host.default_output_device())
+  let (
+    has_default_output_build_probe,
+    default_output_build,
+  ) = probe_default_output_build(host.default_output_device())
   {
     id: id.to_string(),
     devices_ok,
@@ -218,9 +547,13 @@ fn probe_host(id : @moon_cpal.HostId) -> ProbeHost {
     has_default_input_device,
     default_input_device_id_ok,
     default_input_device_id,
+    has_default_input_build_probe,
+    default_input_build,
     has_default_output_device,
     default_output_device_id_ok,
     default_output_device_id,
+    has_default_output_build_probe,
+    default_output_build,
   }
 }
 

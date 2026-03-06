@@ -120,6 +120,15 @@ function projectRange(range) {
   };
 }
 
+function projectBuild(build) {
+  return {
+    raw_ok: build.raw_ok,
+    has_typed_probe: build.has_typed_probe,
+    typed_kind: build.typed_kind,
+    typed_ok: build.typed_ok,
+  };
+}
+
 function sortRanges(ranges) {
   return [...ranges]
     .map(projectRange)
@@ -184,7 +193,11 @@ function sortHosts(hosts) {
       id: host.id,
       devices_ok: host.devices_ok,
       default_input_device: projectDefaultDevice(host, 'input'),
+      has_default_input_build_probe: host.has_default_input_build_probe,
+      default_input_build: projectBuild(host.default_input_build),
       default_output_device: projectDefaultDevice(host, 'output'),
+      has_default_output_build_probe: host.has_default_output_build_probe,
+      default_output_build: projectBuild(host.default_output_build),
       devices: sortDevices(host.devices),
     }))
     .sort((a, b) => a.id.localeCompare(b.id, 'en'));

@@ -73,7 +73,8 @@ We keep equivalent coverage via:
 
 - deterministic unit tests in MoonBit (`cpal_wbtest.mbt`, `cpal_time.mbt` tests)
 - `ci/parity/check.js` differential snapshots against `cpal-reference`, comparing each host's
-  full device enumeration plus supported/default config metadata
+  full device enumeration plus supported/default config metadata, and default-device
+  stream-build acceptance parity (raw builder + stable typed-builder formats)
 - CI smoke commands for real I/O:
   - `cmd/macos_stream_smoke`
   - `cmd/alsa_stream_smoke`
