@@ -89,15 +89,19 @@ function sortStrings(xs) {
   return [...xs].sort();
 }
 
+function clampMoonInt(value) {
+  return Math.min(value, 0x7fffffff);
+}
+
 function projectConfig(config) {
   return {
     channels: config.channels,
-    sample_rate: config.sample_rate,
+    sample_rate: clampMoonInt(config.sample_rate),
     sample_format: config.sample_format,
     buffer: {
       kind: config.buffer.kind,
-      min_frames: config.buffer.min_frames,
-      max_frames: config.buffer.max_frames,
+      min_frames: clampMoonInt(config.buffer.min_frames),
+      max_frames: clampMoonInt(config.buffer.max_frames),
     },
   };
 }
@@ -105,13 +109,13 @@ function projectConfig(config) {
 function projectRange(range) {
   return {
     channels: range.channels,
-    min_sample_rate: range.min_sample_rate,
-    max_sample_rate: range.max_sample_rate,
+    min_sample_rate: clampMoonInt(range.min_sample_rate),
+    max_sample_rate: clampMoonInt(range.max_sample_rate),
     sample_format: range.sample_format,
     buffer: {
       kind: range.buffer.kind,
-      min_frames: range.buffer.min_frames,
-      max_frames: range.buffer.max_frames,
+      min_frames: clampMoonInt(range.buffer.min_frames),
+      max_frames: clampMoonInt(range.buffer.max_frames),
     },
   };
 }
@@ -150,18 +154,51 @@ function sortDevices(devices) {
     );
 }
 
+function projectDevice(device) {
+  return {
+    id_ok: device.id_ok,
+    id: device.id,
+    name_ok: device.name_ok,
+    name: device.name,
+    supports_input: device.supports_input,
+    supports_output: device.supports_output,
+    has_default_input_config: device.has_default_input_config,
+    default_input_config: projectConfig(device.default_input_config),
+    has_default_output_config: device.has_default_output_config,
+    default_output_config: projectConfig(device.default_output_config),
+    supported_input_configs_ok: device.supported_input_configs_ok,
+    supported_output_configs_ok: device.supported_output_configs_ok,
+  };
+}
+
+function projectDefaultDevice(host, kind) {
+  const hasKey = `has_default_${kind}_device`;
+  const idOkKey = `default_${kind}_device_id_ok`;
+  const idKey = `default_${kind}_device_id`;
+  if (!host[hasKey]) {
+    return {
+      present: false,
+    };
+  }
+  const match = host.devices.find(
+    (device) => device.id_ok === host[idOkKey] && device.id === host[idKey],
+  );
+  return {
+    present: true,
+    id_ok: host[idOkKey],
+    id: host[idKey],
+    listed: match !== undefined,
+    device: match === undefined ? null : projectDevice(match),
+  };
+}
+
 function sortHosts(hosts) {
   return [...hosts]
     .map((host) => ({
       id: host.id,
       devices_ok: host.devices_ok,
-      has_default_input_device: host.has_default_input_device,
-      default_input_device_id_ok: host.default_input_device_id_ok,
-      default_input_device_id: host.default_input_device_id,
-      has_default_output_device: host.has_default_output_device,
-      default_output_device_id_ok: host.default_output_device_id_ok,
-      default_output_device_id: host.default_output_device_id,
-      devices: sortDevices(host.devices),
+      default_input_device: projectDefaultDevice(host, 'input'),
+      default_output_device: projectDefaultDevice(host, 'output'),
     }))
     .sort((a, b) => a.id.localeCompare(b.id, 'en'));
 }
