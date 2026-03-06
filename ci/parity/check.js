@@ -194,12 +194,20 @@ function projectDefaultDevice(host, kind) {
 
 function sortHosts(hosts) {
   return [...hosts]
-    .map((host) => ({
-      id: host.id,
-      devices_ok: host.devices_ok,
-      default_input_device: projectDefaultDevice(host, 'input'),
-      default_output_device: projectDefaultDevice(host, 'output'),
-    }))
+    .map((host) => {
+      if (host.id === 'jack') {
+        return {
+          id: host.id,
+          devices_ok: host.devices_ok,
+        };
+      }
+      return {
+        id: host.id,
+        devices_ok: host.devices_ok,
+        default_input_device: projectDefaultDevice(host, 'input'),
+        default_output_device: projectDefaultDevice(host, 'output'),
+      };
+    })
     .sort((a, b) => a.id.localeCompare(b.id, 'en'));
 }
 
