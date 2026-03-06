@@ -4,6 +4,20 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..', '..');
 const outDir = path.join(root, '_build', 'parity');
+const upstreamDoc = path.join(root, 'UPSTREAM.md');
+
+function loadUpstreamReference() {
+  const text = fs.readFileSync(upstreamDoc, 'utf8');
+  const repoMatch = text.match(/Upstream repo:\s+([A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)/);
+  const commitMatch = text.match(/Pinned commit .*: `([0-9a-f]{40})`/);
+  if (!repoMatch || !commitMatch) {
+    throw new Error(`failed to parse upstream reference from ${upstreamDoc}`);
+  }
+  return {
+    repo: repoMatch[1],
+    commit: commitMatch[1],
+  };
+}
 
 function runChecked(name, command, args) {
   const result = spawnSync(command, args, {
@@ -23,6 +37,52 @@ function runChecked(name, command, args) {
     );
   }
   return result.stdout.trim();
+}
+
+function ensureReferenceCheckout() {
+  const { repo, commit } = loadUpstreamReference();
+  const referenceDir = path.join(root, 'cpal-reference');
+  const cargoManifest = path.join(referenceDir, 'Cargo.toml');
+  if (fs.existsSync(cargoManifest)) {
+    const head = runChecked('cpal-reference rev-parse', 'git', [
+      '-C',
+      referenceDir,
+      'rev-parse',
+      'HEAD',
+    ]);
+    if (head === commit) {
+      return;
+    }
+  }
+
+  if (!fs.existsSync(referenceDir)) {
+    runChecked('clone cpal-reference', 'git', [
+      'clone',
+      '--filter=blob:none',
+      '--no-checkout',
+      `https://github.com/${repo}.git`,
+      referenceDir,
+    ]);
+  } else if (!fs.existsSync(path.join(referenceDir, '.git'))) {
+    throw new Error(`${referenceDir} exists but is not a git checkout`);
+  }
+
+  runChecked('fetch cpal-reference commit', 'git', [
+    '-C',
+    referenceDir,
+    'fetch',
+    '--depth',
+    '1',
+    'origin',
+    commit,
+  ]);
+  runChecked('checkout cpal-reference commit', 'git', [
+    '-C',
+    referenceDir,
+    'checkout',
+    '--detach',
+    commit,
+  ]);
 }
 
 function sortStrings(xs) {
@@ -176,6 +236,8 @@ function writeArtifacts(rustRaw, moonRaw, rustProjected, moonProjected) {
 }
 
 function main() {
+  ensureReferenceCheckout();
+
   const cargoArgs = [
     'run',
     '--quiet',
