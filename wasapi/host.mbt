@@ -233,7 +233,7 @@ pub fn Device::description(
       }
     None => ()
   }
-  let mut builder = @core.DeviceDescriptionBuilder::new(name)
+  let mut builder = @core.DeviceDescriptionBuilder(name)
     .direction(direction)
     .device_type(device_type)
   match interface_type_opt {
@@ -256,7 +256,7 @@ pub fn Device::description(
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId::new(@core.HostId::Wasapi, _self.id)
+  @core.DeviceId(@core.HostId::Wasapi, _self.id)
 }
 
 ///|
@@ -325,7 +325,7 @@ pub fn Device::supported_input_configs(
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @core.SupportedStreamConfigRange::new(
+            @core.SupportedStreamConfigRange(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -355,7 +355,7 @@ pub fn Device::supported_input_configs(
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @core.SupportedStreamConfigRange::new(
+          @core.SupportedStreamConfigRange(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -394,7 +394,7 @@ pub fn Device::supported_output_configs(
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @core.SupportedStreamConfigRange::new(
+            @core.SupportedStreamConfigRange(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -424,7 +424,7 @@ pub fn Device::supported_output_configs(
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @core.SupportedStreamConfigRange::new(
+          @core.SupportedStreamConfigRange(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -465,7 +465,7 @@ pub fn Device::default_input_config(
             "wasapi default_input_config: unsupported format tag",
           )
       }
-      @core.SupportedStreamConfig::new(
+      @core.SupportedStreamConfig(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
         @core.SupportedBufferSize::Range(
@@ -505,7 +505,7 @@ pub fn Device::default_output_config(
             "wasapi default_output_config: unsupported format tag",
           )
       }
-      @core.SupportedStreamConfig::new(
+      @core.SupportedStreamConfig(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
         @core.SupportedBufferSize::Range(

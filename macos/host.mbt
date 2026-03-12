@@ -61,10 +61,10 @@ pub fn Device::name(self : Device) -> String raise CoreAudioError {
 pub fn Device::id(self : Device) -> @core.DeviceId {
   match device_uid(self.id) {
     Some(uid) if uid.trim().length() > 0 =>
-      @core.DeviceId::new(@core.HostId::CoreAudio, uid)
+      @core.DeviceId(@core.HostId::CoreAudio, uid)
     // Keep backend parity with upstream: ID is the CoreAudio UID, not the numeric AudioDeviceID.
     // An empty ID is promoted to DeviceIdError by platform.Device::id.
-    _ => @core.DeviceId::new(@core.HostId::CoreAudio, "")
+    _ => @core.DeviceId(@core.HostId::CoreAudio, "")
   }
 }
 
@@ -94,7 +94,7 @@ pub fn Device::description(
     xs => Some(xs.length())
   }
   let direction = @core.direction_from_counts(input_count, output_count)
-  let mut builder = @core.DeviceDescriptionBuilder::new(name).direction(
+  let mut builder = @core.DeviceDescriptionBuilder(name).direction(
     direction,
   )
   // Mirrors upstream CPAL: only tag aggregate devices.

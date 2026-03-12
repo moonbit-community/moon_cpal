@@ -24,7 +24,7 @@ test "traits: HostTrait/DeviceTrait/StreamTrait roundtrip (best-effort)" {
     Some(dev) => {
       let _ = DeviceTrait::supports_output(dev)
       let _ = try DeviceTrait::id(dev) catch {
-        _ => @core.DeviceId::new(_id, "")
+        _ => @core.DeviceId(_id, "")
       } noraise {
         x => x
       }

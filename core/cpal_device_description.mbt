@@ -213,6 +213,16 @@ pub struct DeviceDescription {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
+  fn new(
+    name : String,
+    manufacturer? : String?,
+    driver? : String?,
+    device_type? : DeviceType,
+    interface_type? : InterfaceType,
+    direction? : DeviceDirection,
+    address? : String?,
+    extended? : Array[String],
+  ) -> DeviceDescription
 } derive(Show, Eq)
 
 ///|
@@ -376,6 +386,7 @@ pub struct DeviceDescriptionBuilder {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
+  fn new(name : String) -> DeviceDescriptionBuilder
 } derive(Show, Eq)
 
 ///|
@@ -534,7 +545,7 @@ pub fn DeviceDescriptionBuilder::add_extended_line(
 pub fn DeviceDescriptionBuilder::build(
   self : DeviceDescriptionBuilder,
 ) -> DeviceDescription {
-  DeviceDescription::new(
+  DeviceDescription(
     self.name,
     manufacturer=self.manufacturer,
     driver=self.driver,

@@ -42,7 +42,7 @@ test "wasapi fixed buffer outside supported range is best-effort (best-effort)" 
         return
       }
       let want = max_buf + 1
-      let sc = @core.StreamConfig::new(
+      let sc = @core.StreamConfig(
         cfg.channels(),
         cfg.sample_rate(),
         @core.BufferSize::fixed(want),
@@ -77,7 +77,7 @@ test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
     return
   }
   let dev : Device = { id: "does_not_matter" }
-  let sc = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(0))
+  let sc = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(0))
   try
     dev.build_output_stream_raw(
       sc,

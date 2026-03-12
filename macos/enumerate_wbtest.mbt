@@ -16,8 +16,8 @@
 fn expected_device_id(device_id : UInt) -> @core.DeviceId {
   match device_uid(device_id) {
     Some(uid) if uid.trim().length() > 0 =>
-      @core.DeviceId::new(@core.HostId::CoreAudio, uid)
-    _ => @core.DeviceId::new(@core.HostId::CoreAudio, "")
+      @core.DeviceId(@core.HostId::CoreAudio, uid)
+    _ => @core.DeviceId(@core.HostId::CoreAudio, "")
   }
 }
 

@@ -87,10 +87,10 @@ test "cmp_default_heuristics (ported from upstream cpal/src/lib.rs)" {
 
 ///|
 test "stream_instant add/sub (ported from upstream cpal/src/lib.rs)" {
-  let a = StreamInstant::new(2L, 0)
-  let b = StreamInstant::new(-2L, 0)
-  let min = StreamInstant::new(-9223372036854775808L, 0)
-  let max = StreamInstant::new(9223372036854775807L, 0)
+  let a = StreamInstant(2L, 0)
+  let b = StreamInstant(-2L, 0)
+  let min = StreamInstant(-9223372036854775808L, 0)
+  let max = StreamInstant(9223372036854775807L, 0)
   inspect(a.sub(Duration::from_secs(1)), content="Some({secs: 1, nanos: 0})")
   inspect(a.sub(Duration::from_secs(2)), content="Some({secs: 0, nanos: 0})")
   inspect(a.sub(Duration::from_secs(3)), content="Some({secs: -1, nanos: 0})")
@@ -103,19 +103,19 @@ test "stream_instant add/sub (ported from upstream cpal/src/lib.rs)" {
 
 ///|
 test "stream_instant duration_since (ported from upstream cpal/src/lib.rs)" {
-  let a = StreamInstant::new(2L, 0)
-  let b = StreamInstant::new(1L, 0)
+  let a = StreamInstant(2L, 0)
+  let b = StreamInstant(1L, 0)
   inspect(a.duration_since(b), content="Some({secs: 1, nanos: 0})")
   inspect(b.duration_since(a), content="None")
-  let c = StreamInstant::new(1L, 100)
-  let d = StreamInstant::new(0L, 200)
+  let c = StreamInstant(1L, 100)
+  let d = StreamInstant(0L, 200)
   inspect(c.duration_since(d), content="Some({secs: 0, nanos: 999999900})")
 }
 
 ///|
 test "duration constructor supports nanos" {
-  inspect(Duration::new(2UL, 123), content="{secs: 2, nanos: 123}")
-  inspect(Duration::new(2UL, 1_000_000_123), content="{secs: 3, nanos: 123}")
+  inspect(Duration(2UL, 123), content="{secs: 2, nanos: 123}")
+  inspect(Duration(2UL, 1_000_000_123), content="{secs: 3, nanos: 123}")
 }
 
 ///|
@@ -148,7 +148,7 @@ test "sample_format properties (ported from upstream cpal/src/samples_formats.rs
 
 ///|
 test "supported_config_range sample-rate helpers" {
-  let range = SupportedStreamConfigRange::new(
+  let range = SupportedStreamConfigRange(
     2,
     10,
     20,
@@ -185,11 +185,11 @@ test "supported_buffer_size contains" {
 
 ///|
 test "device description formatting" {
-  let d0 = DeviceDescription::new("My Device")
+  let d0 = DeviceDescription("My Device")
   inspect(d0.to_string(), content="My Device")
   inspect(d0.supports_input(), content="false")
   inspect(d0.supports_output(), content="false")
-  let d1 = DeviceDescription::new(
+  let d1 = DeviceDescription(
     "My Device",
     manufacturer=Some("ACME"),
     device_type=DeviceType::Speaker,
@@ -211,7 +211,7 @@ test "device description builder + direction_from_caps" {
   inspect(direction_from_counts(Some(2), Some(0)), content="Input")
   inspect(direction_from_counts(None, Some(2)), content="Output")
   inspect(direction_from_counts(None, None), content="Unknown")
-  let built = DeviceDescriptionBuilder::new("X")
+  let built = DeviceDescriptionBuilder("X")
     .manufacturer("ACME")
     .driver("drv")
     .device_type(DeviceType::speaker())
@@ -229,17 +229,17 @@ test "device description builder + direction_from_caps" {
 
 ///|
 test "callback timestamp types" {
-  let callback = StreamInstant::new(1L, 2)
-  let capture = StreamInstant::new(3L, 4)
-  let playback = StreamInstant::new(5L, 6)
-  let in_ts = InputStreamTimestamp::new(callback, capture)
-  let out_ts = OutputStreamTimestamp::new(callback, playback)
+  let callback = StreamInstant(1L, 2)
+  let capture = StreamInstant(3L, 4)
+  let playback = StreamInstant(5L, 6)
+  let in_ts = InputStreamTimestamp(callback, capture)
+  let out_ts = OutputStreamTimestamp(callback, playback)
   inspect(in_ts.callback(), content="{secs: 1, nanos: 2}")
   inspect(in_ts.capture(), content="{secs: 3, nanos: 4}")
   inspect(out_ts.callback(), content="{secs: 1, nanos: 2}")
   inspect(out_ts.playback(), content="{secs: 5, nanos: 6}")
-  let in_info = InputCallbackInfo::new(in_ts)
-  let out_info = OutputCallbackInfo::new(out_ts)
+  let in_info = InputCallbackInfo(in_ts)
+  let out_info = OutputCallbackInfo(out_ts)
   inspect(
     in_info.timestamp(),
     content="{callback: {secs: 1, nanos: 2}, capture: {secs: 3, nanos: 4}}",
@@ -265,7 +265,7 @@ test "host_id parsing" {
 
 ///|
 test "device_id parsing and formatting" {
-  let id = DeviceId::new(CoreAudio, "abc")
+  let id = DeviceId(CoreAudio, "abc")
   inspect(id.to_string(), content="coreaudio:abc")
   inspect(
     try? DeviceId::from_string("coreaudio:abc"),

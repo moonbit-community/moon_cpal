@@ -30,7 +30,7 @@ test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
       } noraise {
         x => x
       }
-      let sc = @core.StreamConfig::new(
+      let sc = @core.StreamConfig(
         cfg.channels(),
         cfg.sample_rate(),
         @core.BufferSize::fixed(0),
@@ -91,7 +91,7 @@ test "alsa fixed buffer outside supported range is best-effort (best-effort)" {
         return
       }
       let want = max_buf + 1
-      let sc = @core.StreamConfig::new(
+      let sc = @core.StreamConfig(
         cfg.channels(),
         cfg.sample_rate(),
         @core.BufferSize::fixed(want),

@@ -26,6 +26,7 @@ pub struct Host {
 ///|
 pub struct Device {
   _unit : Unit
+  fn new() -> Device
 } derive(Show, Eq)
 
 ///|
@@ -40,17 +41,17 @@ pub fn default_host() -> Host {
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  [Device::new()]
+  [Device()]
 }
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  Some(Device::new())
+  Some(Device())
 }
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  Some(Device::new())
+  Some(Device())
 }
 
 ///|
@@ -60,7 +61,7 @@ pub fn Device::name(_self : Device) -> String {
 
 ///|
 pub fn Device::description(_self : Device) -> @core.DeviceDescription {
-  @core.DeviceDescription::new(
+  @core.DeviceDescription(
     "Test Device",
     driver=Some("TestHost"),
     device_type=@core.DeviceType::virtual_(),
@@ -71,7 +72,7 @@ pub fn Device::description(_self : Device) -> @core.DeviceDescription {
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId::new(@core.HostId::Null, "test_host")
+  @core.DeviceId(@core.HostId::Null, "test_host")
 }
 
 ///|
@@ -92,7 +93,7 @@ pub fn Device::supported_input_configs(
   for ch in chans {
     for fmt in fmts {
       out.push(
-        @core.SupportedStreamConfigRange::new(ch, min_sr, max_sr, buf, fmt),
+        @core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt),
       )
     }
   }
@@ -110,7 +111,7 @@ pub fn Device::supported_output_configs(
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig {
-  @core.SupportedStreamConfig::new(
+  @core.SupportedStreamConfig(
     2,
     48000,
     @core.SupportedBufferSize::Range(min=64, max=2048),

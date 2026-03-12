@@ -14,8 +14,8 @@
 
 ///|
 test "wasapi callback timestamps + format tags" {
-  let want_cb = @core.StreamInstant::new(1, 2)
-  let want_pb = @core.StreamInstant::new(3, 4)
+  let want_cb = @core.StreamInstant(1, 2)
+  let want_pb = @core.StreamInstant(3, 4)
   let got = FixedArray::make(3, false)
   call_output_data_callback(
     fn(d, info) {
@@ -33,8 +33,8 @@ test "wasapi callback timestamps + format tags" {
   inspect(got[0], content="true")
   inspect(got[1], content="true")
   inspect(got[2], content="true")
-  let want_cb2 = @core.StreamInstant::new(5, 6)
-  let want_cap = @core.StreamInstant::new(7, 8)
+  let want_cb2 = @core.StreamInstant(5, 6)
+  let want_cap = @core.StreamInstant(7, 8)
   let got2 = FixedArray::make(3, false)
   call_input_data_callback(
     fn(d, info) {

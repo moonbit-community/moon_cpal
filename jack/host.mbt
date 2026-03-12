@@ -103,12 +103,12 @@ pub fn Device::description(
     )
   }
   // Mirrors upstream CPAL: only name + direction are filled for JACK.
-  @core.DeviceDescriptionBuilder::new(name).direction(_self.direction).build()
+  @core.DeviceDescriptionBuilder(name).direction(_self.direction).build()
 }
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId::new(@core.HostId::Jack, _self.id)
+  @core.DeviceId(@core.HostId::Jack, _self.id)
 }
 
 ///|
@@ -186,7 +186,7 @@ fn default_config(
   match default_server_config() {
     None => raise @core.default_stream_config_error_device_not_available()
     Some((sr, buf)) =>
-      @core.SupportedStreamConfig::new(
+      @core.SupportedStreamConfig(
         2,
         sr,
         @core.SupportedBufferSize::Range(min=buf, max=buf),
@@ -207,7 +207,7 @@ fn supported_configs(_self : Device) -> Array[@core.SupportedStreamConfigRange] 
       let out : Array[@core.SupportedStreamConfigRange] = []
       for ch in chans {
         out.push(
-          @core.SupportedStreamConfigRange::new(
+          @core.SupportedStreamConfigRange(
             ch,
             sr,
             sr,

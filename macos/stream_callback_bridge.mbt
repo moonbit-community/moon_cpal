@@ -38,11 +38,11 @@ fn call_output_data_callback(
   playback_nanos : Int,
 ) -> Unit {
   let fmt = sample_format_from_tag(sample_format_tag)
-  let data = @core.Data::new(fmt, bytes)
-  let callback = @core.StreamInstant::new(callback_secs, callback_nanos)
-  let playback = @core.StreamInstant::new(playback_secs, playback_nanos)
-  let ts = @core.OutputStreamTimestamp::new(callback, playback)
-  let info = @core.OutputCallbackInfo::new(ts)
+  let data = @core.Data(fmt, bytes)
+  let callback = @core.StreamInstant(callback_secs, callback_nanos)
+  let playback = @core.StreamInstant(playback_secs, playback_nanos)
+  let ts = @core.OutputStreamTimestamp(callback, playback)
+  let info = @core.OutputCallbackInfo(ts)
   data_callback(data, info)
 }
 
@@ -83,11 +83,11 @@ fn call_input_data_callback(
   capture_nanos : Int,
 ) -> Unit {
   let fmt = sample_format_from_tag(sample_format_tag)
-  let data = @core.Data::new(fmt, bytes)
-  let callback = @core.StreamInstant::new(callback_secs, callback_nanos)
-  let capture = @core.StreamInstant::new(capture_secs, capture_nanos)
-  let ts = @core.InputStreamTimestamp::new(callback, capture)
-  let info = @core.InputCallbackInfo::new(ts)
+  let data = @core.Data(fmt, bytes)
+  let callback = @core.StreamInstant(callback_secs, callback_nanos)
+  let capture = @core.StreamInstant(capture_secs, capture_nanos)
+  let ts = @core.InputStreamTimestamp(callback, capture)
+  let info = @core.InputCallbackInfo(ts)
   data_callback(data, info)
 }
 

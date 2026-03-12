@@ -56,6 +56,11 @@ pub struct StreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   buffer_size : BufferSize
+  fn new(
+    channels : ChannelCount,
+    sample_rate : SampleRate,
+    buffer_size : BufferSize,
+  ) -> StreamConfig
 } derive(Show, Eq)
 
 ///|
@@ -115,6 +120,12 @@ pub struct SupportedStreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   sample_format : SampleFormat
+  fn new(
+    channels : ChannelCount,
+    sample_rate : SampleRate,
+    buffer_size : SupportedBufferSize,
+    sample_format : SampleFormat,
+  ) -> SupportedStreamConfig
 } derive(Show, Eq)
 
 ///|
@@ -175,6 +186,13 @@ pub struct SupportedStreamConfigRange {
   min_sample_rate : SampleRate
   max_sample_rate : SampleRate
   sample_format : SampleFormat
+  fn new(
+    channels : ChannelCount,
+    min_sample_rate : SampleRate,
+    max_sample_rate : SampleRate,
+    buffer_size : SupportedBufferSize,
+    sample_format : SampleFormat,
+  ) -> SupportedStreamConfigRange
 } derive(Show, Eq)
 
 ///|
@@ -250,7 +268,7 @@ pub fn SupportedStreamConfigRange::try_with_sample_rate(
 ) -> SupportedStreamConfig? {
   if self.min_sample_rate <= sample_rate && sample_rate <= self.max_sample_rate {
     Some(
-      SupportedStreamConfig::new(
+      SupportedStreamConfig(
         self.channels,
         sample_rate,
         self.buffer_size,
@@ -267,7 +285,7 @@ pub fn SupportedStreamConfigRange::try_with_sample_rate(
 pub fn SupportedStreamConfigRange::with_max_sample_rate(
   self : SupportedStreamConfigRange,
 ) -> SupportedStreamConfig {
-  SupportedStreamConfig::new(
+  SupportedStreamConfig(
     self.channels,
     self.max_sample_rate,
     self.buffer_size,

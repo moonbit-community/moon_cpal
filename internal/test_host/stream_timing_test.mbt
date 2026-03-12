@@ -40,7 +40,7 @@ test "test_host stream: no callbacks before play; pause stops callbacks (best-ef
   }
   let frames = 128
   let ch = 2
-  let cfg = @core.StreamConfig::new(ch, 48000, @core.BufferSize::fixed(frames))
+  let cfg = @core.StreamConfig(ch, 48000, @core.BufferSize::fixed(frames))
   let calls : Array[Int] = [0]
   let seen_sizes : Array[Int] = [0]
   let stream = try
@@ -108,7 +108,7 @@ test "test_host stream: close stops callbacks; play after close fails" {
     }
     Some(d) => d
   }
-  let cfg = @core.StreamConfig::new(1, 48000, @core.BufferSize::fixed(64))
+  let cfg = @core.StreamConfig(1, 48000, @core.BufferSize::fixed(64))
   let calls : Array[Int] = [0]
   let stream = try
     dev.build_input_stream(
@@ -159,7 +159,7 @@ test "test_host stream: play resumes after pause (best-effort)" {
     }
     Some(d) => d
   }
-  let cfg = @core.StreamConfig::new(2, 48000, @core.BufferSize::fixed(128))
+  let cfg = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(128))
   let calls : Array[Int] = [0]
   let stream = try
     dev.build_output_stream(
@@ -224,7 +224,7 @@ test "test_host stream: pause after close fails" {
     }
     Some(d) => d
   }
-  let cfg = @core.StreamConfig::new(1, 48000, @core.BufferSize::fixed(64))
+  let cfg = @core.StreamConfig(1, 48000, @core.BufferSize::fixed(64))
   let stream = try
     dev.build_input_stream(
       cfg,

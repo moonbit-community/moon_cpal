@@ -30,6 +30,7 @@
 pub struct Data {
   sample_format : SampleFormat
   bytes : FixedArray[Byte]
+  fn new(sample_format : SampleFormat, bytes : FixedArray[Byte]) -> Data
 } derive(Show, Eq)
 
 ///|
@@ -251,7 +252,7 @@ pub fn Data::try_as_u24(self : Data) -> Array[U24]? {
       None => return None
       Some(bits) => {
         let raw = (bits & (0x00ff_ffff : UInt)).reinterpret_as_int()
-        out.push(U24::new(raw))
+        out.push(U24(raw))
       }
     }
     i = i + 1
@@ -281,7 +282,7 @@ pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
         } else {
           u.reinterpret_as_int()
         }
-        out.push(I24::new(raw))
+        out.push(I24(raw))
       }
     }
     i = i + 1

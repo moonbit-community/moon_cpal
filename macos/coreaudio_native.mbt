@@ -236,7 +236,7 @@ fn default_stream_config(
     _ => raise @core.default_stream_config_error_stream_type_not_supported()
   }
   let buffer_size = get_buffer_frame_size_range_default(device_id)
-  @core.SupportedStreamConfig::new(
+  @core.SupportedStreamConfig(
     channels, sample_rate, buffer_size, sample_format,
   )
 }
@@ -333,7 +333,7 @@ fn supported_configs(
     for i in 0..<ranges.length() {
       let (minv, maxv) = ranges[i]
       out.push(
-        @core.SupportedStreamConfigRange::new(
+        @core.SupportedStreamConfigRange(
           channels,
           minv.to_int(),
           maxv.to_int(),
@@ -358,7 +358,7 @@ fn supported_configs(
       }
     }
     [
-      @core.SupportedStreamConfigRange::new(
+      @core.SupportedStreamConfigRange(
         channels, min_sr, max_sr, buffer_size, sample_format,
       ),
     ]

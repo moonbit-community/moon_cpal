@@ -20,6 +20,7 @@
 ///|
 pub struct BackendSpecificError {
   description : String
+  fn new(description : String) -> BackendSpecificError
 } derive(Show, Eq)
 
 ///|
@@ -208,7 +209,7 @@ pub fn default_stream_config_error_stream_type_not_supported() -> DefaultStreamC
 pub fn default_stream_config_error_backend_specific(
   description : String,
 ) -> DefaultStreamConfigError {
-  BackendSpecific(BackendSpecificError::new(description))
+  BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
@@ -231,20 +232,20 @@ pub fn supported_stream_configs_error_backend_specific(
   description : String,
 ) -> SupportedStreamConfigsError {
   SupportedStreamConfigsError::BackendSpecific(
-    BackendSpecificError::new(description),
+    BackendSpecificError(description),
   )
 }
 
 ///|
 pub fn devices_error_backend_specific(description : String) -> DevicesError {
-  DevicesError::BackendSpecific(BackendSpecificError::new(description))
+  DevicesError::BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
 pub fn device_name_error_backend_specific(
   description : String,
 ) -> DeviceNameError {
-  DeviceNameError::BackendSpecific(BackendSpecificError::new(description))
+  DeviceNameError::BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
@@ -276,7 +277,7 @@ pub fn build_stream_error_stream_id_overflow() -> BuildStreamError {
 pub fn build_stream_error_backend_specific(
   description : String,
 ) -> BuildStreamError {
-  BuildStreamError::BackendSpecific(BackendSpecificError::new(description))
+  BuildStreamError::BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
@@ -288,7 +289,7 @@ pub fn play_stream_error_device_not_available() -> PlayStreamError {
 pub fn play_stream_error_backend_specific(
   description : String,
 ) -> PlayStreamError {
-  PlayStreamError::BackendSpecific(BackendSpecificError::new(description))
+  PlayStreamError::BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
@@ -300,7 +301,7 @@ pub fn pause_stream_error_device_not_available() -> PauseStreamError {
 pub fn pause_stream_error_backend_specific(
   description : String,
 ) -> PauseStreamError {
-  PauseStreamError::BackendSpecific(BackendSpecificError::new(description))
+  PauseStreamError::BackendSpecific(BackendSpecificError(description))
 }
 
 ///|
@@ -320,5 +321,5 @@ pub fn stream_error_buffer_underrun() -> StreamError {
 
 ///|
 pub fn stream_error_backend_specific(description : String) -> StreamError {
-  StreamError::BackendSpecific(BackendSpecificError::new(description))
+  StreamError::BackendSpecific(BackendSpecificError(description))
 }

@@ -159,7 +159,7 @@ pub fn Device::description(
         }
       }
   }
-  @core.DeviceDescription::new(
+  @core.DeviceDescription(
     name,
     driver=Some(_self.id),
     device_type=@core.DeviceType::unknown(),
@@ -172,7 +172,7 @@ pub fn Device::description(
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId::new(@core.HostId::Alsa, _self.id)
+  @core.DeviceId(@core.HostId::Alsa, _self.id)
 }
 
 ///|
@@ -353,7 +353,7 @@ fn parse_supported_configs_bin(
           max=if buf_max >= buf_min && buf_max > 0 { buf_max } else { buf_min },
         )
         out.push(
-          @core.SupportedStreamConfigRange::new(ch, min_sr, max_sr, buf, fmt),
+          @core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt),
         )
       }
     }

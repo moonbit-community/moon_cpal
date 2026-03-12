@@ -24,11 +24,13 @@
 ///|
 pub struct I24 {
   raw : Int
+  fn new(raw : Int) -> I24
 } derive(Show, Eq)
 
 ///|
 pub struct U24 {
   raw : Int
+  fn new(raw : Int) -> U24
 } derive(Show, Eq)
 
 ///|
@@ -255,7 +257,7 @@ pub impl FromSample for Byte with from_sample(x : Float) -> Byte {
 
 ///|
 pub impl Sample for I24 with equilibrium() {
-  I24::new(0)
+  I24(0)
 }
 
 ///|
@@ -267,7 +269,7 @@ pub impl Sample for I24 with to_f32(self : I24) -> Float {
 pub impl Sample for I24 with from_f32(x : Float) -> I24 {
   let x = clamp_unit(x)
   let scaled = round_to_int(x * Float::from_int(8_388_608))
-  I24::new(scaled)
+  I24(scaled)
 }
 
 ///|
@@ -282,7 +284,7 @@ pub impl FromSample for I24 with from_sample(x : Float) -> I24 {
 
 ///|
 pub impl Sample for U24 with equilibrium() {
-  U24::new(u24_mid)
+  U24(u24_mid)
 }
 
 ///|
@@ -294,7 +296,7 @@ pub impl Sample for U24 with to_f32(self : U24) -> Float {
 pub impl Sample for U24 with from_f32(x : Float) -> U24 {
   let x = clamp_unit(x)
   let scaled = round_to_int(x * Float::from_int(u24_mid)) + u24_mid
-  U24::new(scaled)
+  U24(scaled)
 }
 
 ///|

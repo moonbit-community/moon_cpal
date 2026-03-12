@@ -134,12 +134,12 @@ test "spec: raw + typed stream builders (best-effort)" {
   } noraise {
     x => x
   }
-  let out_sc = @core.StreamConfig::new(
+  let out_sc = @core.StreamConfig(
     out_cfg.channels(),
     out_cfg.sample_rate(),
     @core.BufferSize::fixed(64),
   )
-  let inp_sc = @core.StreamConfig::new(
+  let inp_sc = @core.StreamConfig(
     inp_cfg.channels(),
     inp_cfg.sample_rate(),
     @core.BufferSize::fixed(64),
