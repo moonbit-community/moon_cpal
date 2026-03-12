@@ -15,7 +15,7 @@
 ///|
 test "error display strings (cpal-reference parity)" {
   inspect(
-    BackendSpecificError::new("oops").to_string(),
+    BackendSpecificError::BackendSpecificError("oops").to_string(),
     content="A backend-specific error has occurred: oops",
   )
   inspect(

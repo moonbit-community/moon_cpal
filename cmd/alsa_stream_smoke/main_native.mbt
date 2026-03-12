@@ -128,7 +128,7 @@ fn main {
         // Validate BufferSize::Fixed semantics: re-build with fixed size equal to the observed
         // callback frame count and ensure callback buffer sizing matches.
         if first_frames[0] > 0 && cfg.channels > 0 {
-          let fixed_cfg = @moon_cpal.StreamConfig::new(
+          let fixed_cfg = @moon_cpal.StreamConfig::StreamConfig(
             cfg.channels,
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
@@ -270,7 +270,7 @@ fn main {
 
         // Validate BufferSize::Fixed semantics (best-effort) using the observed callback size.
         if first_frames[0] > 0 && cfg.channels > 0 {
-          let fixed_cfg = @moon_cpal.StreamConfig::new(
+          let fixed_cfg = @moon_cpal.StreamConfig::StreamConfig(
             cfg.channels,
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),

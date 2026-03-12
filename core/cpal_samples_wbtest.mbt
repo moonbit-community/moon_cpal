@@ -14,8 +14,8 @@
 
 ///|
 test "i24 clamp + float conversions" {
-  inspect(I24::new(9_000_000).to_int(), content="8388607")
-  inspect(I24::new(-9_000_000).to_int(), content="-8388608")
+  inspect(I24::I24(9_000_000).to_int(), content="8388607")
+  inspect(I24::I24(-9_000_000).to_int(), content="-8388608")
   let i24_eq : I24 = Sample::equilibrium()
   inspect(i24_eq.to_f32(), content="0")
   inspect(I24::from_f32(1.0).to_int(), content="8388607")
@@ -29,8 +29,8 @@ test "i24 clamp + float conversions" {
 
 ///|
 test "u24 clamp + float conversions" {
-  inspect(U24::new(-1).to_int(), content="0")
-  inspect(U24::new(99_999_999).to_int(), content="16777215")
+  inspect(U24::U24(-1).to_int(), content="0")
+  inspect(U24::U24(99_999_999).to_int(), content="16777215")
   let u24_eq : U24 = Sample::equilibrium()
   inspect(u24_eq.to_int(), content="8388608")
   inspect(u24_eq.to_f32(), content="0")
@@ -45,8 +45,8 @@ test "sized_sample format mapping" {
   inspect(SizedSample::format(Int16::from_int(0)), content="I16")
   inspect(SizedSample::format(Int::to_uint16(0)), content="U16")
   inspect(SizedSample::format(Int::to_byte(0)), content="U8")
-  inspect(SizedSample::format(I24::new(0)), content="I24")
-  inspect(SizedSample::format(U24::new(0)), content="U24")
+  inspect(SizedSample::format(I24::I24(0)), content="I24")
+  inspect(SizedSample::format(U24::U24(0)), content="U24")
 }
 
 ///|

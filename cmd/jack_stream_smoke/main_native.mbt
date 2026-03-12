@@ -66,12 +66,12 @@ fn main {
         )
         panic()
       }
-      let fixed_ok = @moon_cpal.StreamConfig::new(
+      let fixed_ok = @moon_cpal.StreamConfig::StreamConfig(
         cfg.channels,
         cfg.sample_rate,
         @moon_cpal.BufferSize::fixed(mn),
       )
-      let fixed_bad = @moon_cpal.StreamConfig::new(
+      let fixed_bad = @moon_cpal.StreamConfig::StreamConfig(
         cfg.channels,
         cfg.sample_rate,
         @moon_cpal.BufferSize::fixed(mn + 1),

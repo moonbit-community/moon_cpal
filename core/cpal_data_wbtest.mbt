@@ -128,14 +128,14 @@ test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
   inspect(i8.write_i8([-128, 0, 127]), content="true")
   inspect(i8.try_as_i8(), content="Some([-128, 0, 127])")
   let i24 = Data(SampleFormat::I24, FixedArray::make(8, Int::to_byte(0)))
-  inspect(i24.write_i24([I24::new(-1), I24::new(8_388_607)]), content="true")
+  inspect(i24.write_i24([I24::I24(-1), I24::I24(8_388_607)]), content="true")
   match i24.try_as_i24() {
     None => inspect(false, content="true")
     Some(xs) =>
       inspect([xs[0].to_int(), xs[1].to_int()], content="[-1, 8388607]")
   }
   let u24 = Data(SampleFormat::U24, FixedArray::make(8, Int::to_byte(0)))
-  inspect(u24.write_u24([U24::new(0), U24::new(16_777_215)]), content="true")
+  inspect(u24.write_u24([U24::U24(0), U24::U24(16_777_215)]), content="true")
   match u24.try_as_u24() {
     None => inspect(false, content="true")
     Some(xs) =>
