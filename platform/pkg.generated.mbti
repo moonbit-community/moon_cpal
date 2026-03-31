@@ -30,7 +30,7 @@ pub enum Device {
   Alsa(@alsa.Device)
   Jack(@jack.Device)
   Wasapi(@wasapi.Device)
-}
+} derive(Eq, Show)
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_output_stream(Self, @core.StreamConfig, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -46,8 +46,6 @@ pub fn Device::supports_input(Self) -> Bool
 pub fn Device::supports_output(Self) -> Bool
 pub fn Device::try_default_input_config(Self) -> @core.SupportedStreamConfig?
 pub fn Device::try_default_output_config(Self) -> @core.SupportedStreamConfig?
-pub impl Eq for Device
-pub impl Show for Device
 
 pub enum Host {
   Null(@null.Host)
@@ -55,7 +53,7 @@ pub enum Host {
   Alsa(@alsa.Host)
   Jack(@jack.Host)
   Wasapi(@wasapi.Host)
-}
+} derive(Eq, Show)
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::device_by_id(Self, @core.DeviceId) -> Device?
@@ -63,8 +61,6 @@ pub fn Host::devices(Self) -> Iter[Device] raise @core.DevicesError
 pub fn Host::id(Self) -> @core.HostId
 pub fn Host::input_devices(Self) -> Iter[Device] raise @core.DevicesError
 pub fn Host::output_devices(Self) -> Iter[Device] raise @core.DevicesError
-pub impl Eq for Host
-pub impl Show for Host
 
 pub enum Stream {
   Null(@null.Stream)
@@ -72,12 +68,10 @@ pub enum Stream {
   Alsa(@alsa.Stream)
   Jack(@jack.Stream)
   Wasapi(@wasapi.Stream)
-}
+} derive(Eq, Show)
 pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
-pub impl Eq for Stream
-pub impl Show for Stream
 
 // Type aliases
 

@@ -94,9 +94,7 @@ pub fn Device::description(
     xs => Some(xs.length())
   }
   let direction = @core.direction_from_counts(input_count, output_count)
-  let mut builder = @core.DeviceDescriptionBuilder(name).direction(
-    direction,
-  )
+  let mut builder = @core.DeviceDescriptionBuilder(name).direction(direction)
   // Mirrors upstream CPAL: only tag aggregate devices.
   if device_is_aggregate(self.id) {
     builder = builder.interface_type(@core.InterfaceType::aggregate())

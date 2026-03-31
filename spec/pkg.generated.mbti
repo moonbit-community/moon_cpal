@@ -22,7 +22,7 @@ pub fn try_host_from_id(@core.HostId) -> Host?
 // Types and methods
 pub struct Data {
   inner : @core.Data
-}
+} derive(Eq, Show)
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::clear(Self) -> Unit
 pub fn Data::len(Self) -> Int
@@ -43,12 +43,10 @@ pub fn Data::write_u24(Self, Array[@core.U24]) -> Bool
 pub fn Data::write_u32(Self, Array[UInt]) -> Bool
 pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
 pub fn Data::write_u8(Self, Array[Byte]) -> Bool
-pub impl Eq for Data
-pub impl Show for Data
 
 pub struct Device {
   inner : @platform.Device
-}
+} derive(Eq, Show)
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -70,12 +68,10 @@ pub fn Device::supported_input_configs(Self) -> Iter[@core.SupportedStreamConfig
 pub fn Device::supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
 pub fn Device::supports_input(Self) -> Bool
 pub fn Device::supports_output(Self) -> Bool
-pub impl Eq for Device
-pub impl Show for Device
 
 pub struct Host {
   inner : @platform.Host
-}
+} derive(Eq, Show)
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::device_by_id(Self, @core.DeviceId) -> Device?
@@ -83,17 +79,13 @@ pub fn Host::devices(Self) -> Iter[Device] raise @core.DevicesError
 pub fn Host::id(Self) -> @core.HostId
 pub fn Host::input_devices(Self) -> Iter[Device] raise @core.DevicesError
 pub fn Host::output_devices(Self) -> Iter[Device] raise @core.DevicesError
-pub impl Eq for Host
-pub impl Show for Host
 
 pub struct Stream {
   inner : @platform.Stream
-}
+} derive(Eq, Show)
 pub fn Stream::close(Self) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
-pub impl Eq for Stream
-pub impl Show for Stream
 
 // Type aliases
 

@@ -23,7 +23,11 @@
 pub struct InputStreamTimestamp {
   callback : StreamInstant
   capture : StreamInstant
-  fn new(callback : StreamInstant, capture : StreamInstant) -> InputStreamTimestamp
+
+  fn new(
+    callback : StreamInstant,
+    capture : StreamInstant,
+  ) -> InputStreamTimestamp
 } derive(Show, Eq)
 
 ///|
@@ -53,7 +57,11 @@ pub fn InputStreamTimestamp::capture(
 pub struct OutputStreamTimestamp {
   callback : StreamInstant
   playback : StreamInstant
-  fn new(callback : StreamInstant, playback : StreamInstant) -> OutputStreamTimestamp
+
+  fn new(
+    callback : StreamInstant,
+    playback : StreamInstant,
+  ) -> OutputStreamTimestamp
 } derive(Show, Eq)
 
 ///|
@@ -82,6 +90,7 @@ pub fn OutputStreamTimestamp::playback(
 /// Information relevant to a single call to the user's input stream data callback.
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
+
   fn new(timestamp : InputStreamTimestamp) -> InputCallbackInfo
 } derive(Show, Eq)
 
@@ -103,6 +112,7 @@ pub fn InputCallbackInfo::timestamp(
 /// Information relevant to a single call to the user's output stream data callback.
 pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
+
   fn new(timestamp : OutputStreamTimestamp) -> OutputCallbackInfo
 } derive(Show, Eq)
 

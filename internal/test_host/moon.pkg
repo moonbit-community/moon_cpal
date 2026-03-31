@@ -2,6 +2,8 @@ import {
   "Milky2018/moon_cpal/core",
 }
 
+supported_targets = "native"
+
 options(
   "native-stub": [ "null_stream.c" ],
   targets: {

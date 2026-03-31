@@ -26,6 +26,7 @@ pub struct Host {
 ///|
 pub struct Device {
   _unit : Unit
+
   fn new() -> Device
 } derive(Show, Eq)
 
@@ -92,9 +93,7 @@ pub fn Device::supported_input_configs(
   let out : Array[@core.SupportedStreamConfigRange] = []
   for ch in chans {
     for fmt in fmts {
-      out.push(
-        @core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt),
-      )
+      out.push(@core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
     }
   }
   out

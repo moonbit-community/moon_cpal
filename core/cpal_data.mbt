@@ -30,6 +30,7 @@
 pub struct Data {
   sample_format : SampleFormat
   bytes : FixedArray[Byte]
+
   fn new(sample_format : SampleFormat, bytes : FixedArray[Byte]) -> Data
 } derive(Show, Eq)
 

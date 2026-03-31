@@ -20,6 +20,7 @@
 ///|
 pub struct BackendSpecificError {
   description : String
+
   fn new(description : String) -> BackendSpecificError
 } derive(Show, Eq)
 

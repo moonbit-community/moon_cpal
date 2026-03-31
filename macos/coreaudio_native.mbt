@@ -236,9 +236,7 @@ fn default_stream_config(
     _ => raise @core.default_stream_config_error_stream_type_not_supported()
   }
   let buffer_size = get_buffer_frame_size_range_default(device_id)
-  @core.SupportedStreamConfig(
-    channels, sample_rate, buffer_size, sample_format,
-  )
+  @core.SupportedStreamConfig(channels, sample_rate, buffer_size, sample_format)
 }
 
 ///|

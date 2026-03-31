@@ -56,6 +56,7 @@ pub struct StreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   buffer_size : BufferSize
+
   fn new(
     channels : ChannelCount,
     sample_rate : SampleRate,
@@ -120,6 +121,7 @@ pub struct SupportedStreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   sample_format : SampleFormat
+
   fn new(
     channels : ChannelCount,
     sample_rate : SampleRate,
@@ -186,6 +188,7 @@ pub struct SupportedStreamConfigRange {
   min_sample_rate : SampleRate
   max_sample_rate : SampleRate
   sample_format : SampleFormat
+
   fn new(
     channels : ChannelCount,
     min_sample_rate : SampleRate,

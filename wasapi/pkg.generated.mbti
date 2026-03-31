@@ -31,7 +31,7 @@ pub fn supported_configs_u32(String, Bool) -> (Int, FixedArray[UInt])?
 // Types and methods
 pub struct Device {
   id : String
-}
+} derive(Eq, Show)
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_loopback_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -46,18 +46,14 @@ pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfi
 pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange]
 pub fn Device::supports_input(Self) -> Bool
 pub fn Device::supports_output(Self) -> Bool
-pub impl Eq for Device
-pub impl Show for Device
 
 pub struct Host {
   _unit : Unit
-}
+} derive(Eq, Show)
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::devices(Self) -> Array[Device]
 pub fn Host::is_available(Self) -> Bool
-pub impl Eq for Host
-pub impl Show for Host
 
 pub struct Stream {
   kind : StreamKind
@@ -73,9 +69,7 @@ pub impl Show for Stream
 pub enum StreamKind {
   Output
   Input
-}
-pub impl Eq for StreamKind
-pub impl Show for StreamKind
+} derive(Eq, Show)
 
 type StreamOwner
 

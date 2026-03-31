@@ -213,6 +213,7 @@ pub struct DeviceDescription {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
+
   fn new(
     name : String,
     manufacturer? : String?,
@@ -386,6 +387,7 @@ pub struct DeviceDescriptionBuilder {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
+
   fn new(name : String) -> DeviceDescriptionBuilder
 } derive(Show, Eq)
 

@@ -4,6 +4,8 @@ import {
   "Milky2018/moon_cpal/traits",
 }
 
+supported_targets = "native"
+
 options(
   targets: { },
 )

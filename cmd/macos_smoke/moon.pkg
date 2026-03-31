@@ -2,6 +2,8 @@ import {
   "Milky2018/moon_cpal/macos",
 }
 
+supported_targets = "native"
+
 options(
   is_main: true,
 )

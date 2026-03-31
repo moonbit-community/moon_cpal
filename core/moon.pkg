@@ -2,6 +2,8 @@ import {
   "moonbitlang/core/bigint",
 }
 
+supported_targets = "native"
+
 options(
   "native-stub": [ "os_stub.c", "sleep_stub.c" ],
 )

@@ -352,9 +352,7 @@ fn parse_supported_configs_bin(
           min=if buf_min > 0 { buf_min } else { 1 },
           max=if buf_max >= buf_min && buf_max > 0 { buf_max } else { buf_min },
         )
-        out.push(
-          @core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt),
-        )
+        out.push(@core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
       }
     }
   }

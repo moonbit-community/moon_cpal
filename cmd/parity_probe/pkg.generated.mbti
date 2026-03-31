@@ -6,26 +6,19 @@ package "Milky2018/moon_cpal/cmd/parity_probe"
 // Errors
 
 // Types and methods
-type ProbeBuffer
-pub impl ToJson for ProbeBuffer
+type ProbeBuffer derive(ToJson)
 
-type ProbeBuild
-pub impl ToJson for ProbeBuild
+type ProbeBuild derive(ToJson)
 
-type ProbeConfig
-pub impl ToJson for ProbeConfig
+type ProbeConfig derive(ToJson)
 
-type ProbeConfigRange
-pub impl ToJson for ProbeConfigRange
+type ProbeConfigRange derive(ToJson)
 
-type ProbeDevice
-pub impl ToJson for ProbeDevice
+type ProbeDevice derive(ToJson)
 
-type ProbeHost
-pub impl ToJson for ProbeHost
+type ProbeHost derive(ToJson)
 
-type ProbeSnapshot
-pub impl ToJson for ProbeSnapshot
+type ProbeSnapshot derive(ToJson)
 
 // Type aliases
 

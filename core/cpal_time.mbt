@@ -19,6 +19,7 @@
 pub struct Duration {
   secs : UInt64
   nanos : Int // 0 <= nanos < 1_000_000_000
+
   fn new(secs : UInt64, nanos : Int) -> Duration
 } derive(Show, Eq)
 
@@ -61,6 +62,7 @@ fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
 pub struct StreamInstant {
   secs : Int64
   nanos : Int // normalized to 0 <= nanos < 1_000_000_000
+
   fn new(secs : Int64, nanos : Int) -> StreamInstant
 } derive(Show, Eq)
 

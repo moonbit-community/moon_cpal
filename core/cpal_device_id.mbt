@@ -46,6 +46,7 @@ pub fn DeviceIdError::to_string(self : DeviceIdError) -> String {
 pub struct DeviceId {
   host_id : HostId
   device_id : String
+
   fn new(host_id : HostId, device_id : String) -> DeviceId
 } derive(Show, Eq)
 

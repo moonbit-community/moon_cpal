@@ -3,6 +3,8 @@ import {
   "Milky2018/moon_cpal/spec",
 }
 
+supported_targets = "native"
+
 options(
   targets: { "traits_test.mbt": [ "native" ] },
 )
