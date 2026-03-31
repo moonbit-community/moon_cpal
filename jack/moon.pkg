@@ -3,6 +3,7 @@ import {
 }
 
 options(
+  "warn-list": "-20",
   "native-stub": [ "jack_stub.c", "jack_stream.c" ],
   targets: {
     "error_mapping_wbtest.mbt": [ "native" ],

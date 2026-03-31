@@ -4,5 +4,6 @@ import {
 }
 
 options(
+  "warn-list": "-20",
   targets: { "traits_test.mbt": [ "native" ] },
 )
