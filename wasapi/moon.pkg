@@ -3,7 +3,6 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   "native-stub": [ "wasapi_stub.c", "wasapi_stream.c", "wasapi_guids.c" ],
   targets: {
     "ffi_native.mbt": [ "native" ],

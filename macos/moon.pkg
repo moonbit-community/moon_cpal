@@ -3,7 +3,6 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   "native-stub": [ "coreaudio_stub.c" ],
   targets: {
     "coreaudio_configs_wbtest.mbt": [ "native" ],

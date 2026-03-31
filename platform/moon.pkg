@@ -8,7 +8,6 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   targets: {
     "platform_native.mbt": [ "native" ],
     "platform_native_test.mbt": [ "native" ],

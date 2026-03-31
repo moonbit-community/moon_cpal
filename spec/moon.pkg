@@ -2,7 +2,3 @@ import {
   "Milky2018/moon_cpal/core",
   "Milky2018/moon_cpal/platform",
 }
-
-options(
-  "warn-list": "-20",
-)

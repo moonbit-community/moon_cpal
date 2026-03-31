@@ -3,7 +3,6 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   "native-stub": [ "alsa_stub.c", "alsa_stream.c" ],
   targets: {
     "ffi_native.mbt": [ "native" ],

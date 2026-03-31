@@ -5,7 +5,6 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   is_main: true,
   targets: {
     "main_native.mbt": [ "native" ],

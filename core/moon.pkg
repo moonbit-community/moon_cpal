@@ -3,6 +3,5 @@ import {
 }
 
 options(
-  "warn-list": "-20",
   "native-stub": [ "os_stub.c", "sleep_stub.c" ],
 )
