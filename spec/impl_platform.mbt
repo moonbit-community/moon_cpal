@@ -21,22 +21,22 @@
 ///|
 pub struct Host {
   inner : @platform.Host
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Device {
   inner : @platform.Device
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Stream {
   inner : @platform.Stream
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Data {
   inner : @core.Data
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn default_host() -> Host {

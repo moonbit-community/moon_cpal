@@ -24,7 +24,7 @@ pub(all) enum NativeOs {
   Macos
   Windows
   Linux
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 extern "C" fn native_os_tag() -> Int = "moon_cpal_os_tag"

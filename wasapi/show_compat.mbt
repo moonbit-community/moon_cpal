@@ -13,26 +13,29 @@
 // limitations under the License.
 
 ///|
-/// Stream types for the internal test backend.
-
-///|
-pub enum StreamKind {
-  Input
-  Output
-} derive(Debug, Eq)
-
-///|
-type StreamOwner
-
-///|
-pub struct Stream {
-  kind : StreamKind
-  owner : StreamOwner
+fn[T : @debug.Debug] show_from_debug(value : T, logger : &Logger) -> Unit {
+  let rendered = @debug.render(@debug.Debug::to_repr(value))
+  logger.write_string(
+    rendered
+    .replace_all(old="{ ", new="{")
+    .replace_all(old=" }", new="}"),
+  )
 }
 
 ///|
-pub impl Show for Stream with output(self : Stream, logger : &Logger) -> Unit {
-  logger.write_string("Stream(")
-  logger.write_string(self.kind.to_string())
-  logger.write_string(")")
+pub impl Show for Host with output(self : Host, logger : &Logger) -> Unit {
+  show_from_debug(self, logger)
+}
+
+///|
+pub impl Show for Device with output(self : Device, logger : &Logger) -> Unit {
+  show_from_debug(self, logger)
+}
+
+///|
+pub impl Show for StreamKind with output(
+  self : StreamKind,
+  logger : &Logger,
+) -> Unit {
+  show_from_debug(self, logger)
 }

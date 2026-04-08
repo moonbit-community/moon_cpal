@@ -21,7 +21,7 @@ pub struct Duration {
   nanos : Int // 0 <= nanos < 1_000_000_000
 
   fn new(secs : UInt64, nanos : Int) -> Duration
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Duration::from_secs(secs : UInt64) -> Duration {
@@ -64,7 +64,7 @@ pub struct StreamInstant {
   nanos : Int // normalized to 0 <= nanos < 1_000_000_000
 
   fn new(secs : Int64, nanos : Int) -> StreamInstant
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn StreamInstant::new(secs : Int64, nanos : Int) -> StreamInstant {

@@ -21,7 +21,7 @@
 ///|
 pub suberror HostUnavailable {
   HostUnavailable
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
@@ -43,7 +43,7 @@ pub(all) enum HostId {
   Wasapi
   WebAudio
   AudioWorklet
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 /// Upstream `HostId::name()` returns the variant name (before lowercase display).

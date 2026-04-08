@@ -30,7 +30,7 @@ pub enum Host {
   Alsa(@alsa.Host)
   Jack(@jack.Host)
   Wasapi(@wasapi.Host)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum Device {
@@ -39,7 +39,7 @@ pub enum Device {
   Alsa(@alsa.Device)
   Jack(@jack.Device)
   Wasapi(@wasapi.Device)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub enum Stream {
@@ -48,7 +48,7 @@ pub enum Stream {
   Alsa(@alsa.Stream)
   Jack(@jack.Stream)
   Wasapi(@wasapi.Stream)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Host::id(self : Host) -> @core.HostId {

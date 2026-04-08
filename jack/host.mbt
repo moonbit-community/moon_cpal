@@ -24,13 +24,13 @@
 ///|
 pub struct Host {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Device {
   id : String
   direction : @core.DeviceDirection
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn default_host() -> Host {

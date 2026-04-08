@@ -20,7 +20,7 @@
 ///|
 pub struct Stream {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 let _unused_stream_for_lint : Stream = { _unit: () }

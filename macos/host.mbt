@@ -19,12 +19,12 @@
 /// MoonBit callback bridging.
 pub struct Host {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Device {
   id : DeviceId
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn default_host() -> Host {

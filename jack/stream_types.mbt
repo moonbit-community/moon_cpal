@@ -22,7 +22,7 @@
 pub enum StreamKind {
   Output
   Input
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 // An external object that owns native stream resources.
@@ -38,6 +38,11 @@ pub struct Stream {
 ///|
 pub impl Eq for Stream with equal(self : Stream, other : Stream) -> Bool {
   self.kind == other.kind && self.handle == other.handle
+}
+
+///|
+pub impl @debug.Debug for Stream with to_repr(self : Stream) -> @debug.Repr {
+  @debug.Debug::to_repr((self.kind, self.handle))
 }
 
 ///|

@@ -21,14 +21,14 @@
 ///|
 pub struct Host {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Device {
   _unit : Unit
 
   fn new() -> Device
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Device::new() -> Device {

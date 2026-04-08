@@ -32,7 +32,7 @@ pub struct Data {
   bytes : FixedArray[Byte]
 
   fn new(sample_format : SampleFormat, bytes : FixedArray[Byte]) -> Data
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn Data::new(

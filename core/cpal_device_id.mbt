@@ -21,7 +21,7 @@
 pub suberror DeviceIdError {
   UnsupportedPlatform
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn device_id_error_unsupported_platform() -> DeviceIdError {
@@ -48,7 +48,7 @@ pub struct DeviceId {
   device_id : String
 
   fn new(host_id : HostId, device_id : String) -> DeviceId
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceId::new(host_id : HostId, device_id : String) -> DeviceId {

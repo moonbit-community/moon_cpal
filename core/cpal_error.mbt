@@ -22,7 +22,7 @@ pub struct BackendSpecificError {
   description : String
 
   fn new(description : String) -> BackendSpecificError
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn BackendSpecificError::new(description : String) -> BackendSpecificError {
@@ -46,7 +46,7 @@ pub suberror DefaultStreamConfigError {
   DeviceBusy
   StreamTypeNotSupported
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DefaultStreamConfigError::to_string(
@@ -70,7 +70,7 @@ pub suberror SupportedStreamConfigsError {
   DeviceBusy
   InvalidArgument
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn SupportedStreamConfigsError::to_string(
@@ -91,7 +91,7 @@ pub fn SupportedStreamConfigsError::to_string(
 /// An error that might occur while attempting to enumerate devices.
 pub suberror DevicesError {
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DevicesError::to_string(self : DevicesError) -> String {
@@ -104,7 +104,7 @@ pub fn DevicesError::to_string(self : DevicesError) -> String {
 /// An error that may occur while attempting to retrieve a device name.
 pub suberror DeviceNameError {
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceNameError::to_string(self : DeviceNameError) -> String {
@@ -122,7 +122,7 @@ pub suberror BuildStreamError {
   InvalidArgument
   StreamIdOverflow
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn BuildStreamError::to_string(self : BuildStreamError) -> String {
@@ -145,7 +145,7 @@ pub fn BuildStreamError::to_string(self : BuildStreamError) -> String {
 pub suberror PlayStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn PlayStreamError::to_string(self : PlayStreamError) -> String {
@@ -160,7 +160,7 @@ pub fn PlayStreamError::to_string(self : PlayStreamError) -> String {
 pub suberror PauseStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn PauseStreamError::to_string(self : PauseStreamError) -> String {
@@ -177,7 +177,7 @@ pub suberror StreamError {
   StreamInvalidated
   BufferUnderrun
   BackendSpecific(BackendSpecificError)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn StreamError::to_string(self : StreamError) -> String {

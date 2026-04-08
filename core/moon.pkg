@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/bigint",
+  "moonbitlang/core/debug",
 }
 
 supported_targets = "native"

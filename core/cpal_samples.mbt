@@ -26,14 +26,14 @@ pub struct I24 {
   raw : Int
 
   fn new(raw : Int) -> I24
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct U24 {
   raw : Int
 
   fn new(raw : Int) -> U24
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 let i24_min : Int = -8_388_608

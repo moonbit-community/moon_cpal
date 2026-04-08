@@ -1,6 +1,7 @@
 import {
   "Milky2018/moon_cpal/core",
   "Milky2018/moon_cpal/platform",
+  "moonbitlang/core/debug",
 }
 
 supported_targets = "native"

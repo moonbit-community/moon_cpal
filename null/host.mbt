@@ -22,12 +22,12 @@
 ///|
 pub struct Host {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub struct Device {
   _unit : Unit
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 let _unused_device_for_lint : Device = { _unit: () }

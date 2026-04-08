@@ -39,7 +39,7 @@ pub type FrameCount = Int
 pub enum BufferSize {
   Default
   Fixed(FrameCount)
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn BufferSize::default() -> BufferSize {
@@ -62,7 +62,7 @@ pub struct StreamConfig {
     sample_rate : SampleRate,
     buffer_size : BufferSize,
   ) -> StreamConfig
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn StreamConfig::new(
@@ -77,7 +77,7 @@ pub fn StreamConfig::new(
 pub(all) enum SupportedBufferSize {
   Range(min~ : FrameCount, max~ : FrameCount)
   Unknown
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn SupportedBufferSize::contains(
@@ -110,7 +110,7 @@ pub(all) enum SampleFormat {
   DsdU8
   DsdU16
   DsdU32
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 /// A single supported stream configuration (as opposed to a range).
@@ -128,7 +128,7 @@ pub struct SupportedStreamConfig {
     buffer_size : SupportedBufferSize,
     sample_format : SampleFormat,
   ) -> SupportedStreamConfig
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn SupportedStreamConfig::new(
@@ -196,7 +196,7 @@ pub struct SupportedStreamConfigRange {
     buffer_size : SupportedBufferSize,
     sample_format : SampleFormat,
   ) -> SupportedStreamConfigRange
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 /// Public constructor for black-box tests and downstream users.

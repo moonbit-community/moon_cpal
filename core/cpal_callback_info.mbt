@@ -28,7 +28,7 @@ pub struct InputStreamTimestamp {
     callback : StreamInstant,
     capture : StreamInstant,
   ) -> InputStreamTimestamp
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn InputStreamTimestamp::new(
@@ -62,7 +62,7 @@ pub struct OutputStreamTimestamp {
     callback : StreamInstant,
     playback : StreamInstant,
   ) -> OutputStreamTimestamp
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn OutputStreamTimestamp::new(
@@ -92,7 +92,7 @@ pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
 
   fn new(timestamp : InputStreamTimestamp) -> InputCallbackInfo
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn InputCallbackInfo::new(
@@ -114,7 +114,7 @@ pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
 
   fn new(timestamp : OutputStreamTimestamp) -> OutputCallbackInfo
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn OutputCallbackInfo::new(

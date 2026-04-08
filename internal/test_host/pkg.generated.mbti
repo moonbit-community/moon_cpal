@@ -3,6 +3,7 @@ package "Milky2018/moon_cpal/internal/test_host"
 
 import {
   "Milky2018/moon_cpal/core",
+  "moonbitlang/core/debug",
 }
 
 // Values
@@ -15,7 +16,7 @@ pub struct Device {
   _unit : Unit
 
   fn new() -> Device
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@core.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_output_stream(Self, @core.StreamConfig, (@core.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -28,13 +29,15 @@ pub fn Device::name(Self) -> String
 pub fn Device::new() -> Self
 pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange]
 pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange]
+pub impl Show for Device
 
 pub struct Host {
   _unit : Unit
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::devices(Self) -> Array[Device]
+pub impl Show for Host
 
 pub struct Stream {
   kind : StreamKind
@@ -49,7 +52,8 @@ pub impl Show for Stream
 pub enum StreamKind {
   Input
   Output
-} derive(Eq, Show)
+} derive(Eq, @debug.Debug)
+pub impl Show for StreamKind
 
 type StreamOwner
 

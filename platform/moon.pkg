@@ -5,6 +5,7 @@ import {
   "Milky2018/moon_cpal/macos",
   "Milky2018/moon_cpal/null",
   "Milky2018/moon_cpal/wasapi",
+  "moonbitlang/core/debug",
 }
 
 supported_targets = "native"

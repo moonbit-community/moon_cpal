@@ -30,7 +30,7 @@ pub enum DeviceType {
   Tuner
   Virtual
   Unknown
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceType::speaker() -> DeviceType {
@@ -103,7 +103,7 @@ pub enum InterfaceType {
   DisplayPort
   Aggregate
   Unknown
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn InterfaceType::built_in() -> InterfaceType {
@@ -181,7 +181,7 @@ pub enum DeviceDirection {
   Output
   Duplex
   Unknown
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceDirection::input() -> DeviceDirection {
@@ -224,7 +224,7 @@ pub struct DeviceDescription {
     address? : String?,
     extended? : Array[String],
   ) -> DeviceDescription
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceDescription::new(
@@ -389,7 +389,7 @@ pub struct DeviceDescriptionBuilder {
   extended : Array[String]
 
   fn new(name : String) -> DeviceDescriptionBuilder
-} derive(Show, Eq)
+} derive(Debug, Eq)
 
 ///|
 pub fn DeviceDescriptionBuilder::new(name : String) -> DeviceDescriptionBuilder {
