@@ -21,9 +21,7 @@
 fn[T : @debug.Debug] show_from_debug(value : T, logger : &Logger) -> Unit {
   let rendered = @debug.render(@debug.Debug::to_repr(value))
   logger.write_string(
-    rendered
-    .replace_all(old="{ ", new="{")
-    .replace_all(old=" }", new="}"),
+    rendered.replace_all(old="{ ", new="{").replace_all(old=" }", new="}"),
   )
 }
 
@@ -48,7 +46,10 @@ pub impl Show for Duration with output(self : Duration, logger : &Logger) -> Uni
 }
 
 ///|
-pub impl Show for StreamInstant with output(self : StreamInstant, logger : &Logger) -> Unit {
+pub impl Show for StreamInstant with output(
+  self : StreamInstant,
+  logger : &Logger,
+) -> Unit {
   show_from_debug(self, logger)
 }
 
@@ -146,7 +147,10 @@ pub impl Show for SupportedStreamConfigsError with output(
 }
 
 ///|
-pub impl Show for DevicesError with output(self : DevicesError, logger : &Logger) -> Unit {
+pub impl Show for DevicesError with output(
+  self : DevicesError,
+  logger : &Logger,
+) -> Unit {
   show_from_debug(self, logger)
 }
 
@@ -193,7 +197,10 @@ pub impl Show for Data with output(self : Data, logger : &Logger) -> Unit {
 }
 
 ///|
-pub impl Show for DeviceIdError with output(self : DeviceIdError, logger : &Logger) -> Unit {
+pub impl Show for DeviceIdError with output(
+  self : DeviceIdError,
+  logger : &Logger,
+) -> Unit {
   show_from_debug(self, logger)
 }
 

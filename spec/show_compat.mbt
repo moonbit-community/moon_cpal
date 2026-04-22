@@ -16,9 +16,7 @@
 fn[T : @debug.Debug] show_from_debug(value : T, logger : &Logger) -> Unit {
   let rendered = @debug.render(@debug.Debug::to_repr(value))
   logger.write_string(
-    rendered
-    .replace_all(old="{ ", new="{")
-    .replace_all(old=" }", new="}"),
+    rendered.replace_all(old="{ ", new="{").replace_all(old=" }", new="}"),
   )
 }
 
