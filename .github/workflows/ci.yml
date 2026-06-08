@@ -82,11 +82,11 @@ jobs:
           moon check --target native
           moon build --target native
       - name: Run unit tests
-        run: moon test --target native
+        run: moon test --target native --release
       - name: Enumerate hosts/devices (non-audio)
-        run: moon run --target native cmd/enumerate -q
+        run: moon run --target native --release cmd/enumerate -q
       - name: Run CoreAudio smoke (real I/O)
-        run: moon run --target native cmd/macos_stream_smoke -q
+        run: moon run --target native --release cmd/macos_stream_smoke -q
 
   test-windows-native:
     name: native (windows, WASAPI)
