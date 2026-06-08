@@ -14,7 +14,7 @@
 
 ///|
 test "wasapi fixed buffer outside supported range is best-effort (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -31,11 +31,11 @@ test "wasapi fixed buffer outside supported range is best-effort (best-effort)" 
         x => x
       }
       let max_buf = match cfg.buffer_size() {
-        @core.SupportedBufferSize::Unknown => {
+        Unknown => {
           inspect(true, content="true")
           return
         }
-        @core.SupportedBufferSize::Range(max=mx, ..) => mx
+        Range(max=mx, ..) => mx
       }
       if max_buf >= 2147483647 {
         inspect(true, content="true")
@@ -72,7 +72,7 @@ test "wasapi fixed buffer outside supported range is best-effort (best-effort)" 
 
 ///|
 test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -81,7 +81,7 @@ test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
   try
     dev.build_output_stream_raw(
       sc,
-      @core.SampleFormat::F32,
+      F32,
       fn(_d, _info) { () },
       fn(_e) { () },
       None,
@@ -89,8 +89,7 @@ test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
   catch {
     e =>
       match e {
-        @core.BuildStreamError::StreamConfigNotSupported =>
-          inspect(true, content="true")
+        StreamConfigNotSupported => inspect(true, content="true")
         _ => inspect(false, content="true")
       }
   } noraise {

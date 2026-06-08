@@ -43,17 +43,17 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
 
   // Pick a host id that should not be present on this OS.
   let bad = match os {
-    @core.NativeOs::Linux => @core.HostId::CoreAudio
-    @core.NativeOs::Macos => @core.HostId::Alsa
-    @core.NativeOs::Windows => @core.HostId::CoreAudio
-    @core.NativeOs::Unknown => @core.HostId::CoreAudio
+    Linux => @core.HostId::CoreAudio
+    Macos => Alsa
+    Windows => CoreAudio
+    Unknown => CoreAudio
   }
   if has(hs, bad) {
     inspect(true, content="true")
     return
   }
   try host_from_id(bad) catch {
-    @core.HostUnavailable => inspect(true, content="true")
+    HostUnavailable => inspect(true, content="true")
   } noraise {
     _ => inspect(false, content="true")
   }
@@ -144,6 +144,13 @@ test "spec: raw + typed stream builders (best-effort)" {
     inp_cfg.sample_rate(),
     @core.BufferSize::fixed(64),
   )
+  fn ignore_stream_result(action : () -> Unit raise) -> Unit {
+    try action() catch {
+      _ => ()
+    } noraise {
+      _ => ()
+    }
+  }
 
   // Raw output.
   try
@@ -158,8 +165,8 @@ test "spec: raw + typed stream builders (best-effort)" {
     _ => ()
   } noraise {
     st => {
-      ignore(try? st.play())
-      ignore(try? st.pause())
+      ignore_stream_result(fn() raise { st.play() })
+      ignore_stream_result(fn() raise { st.pause() })
       st.close()
     }
   }
@@ -171,8 +178,8 @@ test "spec: raw + typed stream builders (best-effort)" {
     _ => ()
   } noraise {
     st => {
-      ignore(try? st.play())
-      ignore(try? st.pause())
+      ignore_stream_result(fn() raise { st.play() })
+      ignore_stream_result(fn() raise { st.pause() })
       st.close()
     }
   }
@@ -182,8 +189,8 @@ test "spec: raw + typed stream builders (best-effort)" {
     _ => ()
   } noraise {
     st => {
-      ignore(try? st.play())
-      ignore(try? st.pause())
+      ignore_stream_result(fn() raise { st.play() })
+      ignore_stream_result(fn() raise { st.pause() })
       st.close()
     }
   }
@@ -201,8 +208,8 @@ test "spec: raw + typed stream builders (best-effort)" {
     _ => ()
   } noraise {
     st => {
-      ignore(try? st.play())
-      ignore(try? st.pause())
+      ignore_stream_result(fn() raise { st.play() })
+      ignore_stream_result(fn() raise { st.pause() })
       st.close()
     }
   }
@@ -214,8 +221,8 @@ test "spec: raw + typed stream builders (best-effort)" {
     _ => ()
   } noraise {
     st => {
-      ignore(try? st.play())
-      ignore(try? st.pause())
+      ignore_stream_result(fn() raise { st.play() })
+      ignore_stream_result(fn() raise { st.pause() })
       st.close()
     }
   }

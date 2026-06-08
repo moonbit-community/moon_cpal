@@ -14,7 +14,7 @@
 
 ///|
 test "wasapi output configs reflect device mix format (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -54,7 +54,7 @@ test "wasapi output configs reflect device mix format (best-effort)" {
 
 ///|
 test "wasapi data_flow gating (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -81,7 +81,7 @@ test "wasapi data_flow gating (best-effort)" {
 
 ///|
 test "wasapi default devices appear in enumeration (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }

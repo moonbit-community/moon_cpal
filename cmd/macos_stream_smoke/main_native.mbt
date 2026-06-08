@@ -58,7 +58,7 @@ fn main {
                 }
               }
               match data.sample_format() {
-                @moon_cpal.SampleFormat::F32 => {
+                F32 => {
                   let bytes = data.bytes()
                   let n_samples = bytes.length() / 4
                   let frames = if ch > 0 { n_samples / ch } else { 0 }
@@ -77,7 +77,7 @@ fn main {
                     }
                   }
                 }
-                @moon_cpal.SampleFormat::I16 => {
+                I16 => {
                   let bytes = data.bytes()
                   let n_samples = bytes.length() / 2
                   let frames = if ch > 0 { n_samples / ch } else { 0 }

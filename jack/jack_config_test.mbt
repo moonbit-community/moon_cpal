@@ -14,7 +14,7 @@
 
 ///|
 test "jack supported configs reflect server sample rate/buffer size (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -31,7 +31,7 @@ test "jack supported configs reflect server sample rate/buffer size (best-effort
       } noraise {
         x => x
       }
-      inspect(cfg.sample_format() == @core.SampleFormat::F32, content="true")
+      inspect(cfg.sample_format() == F32, content="true")
       inspect(cfg.sample_rate() > 0, content="true")
       match cfg.buffer_size() {
         Unknown => inspect(false, content="true")
@@ -66,7 +66,7 @@ test "jack supported configs reflect server sample rate/buffer size (best-effort
 
 ///|
 test "jack default devices expose config queries for both stream types (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }

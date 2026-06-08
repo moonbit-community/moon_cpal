@@ -16,44 +16,44 @@ import {
 
 // Traits
 pub trait DeviceTrait {
-  name(Self) -> String raise @core.DeviceNameError
-  id(Self) -> @core.DeviceId raise @core.DeviceIdError
-  description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
-  supports_input(Self) -> Bool
-  supports_output(Self) -> Bool
-  supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-  supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-  default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
-  default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
-  build_input_stream(Self, @core.StreamConfig, (@spec.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@spec.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream(Self, @core.StreamConfig, (@spec.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@spec.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn name(Self) -> String raise @core.DeviceNameError
+  fn id(Self) -> @core.DeviceId raise @core.DeviceIdError
+  fn description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
+  fn supports_input(Self) -> Bool
+  fn supports_output(Self) -> Bool
+  fn supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  fn supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  fn default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+  fn default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+  fn build_input_stream(Self, @core.StreamConfig, (@spec.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_input_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@spec.Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream(Self, @core.StreamConfig, (@spec.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFormat, (@spec.Data, @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_output_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.OutputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_input_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_input_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_input_stream_u16(Self, @core.StreamConfig, (Array[UInt16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
+  fn build_input_stream_u8(Self, @core.StreamConfig, (Array[Byte], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> @spec.Stream raise @core.BuildStreamError
 }
 pub impl DeviceTrait for @spec.Device
 
 pub trait HostTrait {
-  devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
-  device_by_id(Self, @core.DeviceId) -> @spec.Device?
-  default_input_device(Self) -> @spec.Device?
-  default_output_device(Self) -> @spec.Device?
-  input_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
-  output_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn device_by_id(Self, @core.DeviceId) -> @spec.Device?
+  fn default_input_device(Self) -> @spec.Device?
+  fn default_output_device(Self) -> @spec.Device?
+  fn input_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn output_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
 }
 pub impl HostTrait for @spec.Host
 
 pub trait StreamTrait {
-  play(Self) -> Unit raise @core.PlayStreamError
-  pause(Self) -> Unit raise @core.PauseStreamError
-  close(Self) -> Unit
+  fn play(Self) -> Unit raise @core.PlayStreamError
+  fn pause(Self) -> Unit raise @core.PauseStreamError
+  fn close(Self) -> Unit
 }
 pub impl StreamTrait for @spec.Stream
 

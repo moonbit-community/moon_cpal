@@ -14,14 +14,38 @@
 
 ///|
 test "wasapi sample format tag mapping is explicit (unit)" {
-  inspect(wasapi_sample_format_from_tag((1 : UInt)), content="Some(F32)")
-  inspect(wasapi_sample_format_from_tag((2 : UInt)), content="Some(I16)")
-  inspect(wasapi_sample_format_from_tag((3 : UInt)), content="Some(U16)")
-  inspect(wasapi_sample_format_from_tag((4 : UInt)), content="Some(U8)")
-  inspect(wasapi_sample_format_from_tag((6 : UInt)), content="Some(I24)")
-  inspect(wasapi_sample_format_from_tag((7 : UInt)), content="Some(U24)")
-  inspect(wasapi_sample_format_from_tag((8 : UInt)), content="Some(I32)")
-  inspect(wasapi_sample_format_from_tag((10 : UInt)), content="Some(I64)")
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((1 : UInt)),
+    content="Some(F32)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((2 : UInt)),
+    content="Some(I16)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((3 : UInt)),
+    content="Some(U16)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((4 : UInt)),
+    content="Some(U8)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((6 : UInt)),
+    content="Some(I24)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((7 : UInt)),
+    content="Some(U24)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((8 : UInt)),
+    content="Some(I32)",
+  )
+  @debug.debug_inspect(
+    wasapi_sample_format_from_tag((10 : UInt)),
+    content="Some(I64)",
+  )
   inspect(wasapi_sample_format_from_tag((0 : UInt)) == None, content="true")
   inspect(wasapi_sample_format_from_tag((5 : UInt)) == None, content="true")
   inspect(wasapi_sample_format_from_tag((11 : UInt)) == None, content="true")

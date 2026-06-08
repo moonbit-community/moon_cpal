@@ -21,16 +21,16 @@ fn[T : @debug.Debug] show_from_debug(value : T, logger : &Logger) -> Unit {
 }
 
 ///|
-pub impl Show for Host with output(self : Host, logger : &Logger) -> Unit {
+pub impl Show for Host with fn output(self : Host, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for Device with output(self : Device, logger : &Logger) -> Unit {
+pub impl Show for Device with fn output(self : Device, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for StreamKind with output(self : StreamKind, logger : &Logger) -> Unit {
+pub impl Show for StreamKind with fn output(self : StreamKind, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }

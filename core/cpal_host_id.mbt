@@ -26,7 +26,7 @@ pub suberror HostUnavailable {
 ///|
 pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
   match self {
-    HostUnavailable::HostUnavailable => "the requested host is unavailable"
+    HostUnavailable => "the requested host is unavailable"
   }
 }
 
@@ -146,11 +146,11 @@ pub fn HostId::from_string(s : String) -> HostId? {
 pub fn HostId::parse(s : String) -> HostId raise HostUnavailable {
   match HostId::from_string(s) {
     Some(id) => id
-    None => raise HostUnavailable::HostUnavailable
+    None => raise HostUnavailable
   }
 }
 
 ///|
 pub fn host_unavailable() -> HostUnavailable {
-  HostUnavailable::HostUnavailable
+  HostUnavailable
 }

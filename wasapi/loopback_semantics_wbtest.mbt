@@ -14,7 +14,7 @@
 
 ///|
 test "wasapi build_input_stream supports render endpoints via loopback (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -49,8 +49,7 @@ test "wasapi build_input_stream supports render endpoints via loopback (best-eff
       // This path should no longer fail due to pre-validation mismatch between
       // `build_input_stream` and `build_input_stream_raw`.
       match err {
-        @core.BuildStreamError::StreamConfigNotSupported =>
-          inspect(false, content="true")
+        StreamConfigNotSupported => inspect(false, content="true")
         _ => inspect(true, content="true")
       }
   } noraise {

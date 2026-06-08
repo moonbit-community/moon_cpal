@@ -14,7 +14,7 @@
 
 ///|
 test "alsa: devices includes default (linux-only)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return
   }
   let h = default_host()
@@ -32,7 +32,7 @@ test "alsa: devices includes default (linux-only)" {
 
 ///|
 test "alsa: default devices are always Some (linux-only)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -49,7 +49,7 @@ test "alsa: default devices are always Some (linux-only)" {
 
 ///|
 test "alsa: name + description fields (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -72,14 +72,13 @@ test "alsa: name + description fields (best-effort)" {
   inspect(desc.driver() == Some(d.id), content="true")
   // Direction must be stable and never contradict itself.
   match desc.direction() {
-    @core.DeviceDirection::Input => inspect(d.supports_input(), content="true")
-    @core.DeviceDirection::Output =>
-      inspect(d.supports_output(), content="true")
-    @core.DeviceDirection::Duplex => {
+    Input => inspect(d.supports_input(), content="true")
+    Output => inspect(d.supports_output(), content="true")
+    Duplex => {
       inspect(d.supports_input(), content="true")
       inspect(d.supports_output(), content="true")
     }
-    @core.DeviceDirection::Unknown => inspect(true, content="true")
+    Unknown => inspect(true, content="true")
   }
 }
 
@@ -100,7 +99,7 @@ fn has_prefix(s : String, p : String) -> Bool {
 
 ///|
 test "alsa: physical hw/plughw ids come in pairs (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }

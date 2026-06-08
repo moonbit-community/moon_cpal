@@ -144,13 +144,10 @@ fn build_error_from_supported_configs_error(
   e : @core.SupportedStreamConfigsError,
 ) -> @core.BuildStreamError {
   match e {
-    @core.SupportedStreamConfigsError::DeviceNotAvailable =>
-      @core.build_stream_error_device_not_available()
-    @core.SupportedStreamConfigsError::DeviceBusy =>
-      @core.build_stream_error_device_busy()
-    @core.SupportedStreamConfigsError::InvalidArgument =>
-      @core.build_stream_error_invalid_argument()
-    @core.SupportedStreamConfigsError::BackendSpecific(err) =>
+    DeviceNotAvailable => @core.build_stream_error_device_not_available()
+    DeviceBusy => @core.build_stream_error_device_busy()
+    InvalidArgument => @core.build_stream_error_invalid_argument()
+    BackendSpecific(err) =>
       @core.build_stream_error_backend_specific(err.description())
   }
 }
@@ -182,16 +179,16 @@ fn alsa_pause_error_from_errno(
 ///|
 fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
   match r.sample_format() {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
-    @core.SampleFormat::U16 => Some((3 : UInt))
-    @core.SampleFormat::U8 => Some((4 : UInt))
-    @core.SampleFormat::I32 => Some((5 : UInt))
-    @core.SampleFormat::U32 => Some((6 : UInt))
-    @core.SampleFormat::I24 => Some((7 : UInt))
-    @core.SampleFormat::U24 => Some((8 : UInt))
-    @core.SampleFormat::F64 => Some((9 : UInt))
-    @core.SampleFormat::I8 => Some((10 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
+    U16 => Some((3 : UInt))
+    U8 => Some((4 : UInt))
+    I32 => Some((5 : UInt))
+    U32 => Some((6 : UInt))
+    I24 => Some((7 : UInt))
+    U24 => Some((8 : UInt))
+    F64 => Some((9 : UInt))
+    I8 => Some((10 : UInt))
     _ => None
   }
 }
@@ -199,16 +196,16 @@ fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
 ///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
-    @core.SampleFormat::U16 => Some((3 : UInt))
-    @core.SampleFormat::U8 => Some((4 : UInt))
-    @core.SampleFormat::I32 => Some((5 : UInt))
-    @core.SampleFormat::U32 => Some((6 : UInt))
-    @core.SampleFormat::I24 => Some((7 : UInt))
-    @core.SampleFormat::U24 => Some((8 : UInt))
-    @core.SampleFormat::F64 => Some((9 : UInt))
-    @core.SampleFormat::I8 => Some((10 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
+    U16 => Some((3 : UInt))
+    U8 => Some((4 : UInt))
+    I32 => Some((5 : UInt))
+    U32 => Some((6 : UInt))
+    I24 => Some((7 : UInt))
+    U24 => Some((8 : UInt))
+    F64 => Some((9 : UInt))
+    I8 => Some((10 : UInt))
     _ => None
   }
 }
@@ -271,7 +268,7 @@ pub fn Device::build_output_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise_build_errno("alsa build_output_stream_raw", -1)
   }
   if config.channels <= 0 || config.sample_rate <= 0 {
@@ -321,11 +318,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_errno("alsa_stream_build_output", st)
   }
-  {
-    kind: StreamKind::Output,
-    handle: out[0],
-    owner: alsa_stream_owner_new(out[0]),
-  }
+  { kind: Output, handle: out[0], owner: alsa_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -367,7 +360,7 @@ pub fn Device::build_input_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise_build_errno("alsa build_input_stream_raw", -1)
   }
   if config.channels <= 0 || config.sample_rate <= 0 {
@@ -417,11 +410,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_errno("alsa_stream_build_input", st)
   }
-  {
-    kind: StreamKind::Input,
-    handle: out[0],
-    owner: alsa_stream_owner_new(out[0]),
-  }
+  { kind: Input, handle: out[0], owner: alsa_stream_owner_new(out[0]) }
 }
 
 ///|

@@ -14,7 +14,7 @@
 
 ///|
 test "jack build error mapping (unit)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -50,7 +50,7 @@ test "jack build error mapping (unit)" {
 
 ///|
 test "jack stream error mapping (unit)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -80,7 +80,7 @@ test "jack stream error mapping (unit)" {
   inspect(slot[0], content="StreamInvalidated")
   call_stream_error_callback(fn(e) { slot[0] = e }, 7, 0)
   match slot[0] {
-    @core.StreamError::BackendSpecific(_) => inspect(true, content="true")
+    BackendSpecific(_) => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
 }

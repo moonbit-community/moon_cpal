@@ -27,7 +27,7 @@ fn fill_silence_f32(data : @core.Data) -> Unit {
 
 ///|
 fn main {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     println("jack_stream_smoke: Linux-only (native)")
     return
   }

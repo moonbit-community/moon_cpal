@@ -19,17 +19,15 @@
 pub struct Duration {
   secs : UInt64
   nanos : Int // 0 <= nanos < 1_000_000_000
-
-  fn new(secs : UInt64, nanos : Int) -> Duration
 } derive(Debug, Eq)
 
 ///|
 pub fn Duration::from_secs(secs : UInt64) -> Duration {
-  { secs, nanos: 0 }
+  Duration(secs, 0)
 }
 
 ///|
-pub fn Duration::new(secs : UInt64, nanos : Int) -> Duration {
+pub fn Duration::Duration(secs : UInt64, nanos : Int) -> Duration {
   if nanos < 0 {
     panic()
   }
@@ -50,6 +48,11 @@ pub fn Duration::new(secs : UInt64, nanos : Int) -> Duration {
 }
 
 ///|
+pub fn Duration::new(secs : UInt64, nanos : Int) -> Duration {
+  Duration(secs, nanos)
+}
+
+///|
 fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
   let bsecs = @bigint.BigInt::from_uint64(self.secs)
   let bnanos = @bigint.BigInt::from_int(self.nanos)
@@ -62,12 +65,10 @@ fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
 pub struct StreamInstant {
   secs : Int64
   nanos : Int // normalized to 0 <= nanos < 1_000_000_000
-
-  fn new(secs : Int64, nanos : Int) -> StreamInstant
 } derive(Debug, Eq)
 
 ///|
-pub fn StreamInstant::new(secs : Int64, nanos : Int) -> StreamInstant {
+pub fn StreamInstant::StreamInstant(secs : Int64, nanos : Int) -> StreamInstant {
   // Keep the representation normalized; this matches common upstream usage and keeps arithmetic sane.
   let mut secs = secs
   let mut nanos = nanos
@@ -82,6 +83,11 @@ pub fn StreamInstant::new(secs : Int64, nanos : Int) -> StreamInstant {
     nanos = nanos + borrow * billion
   }
   { secs, nanos }
+}
+
+///|
+pub fn StreamInstant::new(secs : Int64, nanos : Int) -> StreamInstant {
+  StreamInstant(secs, nanos)
 }
 
 ///|

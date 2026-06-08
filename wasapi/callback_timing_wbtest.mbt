@@ -19,7 +19,7 @@ test "wasapi callback timestamps + format tags" {
   let got = FixedArray::make(3, false)
   call_output_data_callback(
     fn(d, info) {
-      got[0] = d.sample_format() == @core.SampleFormat::F32
+      got[0] = d.sample_format() == F32
       got[1] = info.timestamp().callback() == want_cb
       got[2] = info.timestamp().playback() == want_pb
     },
@@ -38,7 +38,7 @@ test "wasapi callback timestamps + format tags" {
   let got2 = FixedArray::make(3, false)
   call_input_data_callback(
     fn(d, info) {
-      got2[0] = d.sample_format() == @core.SampleFormat::I16
+      got2[0] = d.sample_format() == I16
       got2[1] = info.timestamp().callback() == want_cb2
       got2[2] = info.timestamp().capture() == want_cap
     },
@@ -56,7 +56,7 @@ test "wasapi callback timestamps + format tags" {
   // Extended format tag: U8.
   let got3 = FixedArray::make(1, false)
   call_output_data_callback(
-    fn(d, _info) { got3[0] = d.sample_format() == @core.SampleFormat::U8 },
+    fn(d, _info) { got3[0] = d.sample_format() == U8 },
     4,
     FixedArray::make(4, Int::to_byte(0)),
     1,

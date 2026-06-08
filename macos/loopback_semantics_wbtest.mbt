@@ -14,7 +14,7 @@
 
 ///|
 test "macos output device as input avoids early unsupported rejection (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Macos {
+  if @core.native_os() != Macos {
     inspect(true, content="true")
     return
   }
@@ -46,7 +46,7 @@ test "macos output device as input avoids early unsupported rejection (best-effo
       } catch {
         e =>
           match e {
-            @core.BuildStreamError::StreamConfigNotSupported => true
+            StreamConfigNotSupported => true
             _ => false
           }
       } noraise {

@@ -18,17 +18,17 @@
 ///|
 fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
   match tag {
-    1 => @core.SampleFormat::F32
-    2 => @core.SampleFormat::I16
-    3 => @core.SampleFormat::U16
-    4 => @core.SampleFormat::U8
-    5 => @core.SampleFormat::I32
-    6 => @core.SampleFormat::U32
-    7 => @core.SampleFormat::I24
-    8 => @core.SampleFormat::U24
-    9 => @core.SampleFormat::F64
-    10 => @core.SampleFormat::I8
-    _ => @core.SampleFormat::F32
+    1 => F32
+    2 => I16
+    3 => U16
+    4 => U8
+    5 => I32
+    6 => U32
+    7 => I24
+    8 => U24
+    9 => F64
+    10 => I8
+    _ => F32
   }
 }
 

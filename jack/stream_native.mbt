@@ -169,7 +169,7 @@ fn validate_buffer_size_or_raise(
 fn validate_sample_format_or_raise(
   sample_format : @core.SampleFormat,
 ) -> Unit raise @core.BuildStreamError {
-  if sample_format != @core.SampleFormat::F32 {
+  if sample_format != F32 {
     raise @core.build_stream_error_stream_config_not_supported()
   }
 }
@@ -183,7 +183,7 @@ pub fn Device::build_output_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise_build_error("jack build_output_stream_raw", -1)
   }
   if self.direction != @core.DeviceDirection::output() {
@@ -211,11 +211,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_error("jack_stream_build_output", st)
   }
-  {
-    kind: StreamKind::Output,
-    handle: out[0],
-    owner: jack_stream_owner_new(out[0]),
-  }
+  { kind: Output, handle: out[0], owner: jack_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -229,7 +225,7 @@ pub fn Device::build_output_stream(
   Device::build_output_stream_raw(
     self,
     config,
-    @core.SampleFormat::F32,
+    F32,
     data_callback,
     error_callback,
     _timeout,
@@ -245,7 +241,7 @@ pub fn Device::build_input_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise_build_error("jack build_input_stream_raw", -1)
   }
   if self.direction != @core.DeviceDirection::input() {
@@ -273,11 +269,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_error("jack_stream_build_input", st)
   }
-  {
-    kind: StreamKind::Input,
-    handle: out[0],
-    owner: jack_stream_owner_new(out[0]),
-  }
+  { kind: Input, handle: out[0], owner: jack_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -291,7 +283,7 @@ pub fn Device::build_input_stream(
   Device::build_input_stream_raw(
     self,
     config,
-    @core.SampleFormat::F32,
+    F32,
     data_callback,
     error_callback,
     _timeout,

@@ -14,7 +14,7 @@
 
 ///|
 test "alsa errno mapping (unit)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }

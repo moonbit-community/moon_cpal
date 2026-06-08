@@ -14,7 +14,7 @@
 
 ///|
 test "alsa default config matches supported configs (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -58,7 +58,7 @@ test "alsa default config matches supported configs (best-effort)" {
 
 ///|
 test "alsa supported configs include sane buffer size ranges (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -92,7 +92,7 @@ test "alsa supported configs include sane buffer size ranges (best-effort)" {
 
 ///|
 test "alsa enumeration keeps null PCM when present (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }

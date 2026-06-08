@@ -37,16 +37,16 @@ pub struct Stream {
 }
 
 ///|
-pub impl Eq for Stream with equal(self : Stream, other : Stream) -> Bool {
+pub impl Eq for Stream with fn equal(self : Stream, other : Stream) -> Bool {
   self.kind == other.kind && self.handle == other.handle
 }
 
 ///|
-pub impl @debug.Debug for Stream with to_repr(self : Stream) -> @debug.Repr {
+pub impl @debug.Debug for Stream with fn to_repr(self : Stream) -> @debug.Repr {
   @debug.Debug::to_repr((self.kind, self.handle))
 }
 
 ///|
-pub impl Show for Stream with output(self : Stream, logger : &Logger) -> Unit {
+pub impl Show for Stream with fn output(self : Stream, logger : &Logger) -> Unit {
   logger.write_string("\{self.kind}(\{self.handle})")
 }

@@ -14,7 +14,7 @@
 
 ///|
 test "coreaudio OSStatus kind + stream error mapping (unit)" {
-  if @core.native_os() != @core.NativeOs::Macos {
+  if @core.native_os() != Macos {
     inspect(true, content="true")
     return
   }
@@ -28,13 +28,11 @@ test "coreaudio OSStatus kind + stream error mapping (unit)" {
   inspect(osstatus_kind(560226676) == 2, content="true") // kAudioDeviceUnsupportedFormatError
   inspect(osstatus_kind(0) == 0, content="true")
   match supported_configs_error_from_osstatus("x", -50) {
-    @core.SupportedStreamConfigsError::InvalidArgument =>
-      inspect(true, content="true")
+    InvalidArgument => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   match supported_configs_error_from_osstatus("x", -66680) {
-    @core.SupportedStreamConfigsError::DeviceNotAvailable =>
-      inspect(true, content="true")
+    DeviceNotAvailable => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   let slot = FixedArray::make(1, @core.stream_error_backend_specific("init"))

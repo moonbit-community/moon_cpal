@@ -20,33 +20,33 @@
 
 ///|
 pub trait HostTrait {
-  devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
-  device_by_id(Self, @core.DeviceId) -> @spec.Device?
-  default_input_device(Self) -> @spec.Device?
-  default_output_device(Self) -> @spec.Device?
-  input_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
-  output_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn device_by_id(Self, @core.DeviceId) -> @spec.Device?
+  fn default_input_device(Self) -> @spec.Device?
+  fn default_output_device(Self) -> @spec.Device?
+  fn input_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
+  fn output_devices(Self) -> Iter[@spec.Device] raise @core.DevicesError
 }
 
 ///|
 pub trait DeviceTrait {
-  name(Self) -> String raise @core.DeviceNameError
-  id(Self) -> @core.DeviceId raise @core.DeviceIdError
-  description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
-  supports_input(Self) -> Bool
-  supports_output(Self) -> Bool
-  supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-  supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
-  default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
-  default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
-  build_input_stream(
+  fn name(Self) -> String raise @core.DeviceNameError
+  fn id(Self) -> @core.DeviceId raise @core.DeviceIdError
+  fn description(Self) -> @core.DeviceDescription raise @core.DeviceNameError
+  fn supports_input(Self) -> Bool
+  fn supports_output(Self) -> Bool
+  fn supported_input_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  fn supported_output_configs(Self) -> Iter[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError
+  fn default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+  fn default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
+  fn build_input_stream(
     Self,
     @core.StreamConfig,
     (@spec.Data, @core.InputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_raw(
+  fn build_input_stream_raw(
     Self,
     @core.StreamConfig,
     @core.SampleFormat,
@@ -54,14 +54,14 @@ pub trait DeviceTrait {
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream(
+  fn build_output_stream(
     Self,
     @core.StreamConfig,
     (@spec.Data, @core.OutputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_raw(
+  fn build_output_stream_raw(
     Self,
     @core.StreamConfig,
     @core.SampleFormat,
@@ -69,56 +69,56 @@ pub trait DeviceTrait {
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_f32(
+  fn build_output_stream_f32(
     Self,
     @core.StreamConfig,
     (Array[Float], @core.OutputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_i16(
+  fn build_output_stream_i16(
     Self,
     @core.StreamConfig,
     (Array[Int16], @core.OutputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_u16(
+  fn build_output_stream_u16(
     Self,
     @core.StreamConfig,
     (Array[UInt16], @core.OutputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_output_stream_u8(
+  fn build_output_stream_u8(
     Self,
     @core.StreamConfig,
     (Array[Byte], @core.OutputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_f32(
+  fn build_input_stream_f32(
     Self,
     @core.StreamConfig,
     (Array[Float], @core.InputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_i16(
+  fn build_input_stream_i16(
     Self,
     @core.StreamConfig,
     (Array[Int16], @core.InputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_u16(
+  fn build_input_stream_u16(
     Self,
     @core.StreamConfig,
     (Array[UInt16], @core.InputCallbackInfo) -> Unit,
     (@core.StreamError) -> Unit,
     @core.Duration?,
   ) -> @spec.Stream raise @core.BuildStreamError
-  build_input_stream_u8(
+  fn build_input_stream_u8(
     Self,
     @core.StreamConfig,
     (Array[Byte], @core.InputCallbackInfo) -> Unit,
@@ -129,18 +129,18 @@ pub trait DeviceTrait {
 
 ///|
 pub trait StreamTrait {
-  play(Self) -> Unit raise @core.PlayStreamError
-  pause(Self) -> Unit raise @core.PauseStreamError
-  close(Self) -> Unit
+  fn play(Self) -> Unit raise @core.PlayStreamError
+  fn pause(Self) -> Unit raise @core.PauseStreamError
+  fn close(Self) -> Unit
 }
 
 ///|
-pub impl HostTrait for @spec.Host with devices(self : @spec.Host) {
+pub impl HostTrait for @spec.Host with fn devices(self : @spec.Host) {
   self.devices()
 }
 
 ///|
-pub impl HostTrait for @spec.Host with device_by_id(
+pub impl HostTrait for @spec.Host with fn device_by_id(
   self : @spec.Host,
   id : @core.DeviceId,
 ) {
@@ -148,80 +148,88 @@ pub impl HostTrait for @spec.Host with device_by_id(
 }
 
 ///|
-pub impl HostTrait for @spec.Host with default_input_device(self : @spec.Host) {
+pub impl HostTrait for @spec.Host with fn default_input_device(
+  self : @spec.Host,
+) {
   self.default_input_device()
 }
 
 ///|
-pub impl HostTrait for @spec.Host with default_output_device(self : @spec.Host) {
+pub impl HostTrait for @spec.Host with fn default_output_device(
+  self : @spec.Host,
+) {
   self.default_output_device()
 }
 
 ///|
-pub impl HostTrait for @spec.Host with input_devices(self : @spec.Host) {
+pub impl HostTrait for @spec.Host with fn input_devices(self : @spec.Host) {
   self.input_devices()
 }
 
 ///|
-pub impl HostTrait for @spec.Host with output_devices(self : @spec.Host) {
+pub impl HostTrait for @spec.Host with fn output_devices(self : @spec.Host) {
   self.output_devices()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with name(self : @spec.Device) {
+pub impl DeviceTrait for @spec.Device with fn name(self : @spec.Device) {
   self.name()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with id(self : @spec.Device) {
+pub impl DeviceTrait for @spec.Device with fn id(self : @spec.Device) {
   self.id()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with description(self : @spec.Device) {
+pub impl DeviceTrait for @spec.Device with fn description(self : @spec.Device) {
   self.description()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with supports_input(self : @spec.Device) {
+pub impl DeviceTrait for @spec.Device with fn supports_input(
+  self : @spec.Device,
+) {
   self.supports_input()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with supports_output(self : @spec.Device) {
+pub impl DeviceTrait for @spec.Device with fn supports_output(
+  self : @spec.Device,
+) {
   self.supports_output()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with supported_input_configs(
+pub impl DeviceTrait for @spec.Device with fn supported_input_configs(
   self : @spec.Device,
 ) {
   self.supported_input_configs()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with supported_output_configs(
+pub impl DeviceTrait for @spec.Device with fn supported_output_configs(
   self : @spec.Device,
 ) {
   self.supported_output_configs()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with default_input_config(
+pub impl DeviceTrait for @spec.Device with fn default_input_config(
   self : @spec.Device,
 ) {
   self.default_input_config()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with default_output_config(
+pub impl DeviceTrait for @spec.Device with fn default_output_config(
   self : @spec.Device,
 ) {
   self.default_output_config()
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (@spec.Data, @core.InputCallbackInfo) -> Unit,
@@ -232,7 +240,7 @@ pub impl DeviceTrait for @spec.Device with build_input_stream(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream_raw(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream_raw(
   self : @spec.Device,
   config : @core.StreamConfig,
   sample_format : @core.SampleFormat,
@@ -246,7 +254,7 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_raw(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (@spec.Data, @core.OutputCallbackInfo) -> Unit,
@@ -257,7 +265,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream_raw(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream_raw(
   self : @spec.Device,
   config : @core.StreamConfig,
   sample_format : @core.SampleFormat,
@@ -271,7 +279,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_raw(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream_f32(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream_f32(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Float], @core.OutputCallbackInfo) -> Unit,
@@ -282,7 +290,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_f32(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream_i16(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream_i16(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Int16], @core.OutputCallbackInfo) -> Unit,
@@ -293,7 +301,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_i16(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream_u16(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream_u16(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[UInt16], @core.OutputCallbackInfo) -> Unit,
@@ -304,7 +312,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_u16(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_output_stream_u8(
+pub impl DeviceTrait for @spec.Device with fn build_output_stream_u8(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Byte], @core.OutputCallbackInfo) -> Unit,
@@ -315,7 +323,7 @@ pub impl DeviceTrait for @spec.Device with build_output_stream_u8(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream_f32(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream_f32(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Float], @core.InputCallbackInfo) -> Unit,
@@ -326,7 +334,7 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_f32(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream_i16(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream_i16(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Int16], @core.InputCallbackInfo) -> Unit,
@@ -337,7 +345,7 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_i16(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream_u16(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream_u16(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[UInt16], @core.InputCallbackInfo) -> Unit,
@@ -348,7 +356,7 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_u16(
 }
 
 ///|
-pub impl DeviceTrait for @spec.Device with build_input_stream_u8(
+pub impl DeviceTrait for @spec.Device with fn build_input_stream_u8(
   self : @spec.Device,
   config : @core.StreamConfig,
   data_callback : (Array[Byte], @core.InputCallbackInfo) -> Unit,
@@ -359,16 +367,16 @@ pub impl DeviceTrait for @spec.Device with build_input_stream_u8(
 }
 
 ///|
-pub impl StreamTrait for @spec.Stream with play(self : @spec.Stream) {
+pub impl StreamTrait for @spec.Stream with fn play(self : @spec.Stream) {
   self.play()
 }
 
 ///|
-pub impl StreamTrait for @spec.Stream with pause(self : @spec.Stream) {
+pub impl StreamTrait for @spec.Stream with fn pause(self : @spec.Stream) {
   self.pause()
 }
 
 ///|
-pub impl StreamTrait for @spec.Stream with close(self : @spec.Stream) {
+pub impl StreamTrait for @spec.Stream with fn close(self : @spec.Stream) {
   self.close()
 }

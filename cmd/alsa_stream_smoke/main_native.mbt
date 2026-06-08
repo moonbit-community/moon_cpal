@@ -19,14 +19,14 @@ extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
 fn fill_silence(data : @core.Data) -> Unit {
   let bytes = data.bytes()
   match data.sample_format() {
-    @core.SampleFormat::F32 => {
+    F32 => {
       let mut off = 0
       while off + 4 <= bytes.length() {
         bytes.unsafe_write_uint32_le(off, 0)
         off += 4
       }
     }
-    @core.SampleFormat::I16 => {
+    I16 => {
       let mut off = 0
       while off + 2 <= bytes.length() {
         bytes.unsafe_write_uint16_le(off, 0)
@@ -39,7 +39,7 @@ fn fill_silence(data : @core.Data) -> Unit {
 
 ///|
 fn main {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     println("alsa_stream_smoke: Linux-only (native)")
     return
   }

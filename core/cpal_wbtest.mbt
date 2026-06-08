@@ -91,25 +91,62 @@ test "stream_instant add/sub (ported from upstream cpal/src/lib.rs)" {
   let b = StreamInstant(-2L, 0)
   let min = StreamInstant(-9223372036854775808L, 0)
   let max = StreamInstant(9223372036854775807L, 0)
-  inspect(a.sub(Duration::from_secs(1)), content="Some({secs: 1, nanos: 0})")
-  inspect(a.sub(Duration::from_secs(2)), content="Some({secs: 0, nanos: 0})")
-  inspect(a.sub(Duration::from_secs(3)), content="Some({secs: -1, nanos: 0})")
-  inspect(min.sub(Duration::from_secs(1)), content="None")
-  inspect(b.add(Duration::from_secs(1)), content="Some({secs: -1, nanos: 0})")
-  inspect(b.add(Duration::from_secs(2)), content="Some({secs: 0, nanos: 0})")
-  inspect(b.add(Duration::from_secs(3)), content="Some({secs: 1, nanos: 0})")
-  inspect(max.add(Duration::from_secs(1)), content="None")
+  @debug.debug_inspect(
+    a.sub(Duration::from_secs(1)),
+    content=(
+      #|Some({ secs: 1, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(
+    a.sub(Duration::from_secs(2)),
+    content=(
+      #|Some({ secs: 0, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(
+    a.sub(Duration::from_secs(3)),
+    content=(
+      #|Some({ secs: -1, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(min.sub(Duration::from_secs(1)), content="None")
+  @debug.debug_inspect(
+    b.add(Duration::from_secs(1)),
+    content=(
+      #|Some({ secs: -1, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(
+    b.add(Duration::from_secs(2)),
+    content=(
+      #|Some({ secs: 0, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(
+    b.add(Duration::from_secs(3)),
+    content=(
+      #|Some({ secs: 1, nanos: 0 })
+    ),
+  )
+  @debug.debug_inspect(max.add(Duration::from_secs(1)), content="None")
 }
 
 ///|
 test "stream_instant duration_since (ported from upstream cpal/src/lib.rs)" {
   let a = StreamInstant(2L, 0)
   let b = StreamInstant(1L, 0)
-  inspect(a.duration_since(b), content="Some({secs: 1, nanos: 0})")
-  inspect(b.duration_since(a), content="None")
+  @debug.debug_inspect(a.duration_since(b), content=(
+    #|Some({ secs: 1, nanos: 0 })
+  ))
+  @debug.debug_inspect(b.duration_since(a), content="None")
   let c = StreamInstant(1L, 100)
   let d = StreamInstant(0L, 200)
-  inspect(c.duration_since(d), content="Some({secs: 0, nanos: 999999900})")
+  @debug.debug_inspect(
+    c.duration_since(d),
+    content=(
+      #|Some({ secs: 0, nanos: 999999900 })
+    ),
+  )
 }
 
 ///|
@@ -140,9 +177,27 @@ test "sample_format properties (ported from upstream cpal/src/samples_formats.rs
   let out = formats.map(fn(fmt) {
     "\{fmt.to_string()}:size=\{fmt.sample_size()}:bits=\{fmt.bits_per_sample()}:int=\{fmt.is_int()}:uint=\{fmt.is_uint()}:float=\{fmt.is_float()}:dsd=\{fmt.is_dsd()}"
   })
-  inspect(
+  @debug.debug_inspect(
     out,
-    content="[\"i8:size=1:bits=8:int=true:uint=false:float=false:dsd=false\", \"i16:size=2:bits=16:int=true:uint=false:float=false:dsd=false\", \"i24:size=4:bits=24:int=true:uint=false:float=false:dsd=false\", \"i32:size=4:bits=32:int=true:uint=false:float=false:dsd=false\", \"i64:size=8:bits=64:int=true:uint=false:float=false:dsd=false\", \"u8:size=1:bits=8:int=false:uint=true:float=false:dsd=false\", \"u16:size=2:bits=16:int=false:uint=true:float=false:dsd=false\", \"u24:size=4:bits=24:int=false:uint=true:float=false:dsd=false\", \"u32:size=4:bits=32:int=false:uint=true:float=false:dsd=false\", \"u64:size=8:bits=64:int=false:uint=true:float=false:dsd=false\", \"f32:size=4:bits=32:int=false:uint=false:float=true:dsd=false\", \"f64:size=8:bits=64:int=false:uint=false:float=true:dsd=false\", \"dsdu8:size=1:bits=1:int=false:uint=false:float=false:dsd=true\", \"dsdu16:size=2:bits=1:int=false:uint=false:float=false:dsd=true\", \"dsdu32:size=4:bits=1:int=false:uint=false:float=false:dsd=true\"]",
+    content=(
+      #|[
+      #|  "i8:size=1:bits=8:int=true:uint=false:float=false:dsd=false",
+      #|  "i16:size=2:bits=16:int=true:uint=false:float=false:dsd=false",
+      #|  "i24:size=4:bits=24:int=true:uint=false:float=false:dsd=false",
+      #|  "i32:size=4:bits=32:int=true:uint=false:float=false:dsd=false",
+      #|  "i64:size=8:bits=64:int=true:uint=false:float=false:dsd=false",
+      #|  "u8:size=1:bits=8:int=false:uint=true:float=false:dsd=false",
+      #|  "u16:size=2:bits=16:int=false:uint=true:float=false:dsd=false",
+      #|  "u24:size=4:bits=24:int=false:uint=true:float=false:dsd=false",
+      #|  "u32:size=4:bits=32:int=false:uint=true:float=false:dsd=false",
+      #|  "u64:size=8:bits=64:int=false:uint=true:float=false:dsd=false",
+      #|  "f32:size=4:bits=32:int=false:uint=false:float=true:dsd=false",
+      #|  "f64:size=8:bits=64:int=false:uint=false:float=true:dsd=false",
+      #|  "dsdu8:size=1:bits=1:int=false:uint=false:float=false:dsd=true",
+      #|  "dsdu16:size=2:bits=1:int=false:uint=false:float=false:dsd=true",
+      #|  "dsdu32:size=4:bits=1:int=false:uint=false:float=false:dsd=true",
+      #|]
+    ),
   )
 }
 
@@ -155,7 +210,7 @@ test "supported_config_range sample-rate helpers" {
     Range(min=128, max=256),
     I16,
   )
-  inspect(range.try_with_sample_rate(9), content="None")
+  @debug.debug_inspect(range.try_with_sample_rate(9), content="None")
   match range.try_with_sample_rate(10) {
     None => inspect(false, content="true")
     Some(cfg) => {
@@ -192,9 +247,9 @@ test "device description formatting" {
   let d1 = DeviceDescription(
     "My Device",
     manufacturer=Some("ACME"),
-    device_type=DeviceType::Speaker,
-    interface_type=InterfaceType::Usb,
-    direction=DeviceDirection::Output,
+    device_type=Speaker,
+    interface_type=Usb,
+    direction=Output,
   )
   inspect(d1.to_string(), content="My Device (ACME) [Speaker] via USB")
   inspect(d1.supports_input(), content="false")
@@ -222,8 +277,8 @@ test "device description builder + direction_from_caps" {
     .add_extended_line("line2")
     .build()
   inspect(built.to_string(), content="X (ACME) [Speaker] via USB")
-  inspect(built.driver(), content="Some(\"drv\")")
-  inspect(built.address(), content="Some(\"addr\")")
+  @debug.debug_inspect(built.driver(), content="Some(\"drv\")")
+  @debug.debug_inspect(built.address(), content="Some(\"addr\")")
   inspect(built.extended().length(), content="2")
 }
 
@@ -252,10 +307,16 @@ test "callback timestamp types" {
 
 ///|
 test "host_id parsing" {
-  inspect(HostId::from_string("coreaudio"), content="Some(CoreAudio)")
-  inspect(HostId::from_string("CoReAuDiO"), content="Some(CoreAudio)")
+  @debug.debug_inspect(
+    HostId::from_string("coreaudio"),
+    content="Some(CoreAudio)",
+  )
+  @debug.debug_inspect(
+    HostId::from_string("CoReAuDiO"),
+    content="Some(CoreAudio)",
+  )
   inspect(HostId::name(CoreAudio), content="CoreAudio")
-  inspect(HostId::from_string("unknown"), content="None")
+  @debug.debug_inspect(HostId::from_string("unknown"), content="None")
   try HostId::parse("unknown") catch {
     HostUnavailable => inspect(true, content="true")
   } noraise {
@@ -267,10 +328,11 @@ test "host_id parsing" {
 test "device_id parsing and formatting" {
   let id = DeviceId(CoreAudio, "abc")
   inspect(id.to_string(), content="coreaudio:abc")
-  inspect(
-    try? DeviceId::from_string("coreaudio:abc"),
-    content="Ok({host_id: CoreAudio, device_id: \"abc\"})",
-  )
+  try DeviceId::from_string("coreaudio:abc") catch {
+    _ => inspect(false, content="true")
+  } noraise {
+    parsed => inspect(parsed == id, content="true")
+  }
   try DeviceId::from_string("unknown:abc") catch {
     UnsupportedPlatform => inspect(true, content="true")
     _ => inspect(false, content="true")

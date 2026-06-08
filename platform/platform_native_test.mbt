@@ -16,15 +16,15 @@
 test "platform default_host (native)" {
   let h = default_host()
   let expected = match @core.native_os() {
-    @core.NativeOs::Macos => @core.HostId::CoreAudio
-    @core.NativeOs::Linux => @core.HostId::Alsa
-    @core.NativeOs::Windows => @core.HostId::Wasapi
-    @core.NativeOs::Unknown => @core.HostId::Null
+    Macos => @core.HostId::CoreAudio
+    Linux => Alsa
+    Windows => Wasapi
+    Unknown => Null
   }
   inspect(h.id() == expected, content="true")
   // Match upstream: platform `HostId` includes `Null` only on unsupported targets.
   match @core.native_os() {
-    @core.NativeOs::Unknown =>
+    Unknown =>
       try host_from_id(Null) catch {
         _ => inspect(false, content="true")
       } noraise {
@@ -48,37 +48,37 @@ test "platform available_hosts + host_from_id (native)" {
     inspect(all.contains(id), content="true")
   }
   // On supported native platforms, all hosts are available.
-  if @core.native_os() != @core.NativeOs::Unknown {
+  if @core.native_os() != Unknown {
     inspect(hs.length() == all.length(), content="true")
   } else {
-    inspect(all.length() == 1 && all[0] == @core.HostId::Null, content="true")
+    inspect(all.length() == 1 && all[0] == Null, content="true")
   }
 
   // Linux should include JACK as well.
-  if @core.native_os() == @core.NativeOs::Linux {
-    inspect(hs.contains(@core.HostId::Jack), content="true")
+  if @core.native_os() == Linux {
+    inspect(hs.contains(Jack), content="true")
   }
 
   // Spot-check: available hosts should match platform OS.
   match @core.native_os() {
-    @core.NativeOs::Macos => {
-      inspect(hs.contains(@core.HostId::CoreAudio), content="true")
-      inspect(!hs.contains(@core.HostId::Alsa), content="true")
-      inspect(!hs.contains(@core.HostId::Wasapi), content="true")
-      inspect(!hs.contains(@core.HostId::Jack), content="true")
+    Macos => {
+      inspect(hs.contains(CoreAudio), content="true")
+      inspect(!hs.contains(Alsa), content="true")
+      inspect(!hs.contains(Wasapi), content="true")
+      inspect(!hs.contains(Jack), content="true")
     }
-    @core.NativeOs::Windows => {
-      inspect(hs.contains(@core.HostId::Wasapi), content="true")
-      inspect(!hs.contains(@core.HostId::CoreAudio), content="true")
-      inspect(!hs.contains(@core.HostId::Alsa), content="true")
-      inspect(!hs.contains(@core.HostId::Jack), content="true")
+    Windows => {
+      inspect(hs.contains(Wasapi), content="true")
+      inspect(!hs.contains(CoreAudio), content="true")
+      inspect(!hs.contains(Alsa), content="true")
+      inspect(!hs.contains(Jack), content="true")
     }
-    @core.NativeOs::Linux => {
-      inspect(hs.contains(@core.HostId::Alsa), content="true")
-      inspect(!hs.contains(@core.HostId::CoreAudio), content="true")
-      inspect(!hs.contains(@core.HostId::Wasapi), content="true")
+    Linux => {
+      inspect(hs.contains(Alsa), content="true")
+      inspect(!hs.contains(CoreAudio), content="true")
+      inspect(!hs.contains(Wasapi), content="true")
     }
-    @core.NativeOs::Unknown => inspect(hs, content="[@core.HostId::Null]")
+    Unknown => @debug.debug_inspect(hs, content="[@core.HostId::Null]")
   }
 
   // All advertised hosts should be constructible.

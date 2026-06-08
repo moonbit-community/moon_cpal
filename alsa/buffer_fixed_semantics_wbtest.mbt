@@ -14,7 +14,7 @@
 
 ///|
 test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -46,8 +46,7 @@ test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
       catch {
         e =>
           match e {
-            @core.BuildStreamError::StreamConfigNotSupported =>
-              inspect(true, content="true")
+            StreamConfigNotSupported => inspect(true, content="true")
             _ => inspect(false, content="true")
           }
       } noraise {
@@ -62,7 +61,7 @@ test "alsa fixed buffer 0 is stream_config_not_supported (best-effort)" {
 
 ///|
 test "alsa fixed buffer outside supported range is best-effort (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -79,11 +78,11 @@ test "alsa fixed buffer outside supported range is best-effort (best-effort)" {
         x => x
       }
       let max_buf = match cfg.buffer_size() {
-        @core.SupportedBufferSize::Unknown => {
+        Unknown => {
           inspect(true, content="true")
           return
         }
-        @core.SupportedBufferSize::Range(max=mx, ..) => mx
+        Range(max=mx, ..) => mx
       }
       // Avoid overflow when buffer size is effectively unbounded.
       if max_buf >= 2147483647 {
@@ -110,8 +109,7 @@ test "alsa fixed buffer outside supported range is best-effort (best-effort)" {
         // we don't pre-classify this as StreamConfigNotSupported purely due to the buffer size.
         e =>
           match e {
-            @core.BuildStreamError::StreamConfigNotSupported =>
-              inspect(false, content="true")
+            StreamConfigNotSupported => inspect(false, content="true")
             _ => inspect(true, content="true")
           }
       } noraise {

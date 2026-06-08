@@ -30,16 +30,22 @@
 pub struct Data {
   sample_format : SampleFormat
   bytes : FixedArray[Byte]
-
-  fn new(sample_format : SampleFormat, bytes : FixedArray[Byte]) -> Data
 } derive(Debug, Eq)
+
+///|
+pub fn Data::Data(
+  sample_format : SampleFormat,
+  bytes : FixedArray[Byte],
+) -> Data {
+  { sample_format, bytes }
+}
 
 ///|
 pub fn Data::new(
   sample_format : SampleFormat,
   bytes : FixedArray[Byte],
 ) -> Data {
-  { sample_format, bytes }
+  Data(sample_format, bytes)
 }
 
 ///|
@@ -173,7 +179,7 @@ fn write_u64_le(bytes : FixedArray[Byte], offset : Int, v : UInt64) -> Bool {
 
 ///|
 pub fn Data::try_as_i8(self : Data) -> Array[Int]? {
-  if self.sample_format != SampleFormat::I8 {
+  if self.sample_format != I8 {
     return None
   }
   let out : Array[Int] = []
@@ -186,15 +192,15 @@ pub fn Data::try_as_i8(self : Data) -> Array[Int]? {
 
 ///|
 pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
-  if self.sample_format != SampleFormat::U8 {
+  if self.sample_format != U8 {
     return None
   }
-  Some(self.bytes.op_as_view().to_array())
+  Some(self.bytes.op_as_view().to_owned())
 }
 
 ///|
 pub fn Data::try_as_u16(self : Data) -> Array[UInt16]? {
-  if self.sample_format != SampleFormat::U16 {
+  if self.sample_format != U16 {
     return None
   }
   if self.bytes.length() % 2 != 0 {
@@ -216,7 +222,7 @@ pub fn Data::try_as_u16(self : Data) -> Array[UInt16]? {
 
 ///|
 pub fn Data::try_as_i16(self : Data) -> Array[Int16]? {
-  if self.sample_format != SampleFormat::I16 {
+  if self.sample_format != I16 {
     return None
   }
   if self.bytes.length() % 2 != 0 {
@@ -238,7 +244,7 @@ pub fn Data::try_as_i16(self : Data) -> Array[Int16]? {
 
 ///|
 pub fn Data::try_as_u24(self : Data) -> Array[U24]? {
-  if self.sample_format != SampleFormat::U24 {
+  if self.sample_format != U24 {
     return None
   }
   if self.bytes.length() % 4 != 0 {
@@ -263,7 +269,7 @@ pub fn Data::try_as_u24(self : Data) -> Array[U24]? {
 
 ///|
 pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
-  if self.sample_format != SampleFormat::I24 {
+  if self.sample_format != I24 {
     return None
   }
   if self.bytes.length() % 4 != 0 {
@@ -293,7 +299,7 @@ pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
 
 ///|
 pub fn Data::try_as_u32(self : Data) -> Array[UInt]? {
-  if self.sample_format != SampleFormat::U32 {
+  if self.sample_format != U32 {
     return None
   }
   if self.bytes.length() % 4 != 0 {
@@ -315,7 +321,7 @@ pub fn Data::try_as_u32(self : Data) -> Array[UInt]? {
 
 ///|
 pub fn Data::try_as_i32(self : Data) -> Array[Int]? {
-  if self.sample_format != SampleFormat::I32 {
+  if self.sample_format != I32 {
     return None
   }
   if self.bytes.length() % 4 != 0 {
@@ -337,7 +343,7 @@ pub fn Data::try_as_i32(self : Data) -> Array[Int]? {
 
 ///|
 pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
-  if self.sample_format != SampleFormat::F32 {
+  if self.sample_format != F32 {
     return None
   }
   if self.bytes.length() % 4 != 0 {
@@ -359,7 +365,7 @@ pub fn Data::try_as_f32(self : Data) -> Array[Float]? {
 
 ///|
 pub fn Data::try_as_u64(self : Data) -> Array[UInt64]? {
-  if self.sample_format != SampleFormat::U64 {
+  if self.sample_format != U64 {
     return None
   }
   if self.bytes.length() % 8 != 0 {
@@ -381,7 +387,7 @@ pub fn Data::try_as_u64(self : Data) -> Array[UInt64]? {
 
 ///|
 pub fn Data::try_as_i64(self : Data) -> Array[Int64]? {
-  if self.sample_format != SampleFormat::I64 {
+  if self.sample_format != I64 {
     return None
   }
   if self.bytes.length() % 8 != 0 {
@@ -403,7 +409,7 @@ pub fn Data::try_as_i64(self : Data) -> Array[Int64]? {
 
 ///|
 pub fn Data::try_as_f64(self : Data) -> Array[Double]? {
-  if self.sample_format != SampleFormat::F64 {
+  if self.sample_format != F64 {
     return None
   }
   if self.bytes.length() % 8 != 0 {
@@ -427,7 +433,7 @@ pub fn Data::try_as_f64(self : Data) -> Array[Double]? {
 /// Fill the underlying buffer with the sample-format equilibrium value (silence).
 pub fn Data::clear(self : Data) -> Unit {
   match self.sample_format {
-    SampleFormat::U8 => {
+    U8 => {
       // U8 equilibrium is 128 (unsigned).
       let mut i = 0
       while i < self.bytes.length() {
@@ -435,7 +441,7 @@ pub fn Data::clear(self : Data) -> Unit {
         i = i + 1
       }
     }
-    SampleFormat::U16 => {
+    U16 => {
       // U16 equilibrium is 0x8000 (little-endian bytes: 00 80).
       let mut i = 0
       while i + 1 < self.bytes.length() {
@@ -447,7 +453,7 @@ pub fn Data::clear(self : Data) -> Unit {
         self.bytes[i] = Int::to_byte(0x00)
       }
     }
-    SampleFormat::U24 => {
+    U24 => {
       // U24 equilibrium is 0x800000 (little-endian bytes: 00 00 80).
       let mut i = 0
       while i + 2 < self.bytes.length() {
@@ -461,7 +467,7 @@ pub fn Data::clear(self : Data) -> Unit {
         i = i + 1
       }
     }
-    SampleFormat::U32 => {
+    U32 => {
       // U32 equilibrium is 0x80000000 (little-endian bytes: 00 00 00 80).
       let mut i = 0
       while i + 3 < self.bytes.length() {
@@ -476,7 +482,7 @@ pub fn Data::clear(self : Data) -> Unit {
         i = i + 1
       }
     }
-    SampleFormat::U64 => {
+    U64 => {
       // U64 equilibrium is 0x8000_0000_0000_0000.
       let mut i = 0
       while i + 7 < self.bytes.length() {
@@ -509,7 +515,7 @@ pub fn Data::clear(self : Data) -> Unit {
 ///|
 /// Best-effort encoder for I8 output buffers.
 pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
-  if self.sample_format != SampleFormat::I8 {
+  if self.sample_format != I8 {
     return false
   }
   if self.bytes.length() != samples.length() {
@@ -531,7 +537,7 @@ pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
 ///|
 /// Best-effort encoder for U8 output buffers.
 pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
-  if self.sample_format != SampleFormat::U8 {
+  if self.sample_format != U8 {
     return false
   }
   if self.bytes.length() != samples.length() {
@@ -548,7 +554,7 @@ pub fn Data::write_u8(self : Data, samples : Array[Byte]) -> Bool {
 ///|
 /// Best-effort encoder for U16 (little-endian) output buffers.
 pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
-  if self.sample_format != SampleFormat::U16 {
+  if self.sample_format != U16 {
     return false
   }
   if self.bytes.length() != samples.length() * 2 {
@@ -567,7 +573,7 @@ pub fn Data::write_u16(self : Data, samples : Array[UInt16]) -> Bool {
 ///|
 /// Best-effort encoder for I16 (little-endian) output buffers.
 pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
-  if self.sample_format != SampleFormat::I16 {
+  if self.sample_format != I16 {
     return false
   }
   if self.bytes.length() != samples.length() * 2 {
@@ -586,7 +592,7 @@ pub fn Data::write_i16(self : Data, samples : Array[Int16]) -> Bool {
 ///|
 /// Best-effort encoder for U24 (little-endian, stored in the low 24 bits of a 32-bit word).
 pub fn Data::write_u24(self : Data, samples : Array[U24]) -> Bool {
-  if self.sample_format != SampleFormat::U24 {
+  if self.sample_format != U24 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
@@ -609,7 +615,7 @@ pub fn Data::write_u24(self : Data, samples : Array[U24]) -> Bool {
 ///|
 /// Best-effort encoder for I24 (little-endian, stored in the low 24 bits of a 32-bit word).
 pub fn Data::write_i24(self : Data, samples : Array[I24]) -> Bool {
-  if self.sample_format != SampleFormat::I24 {
+  if self.sample_format != I24 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
@@ -633,7 +639,7 @@ pub fn Data::write_i24(self : Data, samples : Array[I24]) -> Bool {
 ///|
 /// Best-effort encoder for U32 (little-endian).
 pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
-  if self.sample_format != SampleFormat::U32 {
+  if self.sample_format != U32 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
@@ -657,7 +663,7 @@ pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
 ///|
 /// Best-effort encoder for I32 (little-endian).
 pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
-  if self.sample_format != SampleFormat::I32 {
+  if self.sample_format != I32 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
@@ -677,7 +683,7 @@ pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
 ///|
 /// Best-effort encoder for F32 (IEEE-754, little-endian) output buffers.
 pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
-  if self.sample_format != SampleFormat::F32 {
+  if self.sample_format != F32 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
@@ -696,7 +702,7 @@ pub fn Data::write_f32(self : Data, samples : Array[Float]) -> Bool {
 ///|
 /// Best-effort encoder for U64 (little-endian).
 pub fn Data::write_u64(self : Data, samples : Array[UInt64]) -> Bool {
-  if self.sample_format != SampleFormat::U64 {
+  if self.sample_format != U64 {
     return false
   }
   if self.bytes.length() != samples.length() * 8 {
@@ -715,7 +721,7 @@ pub fn Data::write_u64(self : Data, samples : Array[UInt64]) -> Bool {
 ///|
 /// Best-effort encoder for I64 (little-endian).
 pub fn Data::write_i64(self : Data, samples : Array[Int64]) -> Bool {
-  if self.sample_format != SampleFormat::I64 {
+  if self.sample_format != I64 {
     return false
   }
   if self.bytes.length() != samples.length() * 8 {
@@ -734,7 +740,7 @@ pub fn Data::write_i64(self : Data, samples : Array[Int64]) -> Bool {
 ///|
 /// Best-effort encoder for F64 (IEEE-754, little-endian).
 pub fn Data::write_f64(self : Data, samples : Array[Double]) -> Bool {
-  if self.sample_format != SampleFormat::F64 {
+  if self.sample_format != F64 {
     return false
   }
   if self.bytes.length() != samples.length() * 8 {

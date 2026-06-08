@@ -40,7 +40,7 @@ pub fn supported_configs_error_from_osstatus(
 ///|
 fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
   match osstatus_kind(status) {
-    1 => raise CoreAudioError::DeviceNotAvailable(op, status)
+    1 => raise DeviceNotAvailable(op, status)
     _ => raise CoreAudioError(op, status)
   }
 }

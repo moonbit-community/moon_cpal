@@ -31,7 +31,7 @@ pub struct Stream {
 }
 
 ///|
-pub impl Show for Stream with output(self : Stream, logger : &Logger) -> Unit {
+pub impl Show for Stream with fn output(self : Stream, logger : &Logger) -> Unit {
   logger.write_string("Stream(")
   logger.write_string(self.kind.to_string())
   logger.write_string(")")

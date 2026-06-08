@@ -32,9 +32,9 @@ extern "C" fn native_os_tag() -> Int = "moon_cpal_os_tag"
 ///|
 pub fn native_os() -> NativeOs {
   match native_os_tag() {
-    1 => NativeOs::Macos
-    2 => NativeOs::Windows
-    3 => NativeOs::Linux
-    _ => NativeOs::Unknown
+    1 => Macos
+    2 => Windows
+    3 => Linux
+    _ => Unknown
   }
 }

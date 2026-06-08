@@ -186,10 +186,7 @@ fn get_buffer_frame_size_range(
   if st < 0 {
     raise_osstatus("ca_buffer_frame_size_range", st)
   }
-  @core.SupportedBufferSize::Range(
-    min=out[0].reinterpret_as_int(),
-    max=out[1].reinterpret_as_int(),
-  )
+  Range(min=out[0].reinterpret_as_int(), max=out[1].reinterpret_as_int())
 }
 
 ///|
@@ -201,10 +198,7 @@ fn get_buffer_frame_size_range_default(
   if st < 0 {
     raise_default_osstatus("ca_buffer_frame_size_range", st)
   }
-  @core.SupportedBufferSize::Range(
-    min=out[0].reinterpret_as_int(),
-    max=out[1].reinterpret_as_int(),
-  )
+  Range(min=out[0].reinterpret_as_int(), max=out[1].reinterpret_as_int())
 }
 
 ///|
@@ -232,11 +226,11 @@ fn default_stream_config(
   let channels = out[1].reinterpret_as_int()
   let sample_format = match out[2] {
     1 => @core.SampleFormat::F32
-    2 => @core.SampleFormat::I16
+    2 => I16
     _ => raise @core.default_stream_config_error_stream_type_not_supported()
   }
   let buffer_size = get_buffer_frame_size_range_default(device_id)
-  @core.SupportedStreamConfig(channels, sample_rate, buffer_size, sample_format)
+  SupportedStreamConfig(channels, sample_rate, buffer_size, sample_format)
 }
 
 ///|
@@ -356,7 +350,7 @@ fn supported_configs(
       }
     }
     [
-      @core.SupportedStreamConfigRange(
+      SupportedStreamConfigRange(
         channels, min_sr, max_sr, buffer_size, sample_format,
       ),
     ]
@@ -400,9 +394,9 @@ pub fn device_ids() -> Array[DeviceId] raise CoreAudioError {
   if got == 0 {
     []
   } else if got == n {
-    buf[:].to_array()
+    buf[:].to_owned()
   } else {
-    buf[:got].to_array()
+    buf[:got].to_owned()
   }
 }
 

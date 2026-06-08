@@ -14,7 +14,7 @@
 
 ///|
 test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -26,7 +26,7 @@ test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
   try
     dev.build_output_stream_raw(
       sc,
-      @core.SampleFormat::F32,
+      F32,
       fn(_d, _info) { () },
       fn(_e) { () },
       None,
@@ -34,8 +34,7 @@ test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
   catch {
     e =>
       match e {
-        @core.BuildStreamError::StreamConfigNotSupported =>
-          inspect(true, content="true")
+        StreamConfigNotSupported => inspect(true, content="true")
         _ => inspect(false, content="true")
       }
   } noraise {
@@ -48,7 +47,7 @@ test "jack fixed buffer 0 is stream_config_not_supported (unit)" {
 
 ///|
 test "jack fixed buffer mismatch fails when server config known (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }
@@ -67,7 +66,7 @@ test "jack fixed buffer mismatch fails when server config known (best-effort)" {
       try
         dev.build_output_stream_raw(
           sc,
-          @core.SampleFormat::F32,
+          F32,
           fn(_d, _info) { () },
           fn(_e) { () },
           None,
@@ -75,8 +74,7 @@ test "jack fixed buffer mismatch fails when server config known (best-effort)" {
       catch {
         e =>
           match e {
-            @core.BuildStreamError::StreamConfigNotSupported =>
-              inspect(true, content="true")
+            StreamConfigNotSupported => inspect(true, content="true")
             _ => inspect(false, content="true")
           }
       } noraise {

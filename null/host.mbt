@@ -60,7 +60,7 @@ pub fn Device::name(_self : Device) -> String {
 ///|
 pub fn Device::description(_self : Device) -> @core.DeviceDescription {
   let name = "Null Device"
-  @core.DeviceDescription(
+  DeviceDescription(
     name,
     driver=Some("Null"),
     device_type=@core.DeviceType::virtual_(),
@@ -71,7 +71,7 @@ pub fn Device::description(_self : Device) -> @core.DeviceDescription {
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId(@core.HostId::Null, "")
+  DeviceId(Null, "")
 }
 
 ///|
