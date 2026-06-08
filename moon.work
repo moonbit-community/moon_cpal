@@ -1,0 +1,4 @@
+members = [
+  ".",
+  "./ci/downstream_smoke",
+]

@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "Milky2018/moon_cpal/wasapi"
+package "moonbit-community/moon_cpal/wasapi"
 
 import {
-  "Milky2018/moon_cpal/core",
+  "moonbit-community/moon_cpal/core",
   "moonbitlang/core/debug",
 }
 

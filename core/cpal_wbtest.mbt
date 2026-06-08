@@ -135,9 +135,12 @@ test "stream_instant add/sub (ported from upstream cpal/src/lib.rs)" {
 test "stream_instant duration_since (ported from upstream cpal/src/lib.rs)" {
   let a = StreamInstant(2L, 0)
   let b = StreamInstant(1L, 0)
-  @debug.debug_inspect(a.duration_since(b), content=(
-    #|Some({ secs: 1, nanos: 0 })
-  ))
+  @debug.debug_inspect(
+    a.duration_since(b),
+    content=(
+      #|Some({ secs: 1, nanos: 0 })
+    ),
+  )
   @debug.debug_inspect(b.duration_since(a), content="None")
   let c = StreamInstant(1L, 100)
   let d = StreamInstant(0L, 200)
