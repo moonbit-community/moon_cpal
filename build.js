@@ -1,7 +1,7 @@
 const os = require('os');
 
 const platform = os.platform();
-const moduleName = 'Milky2018/moon_cpal';
+const moduleName = 'moonbit-community/moon_cpal';
 
 const linkConfigs = [];
 

@@ -1,7 +1,7 @@
 import {
-  "Milky2018/moon_cpal/alsa",
-  "Milky2018/moon_cpal/core",
-  "Milky2018/moon_cpal",
+  "moonbit-community/moon_cpal/alsa",
+  "moonbit-community/moon_cpal/core",
+  "moonbit-community/moon_cpal",
 }
 
 supported_targets = "native"

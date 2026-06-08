@@ -13,12 +13,12 @@
 // limitations under the License.
 
 ///|
-/// Root `Milky2018/moon_cpal` public API (native-only).
+/// Root `moonbit-community/moon_cpal` public API (native-only).
 ///
 /// Mirrors upstream `cpal::lib.rs` re-exports:
-/// - core types/errors live in `Milky2018/moon_cpal/core`
-/// - dynamic dispatch host/device/stream live in `Milky2018/moon_cpal/platform`
-/// - CPAL-like traits live in `Milky2018/moon_cpal/traits`
+/// - core types/errors live in `moonbit-community/moon_cpal/core`
+/// - dynamic dispatch host/device/stream live in `moonbit-community/moon_cpal/platform`
+/// - CPAL-like traits live in `moonbit-community/moon_cpal/traits`
 
 ///|
 pub type HostId = @core.HostId
