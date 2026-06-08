@@ -42,12 +42,12 @@ fn default_device() -> Device {
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     let bytes = devices_utf8()
     let s = @core.utf8_bytes_to_string(bytes, bytes.length())
     let out : Array[Device] = []
     for v in s[:].split("\n"[:]) {
-      let id = v.trim().to_string()
+      let id = v.trim().to_owned()
       if id.length() > 0 {
         // Each line is: "<id>\t<dir>\t<desc_escaped>".
         let fields = Array::new()
@@ -55,7 +55,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
           fields.push(p)
         }
         let pcm_id = if fields.length() > 0 {
-          fields[0].trim().to_string()
+          fields[0].trim().to_owned()
         } else {
           "".to_string()
         }
@@ -63,12 +63,12 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
           continue
         }
         let dir_tag = if fields.length() > 1 {
-          fields[1].trim().to_string()
+          fields[1].trim().to_owned()
         } else {
           "?".to_string()
         }
         let desc_esc = if fields.length() > 2 {
-          fields[2].to_string()
+          fields[2].to_owned()
         } else {
           ""
         }
@@ -97,7 +97,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     // Match upstream CPAL ALSA host: always return the "default" PCM, even though the actual
     // availability of output formats can only be determined by attempting to open a stream.
     Some(default_device())
@@ -108,7 +108,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     // Match upstream CPAL ALSA host: always return the "default" PCM (see above).
     Some(default_device())
   } else {
@@ -118,7 +118,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return _self.id
   }
   // Match upstream ALSA: `name()` returns the PCM id.
@@ -134,7 +134,7 @@ pub fn Device::description(
     Some(desc) => {
       let mut first = _self.id
       for line in desc[:].split("\n"[:]) {
-        let s = line.trim().to_string()
+        let s = line.trim().to_owned()
         if s.length() > 0 {
           first = s
           break
@@ -153,13 +153,13 @@ pub fn Device::description(
     None => ()
     Some(desc) =>
       for line in desc[:].split("\n"[:]) {
-        let t = line.trim().to_string()
+        let t = line.trim().to_owned()
         if t.length() > 0 {
           extended.push(t)
         }
       }
   }
-  @core.DeviceDescription(
+  DeviceDescription(
     name,
     driver=Some(_self.id),
     device_type=@core.DeviceType::unknown(),
@@ -172,15 +172,15 @@ pub fn Device::description(
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId(@core.HostId::Alsa, _self.id)
+  DeviceId(Alsa, _self.id)
 }
 
 ///|
 pub fn Device::supports_input(_self : Device) -> Bool {
   match _self.direction {
-    @core.DeviceDirection::Input => true
-    @core.DeviceDirection::Duplex => true
-    @core.DeviceDirection::Unknown => true
+    Input => true
+    Duplex => true
+    Unknown => true
     _ => false
   }
 }
@@ -188,9 +188,9 @@ pub fn Device::supports_input(_self : Device) -> Bool {
 ///|
 pub fn Device::supports_output(_self : Device) -> Bool {
   match _self.direction {
-    @core.DeviceDirection::Output => true
-    @core.DeviceDirection::Duplex => true
-    @core.DeviceDirection::Unknown => true
+    Output => true
+    Duplex => true
+    Unknown => true
     _ => false
   }
 }
@@ -229,7 +229,7 @@ fn unescape(s : String) -> String {
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return []
   }
   if !_self.supports_input() {
@@ -242,7 +242,7 @@ pub fn Device::supported_input_configs(
 pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] raise @core.SupportedStreamConfigsError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return []
   }
   if !_self.supports_output() {
@@ -255,7 +255,7 @@ pub fn Device::supported_output_configs(
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise @core.default_stream_config_error_backend_specific(
       "alsa default_input_config: not available on this OS",
     )
@@ -270,7 +270,7 @@ pub fn Device::default_input_config(
 pub fn Device::default_output_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise @core.default_stream_config_error_backend_specific(
       "alsa default_output_config: not available on this OS",
     )
@@ -303,19 +303,19 @@ fn i32_le_to_int(b : Bytes, off : Int) -> Int {
 ///|
 fn sample_format_from_bin_tag(tag : Int) -> @core.SampleFormat? {
   match tag {
-    1 => Some(@core.SampleFormat::I8)
-    2 => Some(@core.SampleFormat::U8)
-    3 => Some(@core.SampleFormat::I16)
-    4 => Some(@core.SampleFormat::U16)
-    5 => Some(@core.SampleFormat::I24)
-    6 => Some(@core.SampleFormat::U24)
-    7 => Some(@core.SampleFormat::I32)
-    8 => Some(@core.SampleFormat::U32)
-    9 => Some(@core.SampleFormat::F32)
-    10 => Some(@core.SampleFormat::F64)
-    11 => Some(@core.SampleFormat::DsdU8)
-    12 => Some(@core.SampleFormat::DsdU16)
-    13 => Some(@core.SampleFormat::DsdU32)
+    1 => Some(I8)
+    2 => Some(U8)
+    3 => Some(I16)
+    4 => Some(U16)
+    5 => Some(I24)
+    6 => Some(U24)
+    7 => Some(I32)
+    8 => Some(U32)
+    9 => Some(F32)
+    10 => Some(F64)
+    11 => Some(DsdU8)
+    12 => Some(DsdU16)
+    13 => Some(DsdU32)
     _ => None
   }
 }
@@ -352,7 +352,7 @@ fn parse_supported_configs_bin(
           min=if buf_min > 0 { buf_min } else { 1 },
           max=if buf_max >= buf_min && buf_max > 0 { buf_max } else { buf_min },
         )
-        out.push(@core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
+        out.push(SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
       }
     }
   }
@@ -396,13 +396,12 @@ fn default_config(
   is_input : Bool,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   let ranges = try supported_configs(d, is_input) catch {
-    @core.SupportedStreamConfigsError::DeviceNotAvailable =>
+    DeviceNotAvailable =>
       raise @core.default_stream_config_error_device_not_available()
-    @core.SupportedStreamConfigsError::DeviceBusy =>
-      raise @core.default_stream_config_error_device_busy()
-    @core.SupportedStreamConfigsError::InvalidArgument =>
+    DeviceBusy => raise @core.default_stream_config_error_device_busy()
+    InvalidArgument =>
       raise @core.default_stream_config_error_stream_type_not_supported()
-    @core.SupportedStreamConfigsError::BackendSpecific(err) =>
+    BackendSpecific(err) =>
       raise @core.default_stream_config_error_backend_specific(
         err.description(),
       )

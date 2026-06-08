@@ -93,7 +93,7 @@ test "macos supports_input/output follow channel counts" {
 
 ///|
 test "macos can apply nominal sample rate from default input config (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Macos {
+  if @core.native_os() != Macos {
     inspect(true, content="true")
     return
   }

@@ -65,7 +65,7 @@ test "test_host stream: injected stream error is delivered once (best-effort)" {
   inspect(wait_until(errs, 1, 2000), content="true")
   inspect(calls_at_err[0] >= 2, content="true")
   match last[0] {
-    @core.StreamError::BufferUnderrun => inspect(true, content="true")
+    BufferUnderrun => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   // Should not spam errors.
@@ -121,7 +121,7 @@ test "test_host stream: injected device-not-available mapping" {
   inspect(wait_until(calls, 1, 2000), content="true")
   inspect(wait_until(errs, 1, 2000), content="true")
   match last[0] {
-    @core.StreamError::DeviceNotAvailable => inspect(true, content="true")
+    DeviceNotAvailable => inspect(true, content="true")
     _ => inspect(false, content="true")
   }
   stream.close()

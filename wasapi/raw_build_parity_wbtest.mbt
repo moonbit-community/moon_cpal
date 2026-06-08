@@ -14,7 +14,7 @@
 
 ///|
 test "wasapi raw output build on capture endpoint is not pre-rejected by config ranges (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     inspect(true, content="true")
     return
   }
@@ -50,8 +50,7 @@ test "wasapi raw output build on capture endpoint is not pre-rejected by config 
       match e {
         // This case historically indicated MoonBit-side prevalidation against
         // supported_output_configs() on capture endpoints; keep it rejected.
-        @core.BuildStreamError::StreamConfigNotSupported =>
-          inspect(false, content="true")
+        StreamConfigNotSupported => inspect(false, content="true")
         _ => inspect(true, content="true")
       }
   } noraise {

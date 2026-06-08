@@ -30,7 +30,7 @@ fn wait_until(counter : Array[Int], min_count : Int, timeout_ms : Int) -> Bool {
 
 ///|
 test "coreaudio output stream: no callbacks before play; pause/close stops callbacks (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Macos {
+  if @core.native_os() != Macos {
     inspect(true, content="true")
     return
   }

@@ -213,27 +213,16 @@ pub struct DeviceDescription {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
-
-  fn new(
-    name : String,
-    manufacturer? : String?,
-    driver? : String?,
-    device_type? : DeviceType,
-    interface_type? : InterfaceType,
-    direction? : DeviceDirection,
-    address? : String?,
-    extended? : Array[String],
-  ) -> DeviceDescription
 } derive(Debug, Eq)
 
 ///|
-pub fn DeviceDescription::new(
+pub fn DeviceDescription::DeviceDescription(
   name : String,
   manufacturer? : String? = None,
   driver? : String? = None,
-  device_type? : DeviceType = DeviceType::Unknown,
-  interface_type? : InterfaceType = InterfaceType::Unknown,
-  direction? : DeviceDirection = DeviceDirection::Unknown,
+  device_type? : DeviceType = Unknown,
+  interface_type? : InterfaceType = Unknown,
+  direction? : DeviceDirection = Unknown,
   address? : String? = None,
   extended? : Array[String] = [],
 ) -> DeviceDescription {
@@ -247,6 +236,29 @@ pub fn DeviceDescription::new(
     address,
     extended,
   }
+}
+
+///|
+pub fn DeviceDescription::new(
+  name : String,
+  manufacturer? : String? = None,
+  driver? : String? = None,
+  device_type? : DeviceType = Unknown,
+  interface_type? : InterfaceType = Unknown,
+  direction? : DeviceDirection = Unknown,
+  address? : String? = None,
+  extended? : Array[String] = [],
+) -> DeviceDescription {
+  DeviceDescription(
+    name,
+    manufacturer~,
+    driver~,
+    device_type~,
+    interface_type~,
+    direction~,
+    address~,
+    extended~,
+  )
 }
 
 ///|
@@ -364,10 +376,10 @@ pub fn DeviceDescription::to_string(self : DeviceDescription) -> String {
     None => ()
     Some(m) => sb.write_string(" (\{m})")
   }
-  if self.device_type != DeviceType::Unknown {
+  if self.device_type != Unknown {
     sb.write_string(" [\{self.device_type.to_string()}]")
   }
-  if self.interface_type != InterfaceType::Unknown {
+  if self.interface_type != Unknown {
     sb.write_string(" via \{self.interface_type.to_string()}")
   }
   sb.to_string()
@@ -387,22 +399,27 @@ pub struct DeviceDescriptionBuilder {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
-
-  fn new(name : String) -> DeviceDescriptionBuilder
 } derive(Debug, Eq)
 
 ///|
-pub fn DeviceDescriptionBuilder::new(name : String) -> DeviceDescriptionBuilder {
+pub fn DeviceDescriptionBuilder::DeviceDescriptionBuilder(
+  name : String,
+) -> DeviceDescriptionBuilder {
   {
     name,
     manufacturer: None,
     driver: None,
-    device_type: DeviceType::Unknown,
-    interface_type: InterfaceType::Unknown,
-    direction: DeviceDirection::Unknown,
+    device_type: Unknown,
+    interface_type: Unknown,
+    direction: Unknown,
     address: None,
     extended: [],
   }
+}
+
+///|
+pub fn DeviceDescriptionBuilder::new(name : String) -> DeviceDescriptionBuilder {
+  DeviceDescriptionBuilder(name)
 }
 
 ///|
@@ -565,10 +582,10 @@ pub fn direction_from_caps(
   has_output : Bool,
 ) -> DeviceDirection {
   match (has_input, has_output) {
-    (true, true) => DeviceDirection::Duplex
-    (true, false) => DeviceDirection::Input
-    (false, true) => DeviceDirection::Output
-    (false, false) => DeviceDirection::Unknown
+    (true, true) => Duplex
+    (true, false) => Input
+    (false, true) => Output
+    (false, false) => Unknown
   }
 }
 

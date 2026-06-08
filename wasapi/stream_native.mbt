@@ -117,14 +117,14 @@ fn[A] raise_pause_hresult(
 ///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
-    @core.SampleFormat::U8 => Some((4 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
+    U8 => Some((4 : UInt))
     // Match upstream WASAPI supported_formats: i24/u24/i32/i64 use WAVE_FORMAT_EXTENSIBLE.
-    @core.SampleFormat::I24 => Some((6 : UInt))
-    @core.SampleFormat::U24 => Some((7 : UInt))
-    @core.SampleFormat::I32 => Some((8 : UInt))
-    @core.SampleFormat::I64 => Some((10 : UInt))
+    I24 => Some((6 : UInt))
+    U24 => Some((7 : UInt))
+    I32 => Some((8 : UInt))
+    I64 => Some((10 : UInt))
     _ => None
   }
 }
@@ -171,7 +171,7 @@ pub fn Device::build_output_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     raise_build_hresult("wasapi build_output_stream_raw", -1)
   }
   if config.channels <= 0 || config.sample_rate <= 0 {
@@ -212,11 +212,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_output", st)
   }
-  {
-    kind: StreamKind::Output,
-    handle: out[0],
-    owner: wasapi_stream_owner_new(out[0]),
-  }
+  { kind: Output, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -249,7 +245,7 @@ pub fn Device::build_input_stream_raw(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     raise_build_hresult("wasapi build_input_stream_raw", -1)
   }
   if config.channels <= 0 || config.sample_rate <= 0 {
@@ -289,11 +285,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_input", st)
   }
-  {
-    kind: StreamKind::Input,
-    handle: out[0],
-    owner: wasapi_stream_owner_new(out[0]),
-  }
+  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -335,7 +327,7 @@ pub fn Device::build_loopback_input_stream(
   error_callback : (@core.StreamError) -> Unit,
   _timeout : @core.Duration?,
 ) -> Stream raise @core.BuildStreamError {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     raise_build_hresult("wasapi build_loopback_input_stream", -1)
   }
   if config.channels <= 0 || config.sample_rate <= 0 {
@@ -384,11 +376,7 @@ pub fn Device::build_loopback_input_stream(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_input(loopback)", st)
   }
-  {
-    kind: StreamKind::Input,
-    handle: out[0],
-    owner: wasapi_stream_owner_new(out[0]),
-  }
+  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
 }
 
 ///|

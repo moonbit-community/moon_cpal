@@ -35,17 +35,17 @@ pub fn default_host() -> Host {
 
 ///|
 pub fn Host::is_available(_self : Host) -> Bool {
-  @core.native_os() == @core.NativeOs::Windows
+  @core.native_os() == Windows
 }
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  if @core.native_os() == @core.NativeOs::Windows {
+  if @core.native_os() == Windows {
     let bytes = devices_utf8()
     let s = @core.utf8_bytes_to_string(bytes, bytes.length())
     let out : Array[Device] = []
     for v in s[:].split("\n"[:]) {
-      let id = v.trim().to_string()
+      let id = v.trim().to_owned()
       if id.length() > 0 {
         out.push({ id, })
       }
@@ -58,7 +58,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Windows {
+  if @core.native_os() == Windows {
     match default_device_id_utf8(false) {
       None => None
       Some(id) => Some({ id, })
@@ -70,7 +70,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Windows {
+  if @core.native_os() == Windows {
     match default_device_id_utf8(true) {
       None => None
       Some(id) => Some({ id, })
@@ -82,7 +82,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     return _self.id
   }
   match device_name_utf8(_self.id) {
@@ -108,7 +108,7 @@ fn wasapi_ascii_upper(s : String) -> String {
 fn wasapi_interface_type_from_enumerator(
   enumerator_name : String,
 ) -> @core.InterfaceType? {
-  match wasapi_ascii_upper(enumerator_name.trim().to_string()) {
+  match wasapi_ascii_upper(enumerator_name.trim().to_owned()) {
     "HDAUDIO" => Some(@core.InterfaceType::built_in())
     "USB" => Some(@core.InterfaceType::usb())
     "BTHENUM" => Some(@core.InterfaceType::bluetooth())
@@ -121,7 +121,7 @@ fn wasapi_interface_type_from_enumerator(
 fn wasapi_interface_type_from_jack_subtype(
   jack_subtype : String,
 ) -> @core.InterfaceType? {
-  match wasapi_ascii_upper(jack_subtype.trim().to_string()) {
+  match wasapi_ascii_upper(jack_subtype.trim().to_owned()) {
     "{D9E55EA0-0C89-4692-84FF-EB3C4B0D172F}" =>
       Some(@core.InterfaceType::hdmi())
     "{E47E4031-3EA6-418D-8F9B-B73843CCB2AD}" =>
@@ -165,7 +165,7 @@ fn wasapi_types_from_form_factor(
 fn wasapi_non_empty_trimmed(s : String?) -> String? {
   match s {
     Some(v) => {
-      let t = v.trim().to_string()
+      let t = v.trim().to_owned()
       if t.length() > 0 {
         Some(v)
       } else {
@@ -256,7 +256,7 @@ pub fn Device::description(
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId(@core.HostId::Wasapi, _self.id)
+  DeviceId(Wasapi, _self.id)
 }
 
 ///|
@@ -288,14 +288,14 @@ fn clamp_u32_to_frame_count(u : UInt) -> Int {
 ///|
 fn wasapi_sample_format_from_tag(fmt_tag : UInt) -> @core.SampleFormat? {
   match fmt_tag {
-    1 => Some(@core.SampleFormat::F32)
-    2 => Some(@core.SampleFormat::I16)
-    3 => Some(@core.SampleFormat::U16)
-    4 => Some(@core.SampleFormat::U8)
-    6 => Some(@core.SampleFormat::I24)
-    7 => Some(@core.SampleFormat::U24)
-    8 => Some(@core.SampleFormat::I32)
-    10 => Some(@core.SampleFormat::I64)
+    1 => Some(F32)
+    2 => Some(I16)
+    3 => Some(U16)
+    4 => Some(U8)
+    6 => Some(I24)
+    7 => Some(U24)
+    8 => Some(I32)
+    10 => Some(I64)
     _ => None
   }
 }
@@ -304,7 +304,7 @@ fn wasapi_sample_format_from_tag(fmt_tag : UInt) -> @core.SampleFormat? {
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     return []
   }
   match data_flow_tag(_self.id) {
@@ -325,7 +325,7 @@ pub fn Device::supported_input_configs(
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @core.SupportedStreamConfigRange(
+            SupportedStreamConfigRange(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -355,7 +355,7 @@ pub fn Device::supported_input_configs(
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @core.SupportedStreamConfigRange(
+          SupportedStreamConfigRange(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -373,7 +373,7 @@ pub fn Device::supported_input_configs(
 pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     return []
   }
   match data_flow_tag(_self.id) {
@@ -394,7 +394,7 @@ pub fn Device::supported_output_configs(
             max=clamp_u32_to_frame_count(bmax),
           )
           [
-            @core.SupportedStreamConfigRange(
+            SupportedStreamConfigRange(
               ch.reinterpret_as_int(),
               sr.reinterpret_as_int(),
               sr.reinterpret_as_int(),
@@ -424,7 +424,7 @@ pub fn Device::supported_output_configs(
           max=clamp_u32_to_frame_count(bmax),
         )
         out.push(
-          @core.SupportedStreamConfigRange(
+          SupportedStreamConfigRange(
             ch.reinterpret_as_int(),
             sr.reinterpret_as_int(),
             sr.reinterpret_as_int(),
@@ -442,7 +442,7 @@ pub fn Device::supported_output_configs(
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     raise @core.default_stream_config_error_backend_specific(
       "wasapi default_input_config: not available on this OS",
     )
@@ -465,10 +465,10 @@ pub fn Device::default_input_config(
             "wasapi default_input_config: unsupported format tag",
           )
       }
-      @core.SupportedStreamConfig(
+      SupportedStreamConfig(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
-        @core.SupportedBufferSize::Range(
+        Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         ),
@@ -482,7 +482,7 @@ pub fn Device::default_input_config(
 pub fn Device::default_output_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Windows {
+  if @core.native_os() != Windows {
     raise @core.default_stream_config_error_backend_specific(
       "wasapi default_output_config: not available on this OS",
     )
@@ -505,10 +505,10 @@ pub fn Device::default_output_config(
             "wasapi default_output_config: unsupported format tag",
           )
       }
-      @core.SupportedStreamConfig(
+      SupportedStreamConfig(
         ch.reinterpret_as_int(),
         sr.reinterpret_as_int(),
-        @core.SupportedBufferSize::Range(
+        Range(
           min=clamp_u32_to_frame_count(bmin),
           max=clamp_u32_to_frame_count(bmax),
         ),

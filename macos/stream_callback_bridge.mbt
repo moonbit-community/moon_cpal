@@ -21,9 +21,9 @@
 ///|
 fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
   match tag {
-    1 => @core.SampleFormat::F32
-    2 => @core.SampleFormat::I16
-    _ => @core.SampleFormat::F32
+    1 => F32
+    2 => I16
+    _ => F32
   }
 }
 

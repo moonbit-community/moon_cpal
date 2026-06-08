@@ -97,18 +97,18 @@ extern "C" fn null_stream_owner_inject_error(
 ///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
-    @core.SampleFormat::U16 => Some((3 : UInt))
-    @core.SampleFormat::U8 => Some((4 : UInt))
-    @core.SampleFormat::I8 => Some((5 : UInt))
-    @core.SampleFormat::I24 => Some((6 : UInt))
-    @core.SampleFormat::U24 => Some((7 : UInt))
-    @core.SampleFormat::I32 => Some((8 : UInt))
-    @core.SampleFormat::U32 => Some((9 : UInt))
-    @core.SampleFormat::I64 => Some((10 : UInt))
-    @core.SampleFormat::U64 => Some((11 : UInt))
-    @core.SampleFormat::F64 => Some((12 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
+    U16 => Some((3 : UInt))
+    U8 => Some((4 : UInt))
+    I8 => Some((5 : UInt))
+    I24 => Some((6 : UInt))
+    U24 => Some((7 : UInt))
+    I32 => Some((8 : UInt))
+    U32 => Some((9 : UInt))
+    I64 => Some((10 : UInt))
+    U64 => Some((11 : UInt))
+    F64 => Some((12 : UInt))
     _ => None
   }
 }
@@ -229,7 +229,7 @@ pub fn Device::build_output_stream_raw(
   if h == 0 {
     raise_build_status("test_host build_output_stream", -1)
   }
-  { kind: StreamKind::Output, owner: null_stream_owner_new(h) }
+  { kind: Output, owner: null_stream_owner_new(h) }
 }
 
 ///|
@@ -287,7 +287,7 @@ pub fn Device::build_input_stream_raw(
   if h == 0 {
     raise_build_status("test_host build_input_stream", -1)
   }
-  { kind: StreamKind::Input, owner: null_stream_owner_new(h) }
+  { kind: Input, owner: null_stream_owner_new(h) }
 }
 
 ///|

@@ -30,7 +30,7 @@ fn wait_until(counter : Array[Int], min_count : Int, timeout_ms : Int) -> Bool {
 
 ///|
 test "alsa output stream: no callbacks before play; pause/close stops callbacks (best-effort)" {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     inspect(true, content="true")
     return
   }

@@ -23,19 +23,22 @@
 pub struct InputStreamTimestamp {
   callback : StreamInstant
   capture : StreamInstant
-
-  fn new(
-    callback : StreamInstant,
-    capture : StreamInstant,
-  ) -> InputStreamTimestamp
 } derive(Debug, Eq)
+
+///|
+pub fn InputStreamTimestamp::InputStreamTimestamp(
+  callback : StreamInstant,
+  capture : StreamInstant,
+) -> InputStreamTimestamp {
+  { callback, capture }
+}
 
 ///|
 pub fn InputStreamTimestamp::new(
   callback : StreamInstant,
   capture : StreamInstant,
 ) -> InputStreamTimestamp {
-  { callback, capture }
+  InputStreamTimestamp(callback, capture)
 }
 
 ///|
@@ -57,19 +60,22 @@ pub fn InputStreamTimestamp::capture(
 pub struct OutputStreamTimestamp {
   callback : StreamInstant
   playback : StreamInstant
-
-  fn new(
-    callback : StreamInstant,
-    playback : StreamInstant,
-  ) -> OutputStreamTimestamp
 } derive(Debug, Eq)
+
+///|
+pub fn OutputStreamTimestamp::OutputStreamTimestamp(
+  callback : StreamInstant,
+  playback : StreamInstant,
+) -> OutputStreamTimestamp {
+  { callback, playback }
+}
 
 ///|
 pub fn OutputStreamTimestamp::new(
   callback : StreamInstant,
   playback : StreamInstant,
 ) -> OutputStreamTimestamp {
-  { callback, playback }
+  OutputStreamTimestamp(callback, playback)
 }
 
 ///|
@@ -90,15 +96,20 @@ pub fn OutputStreamTimestamp::playback(
 /// Information relevant to a single call to the user's input stream data callback.
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
-
-  fn new(timestamp : InputStreamTimestamp) -> InputCallbackInfo
 } derive(Debug, Eq)
+
+///|
+pub fn InputCallbackInfo::InputCallbackInfo(
+  timestamp : InputStreamTimestamp,
+) -> InputCallbackInfo {
+  { timestamp, }
+}
 
 ///|
 pub fn InputCallbackInfo::new(
   timestamp : InputStreamTimestamp,
 ) -> InputCallbackInfo {
-  { timestamp, }
+  InputCallbackInfo(timestamp)
 }
 
 ///|
@@ -112,15 +123,20 @@ pub fn InputCallbackInfo::timestamp(
 /// Information relevant to a single call to the user's output stream data callback.
 pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
-
-  fn new(timestamp : OutputStreamTimestamp) -> OutputCallbackInfo
 } derive(Debug, Eq)
+
+///|
+pub fn OutputCallbackInfo::OutputCallbackInfo(
+  timestamp : OutputStreamTimestamp,
+) -> OutputCallbackInfo {
+  { timestamp, }
+}
 
 ///|
 pub fn OutputCallbackInfo::new(
   timestamp : OutputStreamTimestamp,
 ) -> OutputCallbackInfo {
-  { timestamp, }
+  OutputCallbackInfo(timestamp)
 }
 
 ///|

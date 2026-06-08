@@ -296,7 +296,7 @@ pub fn Device::build_output_stream_f32(
   let inner_stream = @platform.Device::build_output_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::F32,
+    F32,
     fn(d, info) {
       let n = @core.Data::len(d)
       if scratch.length() != n {
@@ -327,7 +327,7 @@ pub fn Device::build_output_stream_i16(
   let inner_stream = @platform.Device::build_output_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::I16,
+    I16,
     fn(d, info) {
       let n = @core.Data::len(d)
       if scratch.length() != n {
@@ -358,7 +358,7 @@ pub fn Device::build_output_stream_u16(
   let inner_stream = @platform.Device::build_output_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::U16,
+    U16,
     fn(d, info) {
       let n = @core.Data::len(d)
       if scratch.length() != n {
@@ -389,7 +389,7 @@ pub fn Device::build_output_stream_u8(
   let inner_stream = @platform.Device::build_output_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::U8,
+    U8,
     fn(d, info) {
       let n = @core.Data::len(d)
       if scratch.length() != n {
@@ -457,7 +457,7 @@ pub fn Device::build_input_stream_f32(
   let inner_stream = @platform.Device::build_input_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::F32,
+    F32,
     fn(d, info) {
       match @core.Data::try_as_f32(d) {
         None => data_callback([], info)
@@ -481,7 +481,7 @@ pub fn Device::build_input_stream_i16(
   let inner_stream = @platform.Device::build_input_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::I16,
+    I16,
     fn(d, info) {
       match @core.Data::try_as_i16(d) {
         None => data_callback([], info)
@@ -505,7 +505,7 @@ pub fn Device::build_input_stream_u16(
   let inner_stream = @platform.Device::build_input_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::U16,
+    U16,
     fn(d, info) {
       match @core.Data::try_as_u16(d) {
         None => data_callback([], info)
@@ -529,7 +529,7 @@ pub fn Device::build_input_stream_u8(
   let inner_stream = @platform.Device::build_input_stream_raw(
     self.inner,
     config,
-    @core.SampleFormat::U8,
+    U8,
     fn(d, info) {
       match @core.Data::try_as_u8(d) {
         None => data_callback([], info)

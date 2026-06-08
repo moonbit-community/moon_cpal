@@ -49,7 +49,7 @@ fn default_input_device() -> Device {
 
 ///|
 pub fn Host::devices(_self : Host) -> Array[Device] {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     match default_server_config() {
       None => []
       Some(_) => [default_input_device(), default_output_device()]
@@ -61,7 +61,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
 
 ///|
 pub fn Host::default_output_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     match default_server_config() {
       None => None
       Some(_) => Some(default_output_device())
@@ -73,7 +73,7 @@ pub fn Host::default_output_device(_self : Host) -> Device? {
 
 ///|
 pub fn Host::default_input_device(_self : Host) -> Device? {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     match default_server_config() {
       None => None
       Some(_) => Some(default_input_device())
@@ -85,7 +85,7 @@ pub fn Host::default_input_device(_self : Host) -> Device? {
 
 ///|
 pub fn Device::name(_self : Device) -> String {
-  if @core.native_os() == @core.NativeOs::Linux {
+  if @core.native_os() == Linux {
     _self.id
   } else {
     _self.id
@@ -108,12 +108,12 @@ pub fn Device::description(
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId(@core.HostId::Jack, _self.id)
+  DeviceId(Jack, _self.id)
 }
 
 ///|
 pub fn Device::supports_input(_self : Device) -> Bool {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     false
   } else {
     match default_server_config() {
@@ -125,7 +125,7 @@ pub fn Device::supports_input(_self : Device) -> Bool {
 
 ///|
 pub fn Device::supports_output(_self : Device) -> Bool {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     false
   } else {
     match default_server_config() {
@@ -139,7 +139,7 @@ pub fn Device::supports_output(_self : Device) -> Bool {
 pub fn Device::supported_input_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return []
   }
   supported_configs(_self)
@@ -149,7 +149,7 @@ pub fn Device::supported_input_configs(
 pub fn Device::supported_output_configs(
   _self : Device,
 ) -> Array[@core.SupportedStreamConfigRange] {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     return []
   }
   supported_configs(_self)
@@ -159,7 +159,7 @@ pub fn Device::supported_output_configs(
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise @core.default_stream_config_error_backend_specific(
       "jack default_input_config: not available on this OS",
     )
@@ -171,7 +171,7 @@ pub fn Device::default_input_config(
 pub fn Device::default_output_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
-  if @core.native_os() != @core.NativeOs::Linux {
+  if @core.native_os() != Linux {
     raise @core.default_stream_config_error_backend_specific(
       "jack default_output_config: not available on this OS",
     )
@@ -186,12 +186,7 @@ fn default_config(
   match default_server_config() {
     None => raise @core.default_stream_config_error_device_not_available()
     Some((sr, buf)) =>
-      @core.SupportedStreamConfig(
-        2,
-        sr,
-        @core.SupportedBufferSize::Range(min=buf, max=buf),
-        @core.SampleFormat::F32,
-      )
+      SupportedStreamConfig(2, sr, Range(min=buf, max=buf), F32)
   }
 }
 
@@ -206,15 +201,7 @@ fn supported_configs(_self : Device) -> Array[@core.SupportedStreamConfigRange] 
       let buf_range = @core.SupportedBufferSize::Range(min=buf, max=buf)
       let out : Array[@core.SupportedStreamConfigRange] = []
       for ch in chans {
-        out.push(
-          @core.SupportedStreamConfigRange(
-            ch,
-            sr,
-            sr,
-            buf_range,
-            @core.SampleFormat::F32,
-          ),
-        )
+        out.push(SupportedStreamConfigRange(ch, sr, sr, buf_range, F32))
       }
       out
     }

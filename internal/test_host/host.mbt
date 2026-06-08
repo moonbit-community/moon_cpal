@@ -26,13 +26,16 @@ pub struct Host {
 ///|
 pub struct Device {
   _unit : Unit
-
-  fn new() -> Device
 } derive(Debug, Eq)
 
 ///|
-pub fn Device::new() -> Device {
+pub fn Device::Device() -> Device {
   { _unit: () }
+}
+
+///|
+pub fn Device::new() -> Device {
+  Device()
 }
 
 ///|
@@ -62,7 +65,7 @@ pub fn Device::name(_self : Device) -> String {
 
 ///|
 pub fn Device::description(_self : Device) -> @core.DeviceDescription {
-  @core.DeviceDescription(
+  DeviceDescription(
     "Test Device",
     driver=Some("TestHost"),
     device_type=@core.DeviceType::virtual_(),
@@ -73,7 +76,7 @@ pub fn Device::description(_self : Device) -> @core.DeviceDescription {
 
 ///|
 pub fn Device::id(_self : Device) -> @core.DeviceId {
-  @core.DeviceId(@core.HostId::Null, "test_host")
+  DeviceId(Null, "test_host")
 }
 
 ///|
@@ -84,16 +87,11 @@ pub fn Device::supported_input_configs(
   let min_sr = 8000
   let max_sr = 192000
   let chans = [1, 2]
-  let fmts = [
-    @core.SampleFormat::F32,
-    @core.SampleFormat::I16,
-    @core.SampleFormat::U16,
-    @core.SampleFormat::U8,
-  ]
+  let fmts = [@core.SampleFormat::F32, I16, U16, U8]
   let out : Array[@core.SupportedStreamConfigRange] = []
   for ch in chans {
     for fmt in fmts {
-      out.push(@core.SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
+      out.push(SupportedStreamConfigRange(ch, min_sr, max_sr, buf, fmt))
     }
   }
   out
@@ -110,12 +108,7 @@ pub fn Device::supported_output_configs(
 pub fn Device::default_input_config(
   _self : Device,
 ) -> @core.SupportedStreamConfig {
-  @core.SupportedStreamConfig(
-    2,
-    48000,
-    @core.SupportedBufferSize::Range(min=64, max=2048),
-    @core.SampleFormat::F32,
-  )
+  SupportedStreamConfig(2, 48000, Range(min=64, max=2048), F32)
 }
 
 ///|

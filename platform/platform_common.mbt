@@ -53,11 +53,11 @@ pub enum Stream {
 ///|
 pub fn Host::id(self : Host) -> @core.HostId {
   match self {
-    Null(_) => @core.HostId::Null
-    CoreAudio(_) => @core.HostId::CoreAudio
-    Alsa(_) => @core.HostId::Alsa
-    Jack(_) => @core.HostId::Jack
-    Wasapi(_) => @core.HostId::Wasapi
+    Null(_) => Null
+    CoreAudio(_) => CoreAudio
+    Alsa(_) => Alsa
+    Jack(_) => Jack
+    Wasapi(_) => Wasapi
   }
 }
 
@@ -68,13 +68,13 @@ pub fn available_hosts() -> Array[@core.HostId] {
   // We implement the runtime filtering at the `platform` layer (which can depend on backend
   // packages without introducing cycles).
   match @core.native_os() {
-    @core.NativeOs::Macos => [@core.HostId::CoreAudio]
-    @core.NativeOs::Windows => [@core.HostId::Wasapi]
+    Macos => [CoreAudio]
+    Windows => [Wasapi]
     // Match upstream ordering (platform `ALL_HOSTS`): JACK (feature-gated upstream) before ALSA.
-    @core.NativeOs::Linux => [@core.HostId::Jack, @core.HostId::Alsa]
+    Linux => [Jack, Alsa]
     // Match upstream: the Null backend exists as a fallback, but `available_hosts()` yields
     // only hosts that are currently available for real audio I/O.
-    @core.NativeOs::Unknown => []
+    Unknown => []
   }
 }
 
@@ -87,10 +87,10 @@ pub fn all_hosts() -> Array[@core.HostId] {
   // `Null`. In MoonBit we keep a cross-platform superset `HostId`, so we expose the platform
   // subset via this function.
   match @core.native_os() {
-    @core.NativeOs::Macos => [@core.HostId::CoreAudio]
-    @core.NativeOs::Windows => [@core.HostId::Wasapi]
-    @core.NativeOs::Linux => [@core.HostId::Jack, @core.HostId::Alsa]
-    @core.NativeOs::Unknown => [@core.HostId::Null]
+    Macos => [CoreAudio]
+    Windows => [Wasapi]
+    Linux => [Jack, Alsa]
+    Unknown => [Null]
   }
 }
 
@@ -99,32 +99,32 @@ pub fn host_from_id(id : @core.HostId) -> Host raise @core.HostUnavailable {
   match id {
     // Upstream: platform `HostId` includes `Null` only on unsupported targets.
     Null =>
-      if @core.native_os() == @core.NativeOs::Unknown {
-        Host::Null(@null.default_host())
+      if @core.native_os() == Unknown {
+        Null(@null.default_host())
       } else {
         raise @core.host_unavailable()
       }
     CoreAudio =>
-      if @core.native_os() == @core.NativeOs::Macos {
-        Host::CoreAudio(@macos.default_host())
+      if @core.native_os() == Macos {
+        CoreAudio(@macos.default_host())
       } else {
         raise @core.host_unavailable()
       }
     Wasapi =>
-      if @core.native_os() == @core.NativeOs::Windows {
-        Host::Wasapi(@wasapi.default_host())
+      if @core.native_os() == Windows {
+        Wasapi(@wasapi.default_host())
       } else {
         raise @core.host_unavailable()
       }
     Alsa =>
-      if @core.native_os() == @core.NativeOs::Linux {
-        Host::Alsa(@alsa.default_host())
+      if @core.native_os() == Linux {
+        Alsa(@alsa.default_host())
       } else {
         raise @core.host_unavailable()
       }
     Jack =>
-      if @core.native_os() == @core.NativeOs::Linux {
-        Host::Jack(@jack.default_host())
+      if @core.native_os() == Linux {
+        Jack(@jack.default_host())
       } else {
         raise @core.host_unavailable()
       }
@@ -147,27 +147,27 @@ pub fn Host::default_output_device(self : Host) -> Device? {
     Null(h) =>
       match h.default_output_device() {
         None => None
-        Some(d) => Some(Device::Null(d))
+        Some(d) => Some(Null(d))
       }
     CoreAudio(h) =>
       match h.default_output_device() {
         None => None
-        Some(d) => Some(Device::CoreAudio(d))
+        Some(d) => Some(CoreAudio(d))
       }
     Alsa(h) =>
       match h.default_output_device() {
         None => None
-        Some(d) => Some(Device::Alsa(d))
+        Some(d) => Some(Alsa(d))
       }
     Jack(h) =>
       match h.default_output_device() {
         None => None
-        Some(d) => Some(Device::Jack(d))
+        Some(d) => Some(Jack(d))
       }
     Wasapi(h) =>
       match h.default_output_device() {
         None => None
-        Some(d) => Some(Device::Wasapi(d))
+        Some(d) => Some(Wasapi(d))
       }
   }
 }
@@ -178,27 +178,27 @@ pub fn Host::default_input_device(self : Host) -> Device? {
     Null(h) =>
       match h.default_input_device() {
         None => None
-        Some(d) => Some(Device::Null(d))
+        Some(d) => Some(Null(d))
       }
     CoreAudio(h) =>
       match h.default_input_device() {
         None => None
-        Some(d) => Some(Device::CoreAudio(d))
+        Some(d) => Some(CoreAudio(d))
       }
     Alsa(h) =>
       match h.default_input_device() {
         None => None
-        Some(d) => Some(Device::Alsa(d))
+        Some(d) => Some(Alsa(d))
       }
     Jack(h) =>
       match h.default_input_device() {
         None => None
-        Some(d) => Some(Device::Jack(d))
+        Some(d) => Some(Jack(d))
       }
     Wasapi(h) =>
       match h.default_input_device() {
         None => None
-        Some(d) => Some(Device::Wasapi(d))
+        Some(d) => Some(Wasapi(d))
       }
   }
 }
@@ -208,32 +208,32 @@ pub fn Host::devices(self : Host) -> Iter[Device] raise @core.DevicesError {
   match self {
     Null(h) => {
       let ds = h.devices()
-      ds.iter().map(fn(d) { Device::Null(d) })
+      ds.iter().map(fn(d) { Null(d) })
     }
     CoreAudio(h) =>
       try h.devices() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+        DeviceNotAvailable(op, status) =>
           raise @core.devices_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
+        CoreAudioError(op, status) =>
           raise @core.devices_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
       } noraise {
-        ds => ds.iter().map(fn(d) { Device::CoreAudio(d) })
+        ds => ds.iter().map(fn(d) { CoreAudio(d) })
       }
     Alsa(h) => {
       let ds = h.devices()
-      ds.iter().map(fn(d) { Device::Alsa(d) })
+      ds.iter().map(fn(d) { Alsa(d) })
     }
     Jack(h) => {
       let ds = h.devices()
-      ds.iter().map(fn(d) { Device::Jack(d) })
+      ds.iter().map(fn(d) { Jack(d) })
     }
     Wasapi(h) => {
       let ds = h.devices()
-      ds.iter().map(fn(d) { Device::Wasapi(d) })
+      ds.iter().map(fn(d) { Wasapi(d) })
     }
   }
 }
@@ -274,11 +274,11 @@ pub fn Device::name(self : Device) -> String raise @core.DeviceNameError {
     Null(d) => d.name()
     CoreAudio(d) =>
       try d.name() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+        DeviceNotAvailable(op, status) =>
           raise @core.device_name_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
+        CoreAudioError(op, status) =>
           raise @core.device_name_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
@@ -316,11 +316,11 @@ pub fn Device::description(
     Null(d) => d.description()
     CoreAudio(d) =>
       try d.description() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(op, status) =>
+        DeviceNotAvailable(op, status) =>
           raise @core.device_name_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
+        CoreAudioError(op, status) =>
           raise @core.device_name_error_backend_specific(
             "\{op} (OSStatus \{status})",
           )
@@ -372,9 +372,9 @@ pub fn Device::supported_output_configs(
     }
     CoreAudio(d) =>
       try d.supported_output_configs() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
+        DeviceNotAvailable(_, _) =>
           raise @core.supported_stream_configs_error_device_not_available()
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
+        CoreAudioError(op, status) =>
           raise @macos.supported_configs_error_from_osstatus(op, status)
       } noraise {
         xs => xs.iter()
@@ -405,9 +405,9 @@ pub fn Device::supported_input_configs(
     }
     CoreAudio(d) =>
       try d.supported_input_configs() catch {
-        @macos.CoreAudioError::DeviceNotAvailable(_, _) =>
+        DeviceNotAvailable(_, _) =>
           raise @core.supported_stream_configs_error_device_not_available()
-        @macos.CoreAudioError::CoreAudioError(op, status) =>
+        CoreAudioError(op, status) =>
           raise @macos.supported_configs_error_from_osstatus(op, status)
       } noraise {
         xs => xs.iter()
@@ -539,23 +539,23 @@ pub fn Device::build_output_stream(
 ) -> Stream raise @core.BuildStreamError {
   match self {
     Null(d) =>
-      Stream::Null(
+      Null(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
     CoreAudio(d) =>
-      Stream::CoreAudio(
+      CoreAudio(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
     Alsa(d) =>
-      Stream::Alsa(
+      Alsa(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
     Jack(d) =>
-      Stream::Jack(
+      Jack(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
     Wasapi(d) =>
-      Stream::Wasapi(
+      Wasapi(
         d.build_output_stream(config, data_callback, error_callback, timeout),
       )
   }
@@ -572,31 +572,31 @@ pub fn Device::build_output_stream_raw(
 ) -> Stream raise @core.BuildStreamError {
   match self {
     Null(d) =>
-      Stream::Null(
+      Null(
         d.build_output_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     CoreAudio(d) =>
-      Stream::CoreAudio(
+      CoreAudio(
         d.build_output_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Alsa(d) =>
-      Stream::Alsa(
+      Alsa(
         d.build_output_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Jack(d) =>
-      Stream::Jack(
+      Jack(
         d.build_output_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Wasapi(d) =>
-      Stream::Wasapi(
+      Wasapi(
         d.build_output_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
@@ -614,23 +614,17 @@ pub fn Device::build_input_stream(
 ) -> Stream raise @core.BuildStreamError {
   match self {
     Null(d) =>
-      Stream::Null(
-        d.build_input_stream(config, data_callback, error_callback, timeout),
-      )
+      Null(d.build_input_stream(config, data_callback, error_callback, timeout))
     CoreAudio(d) =>
-      Stream::CoreAudio(
+      CoreAudio(
         d.build_input_stream(config, data_callback, error_callback, timeout),
       )
     Alsa(d) =>
-      Stream::Alsa(
-        d.build_input_stream(config, data_callback, error_callback, timeout),
-      )
+      Alsa(d.build_input_stream(config, data_callback, error_callback, timeout))
     Jack(d) =>
-      Stream::Jack(
-        d.build_input_stream(config, data_callback, error_callback, timeout),
-      )
+      Jack(d.build_input_stream(config, data_callback, error_callback, timeout))
     Wasapi(d) =>
-      Stream::Wasapi(
+      Wasapi(
         d.build_input_stream(config, data_callback, error_callback, timeout),
       )
   }
@@ -647,31 +641,31 @@ pub fn Device::build_input_stream_raw(
 ) -> Stream raise @core.BuildStreamError {
   match self {
     Null(d) =>
-      Stream::Null(
+      Null(
         d.build_input_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     CoreAudio(d) =>
-      Stream::CoreAudio(
+      CoreAudio(
         d.build_input_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Alsa(d) =>
-      Stream::Alsa(
+      Alsa(
         d.build_input_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Jack(d) =>
-      Stream::Jack(
+      Jack(
         d.build_input_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),
       )
     Wasapi(d) =>
-      Stream::Wasapi(
+      Wasapi(
         d.build_input_stream_raw(
           config, sample_format, data_callback, error_callback, timeout,
         ),

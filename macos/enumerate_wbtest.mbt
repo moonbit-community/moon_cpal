@@ -15,9 +15,8 @@
 ///|
 fn expected_device_id(device_id : UInt) -> @core.DeviceId {
   match device_uid(device_id) {
-    Some(uid) if uid.trim().length() > 0 =>
-      @core.DeviceId(@core.HostId::CoreAudio, uid)
-    _ => @core.DeviceId(@core.HostId::CoreAudio, "")
+    Some(uid) if uid.trim().length() > 0 => DeviceId(CoreAudio, uid)
+    _ => DeviceId(CoreAudio, "")
   }
 }
 
@@ -33,7 +32,7 @@ fn contains_device_id(devices : Array[Device], id : @core.DeviceId) -> Bool {
 
 ///|
 test "macos enumerate parity: devices ordering + default device mapping" {
-  if @core.native_os() != @core.NativeOs::Macos {
+  if @core.native_os() != Macos {
     inspect(true, content="true")
     return
   }

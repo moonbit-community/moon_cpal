@@ -105,9 +105,8 @@ fn empty_build() -> ProbeBuild {
 ///|
 fn probe_buffer(b : @moon_cpal.SupportedBufferSize) -> ProbeBuffer {
   match b {
-    @moon_cpal.SupportedBufferSize::Unknown => empty_buffer()
-    @moon_cpal.SupportedBufferSize::Range(min=mn, max=mx) =>
-      { kind: "range", min_frames: mn, max_frames: mx }
+    Unknown => empty_buffer()
+    Range(min=mn, max=mx) => { kind: "range", min_frames: mn, max_frames: mx }
   }
 }
 
@@ -182,10 +181,10 @@ fn fill_output_u8_silence(xs : Array[Byte]) -> Unit {
 ///|
 fn typed_probe_kind(sample_format : @moon_cpal.SampleFormat) -> (Bool, String) {
   match sample_format {
-    @moon_cpal.SampleFormat::F32 => (true, "f32")
-    @moon_cpal.SampleFormat::I16 => (true, "i16")
-    @moon_cpal.SampleFormat::U16 => (true, "u16")
-    @moon_cpal.SampleFormat::U8 => (true, "u8")
+    F32 => (true, "f32")
+    I16 => (true, "i16")
+    U16 => (true, "u16")
+    U8 => (true, "u8")
     _ => (false, "")
   }
 }
@@ -249,7 +248,7 @@ fn probe_typed_output_build(
     return (false, "", false)
   }
   let typed_ok = match sample_format {
-    @moon_cpal.SampleFormat::F32 =>
+    F32 =>
       try
         d.build_output_stream_f32(
           cfg,
@@ -265,7 +264,7 @@ fn probe_typed_output_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::I16 =>
+    I16 =>
       try
         d.build_output_stream_i16(
           cfg,
@@ -281,7 +280,7 @@ fn probe_typed_output_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::U16 =>
+    U16 =>
       try
         d.build_output_stream_u16(
           cfg,
@@ -297,7 +296,7 @@ fn probe_typed_output_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::U8 =>
+    U8 =>
       try
         d.build_output_stream_u8(
           cfg,
@@ -329,7 +328,7 @@ fn probe_typed_input_build(
     return (false, "", false)
   }
   let typed_ok = match sample_format {
-    @moon_cpal.SampleFormat::F32 =>
+    F32 =>
       try
         d.build_input_stream_f32(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
       catch {
@@ -340,7 +339,7 @@ fn probe_typed_input_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::I16 =>
+    I16 =>
       try
         d.build_input_stream_i16(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
       catch {
@@ -351,7 +350,7 @@ fn probe_typed_input_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::U16 =>
+    U16 =>
       try
         d.build_input_stream_u16(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
       catch {
@@ -362,7 +361,7 @@ fn probe_typed_input_build(
           true
         }
       }
-    @moon_cpal.SampleFormat::U8 =>
+    U8 =>
       try
         d.build_input_stream_u8(cfg, fn(_xs, _info) {  }, fn(_err) {  }, None)
       catch {

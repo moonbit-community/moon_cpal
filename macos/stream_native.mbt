@@ -143,8 +143,8 @@ fn[A] raise_pause_osstatus(
 ///|
 fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
   match r.sample_format() {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
     _ => None
   }
 }
@@ -152,8 +152,8 @@ fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
 ///|
 fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
   match fmt {
-    @core.SampleFormat::F32 => Some((1 : UInt))
-    @core.SampleFormat::I16 => Some((2 : UInt))
+    F32 => Some((1 : UInt))
+    I16 => Some((2 : UInt))
     _ => None
   }
 }
@@ -295,11 +295,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_osstatus("ca_stream_build_output", st)
   }
-  {
-    kind: StreamKind::Output,
-    handle: out[0],
-    owner: ca_stream_owner_new(out[0]),
-  }
+  { kind: Output, handle: out[0], owner: ca_stream_owner_new(out[0]) }
 }
 
 ///|
@@ -378,11 +374,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_osstatus("ca_stream_build_input", st)
   }
-  {
-    kind: StreamKind::Input,
-    handle: out[0],
-    owner: ca_stream_owner_new(out[0]),
-  }
+  { kind: Input, handle: out[0], owner: ca_stream_owner_new(out[0]) }
 }
 
 ///|

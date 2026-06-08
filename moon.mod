@@ -1,0 +1,19 @@
+name = "Milky2018/moon_cpal"
+
+version = "0.11.6"
+
+readme = "README.mbt.md"
+
+repository = "https://github.com/moonbit-community/moon_cpal"
+
+license = "Apache-2.0"
+
+keywords = [ "audio", "cpal", "port" ]
+
+description = "A MoonBit port (subset) of RustAudio/cpal."
+
+preferred_target = "native"
+
+options(
+  "--moonbit-unstable-prebuild": "build.js",
+)

@@ -26,27 +26,27 @@ fn[T : @debug.Debug] show_from_debug(value : T, logger : &Logger) -> Unit {
 }
 
 ///|
-pub impl Show for NativeOs with output(self : NativeOs, logger : &Logger) -> Unit {
+pub impl Show for NativeOs with fn output(self : NativeOs, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for I24 with output(self : I24, logger : &Logger) -> Unit {
+pub impl Show for I24 with fn output(self : I24, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for U24 with output(self : U24, logger : &Logger) -> Unit {
+pub impl Show for U24 with fn output(self : U24, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for Duration with output(self : Duration, logger : &Logger) -> Unit {
+pub impl Show for Duration with fn output(self : Duration, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for StreamInstant with output(
+pub impl Show for StreamInstant with fn output(
   self : StreamInstant,
   logger : &Logger,
 ) -> Unit {
@@ -54,7 +54,7 @@ pub impl Show for StreamInstant with output(
 }
 
 ///|
-pub impl Show for InputStreamTimestamp with output(
+pub impl Show for InputStreamTimestamp with fn output(
   self : InputStreamTimestamp,
   logger : &Logger,
 ) -> Unit {
@@ -62,7 +62,7 @@ pub impl Show for InputStreamTimestamp with output(
 }
 
 ///|
-pub impl Show for OutputStreamTimestamp with output(
+pub impl Show for OutputStreamTimestamp with fn output(
   self : OutputStreamTimestamp,
   logger : &Logger,
 ) -> Unit {
@@ -70,7 +70,7 @@ pub impl Show for OutputStreamTimestamp with output(
 }
 
 ///|
-pub impl Show for InputCallbackInfo with output(
+pub impl Show for InputCallbackInfo with fn output(
   self : InputCallbackInfo,
   logger : &Logger,
 ) -> Unit {
@@ -78,7 +78,7 @@ pub impl Show for InputCallbackInfo with output(
 }
 
 ///|
-pub impl Show for OutputCallbackInfo with output(
+pub impl Show for OutputCallbackInfo with fn output(
   self : OutputCallbackInfo,
   logger : &Logger,
 ) -> Unit {
@@ -86,12 +86,12 @@ pub impl Show for OutputCallbackInfo with output(
 }
 
 ///|
-pub impl Show for DeviceType with output(self : DeviceType, logger : &Logger) -> Unit {
+pub impl Show for DeviceType with fn output(self : DeviceType, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for InterfaceType with output(
+pub impl Show for InterfaceType with fn output(
   self : InterfaceType,
   logger : &Logger,
 ) -> Unit {
@@ -99,7 +99,7 @@ pub impl Show for InterfaceType with output(
 }
 
 ///|
-pub impl Show for DeviceDirection with output(
+pub impl Show for DeviceDirection with fn output(
   self : DeviceDirection,
   logger : &Logger,
 ) -> Unit {
@@ -107,7 +107,7 @@ pub impl Show for DeviceDirection with output(
 }
 
 ///|
-pub impl Show for DeviceDescription with output(
+pub impl Show for DeviceDescription with fn output(
   self : DeviceDescription,
   logger : &Logger,
 ) -> Unit {
@@ -115,7 +115,7 @@ pub impl Show for DeviceDescription with output(
 }
 
 ///|
-pub impl Show for DeviceDescriptionBuilder with output(
+pub impl Show for DeviceDescriptionBuilder with fn output(
   self : DeviceDescriptionBuilder,
   logger : &Logger,
 ) -> Unit {
@@ -123,7 +123,7 @@ pub impl Show for DeviceDescriptionBuilder with output(
 }
 
 ///|
-pub impl Show for BackendSpecificError with output(
+pub impl Show for BackendSpecificError with fn output(
   self : BackendSpecificError,
   logger : &Logger,
 ) -> Unit {
@@ -131,7 +131,7 @@ pub impl Show for BackendSpecificError with output(
 }
 
 ///|
-pub impl Show for DefaultStreamConfigError with output(
+pub impl Show for DefaultStreamConfigError with fn output(
   self : DefaultStreamConfigError,
   logger : &Logger,
 ) -> Unit {
@@ -139,7 +139,7 @@ pub impl Show for DefaultStreamConfigError with output(
 }
 
 ///|
-pub impl Show for SupportedStreamConfigsError with output(
+pub impl Show for SupportedStreamConfigsError with fn output(
   self : SupportedStreamConfigsError,
   logger : &Logger,
 ) -> Unit {
@@ -147,7 +147,7 @@ pub impl Show for SupportedStreamConfigsError with output(
 }
 
 ///|
-pub impl Show for DevicesError with output(
+pub impl Show for DevicesError with fn output(
   self : DevicesError,
   logger : &Logger,
 ) -> Unit {
@@ -155,7 +155,7 @@ pub impl Show for DevicesError with output(
 }
 
 ///|
-pub impl Show for DeviceNameError with output(
+pub impl Show for DeviceNameError with fn output(
   self : DeviceNameError,
   logger : &Logger,
 ) -> Unit {
@@ -163,7 +163,7 @@ pub impl Show for DeviceNameError with output(
 }
 
 ///|
-pub impl Show for BuildStreamError with output(
+pub impl Show for BuildStreamError with fn output(
   self : BuildStreamError,
   logger : &Logger,
 ) -> Unit {
@@ -171,7 +171,7 @@ pub impl Show for BuildStreamError with output(
 }
 
 ///|
-pub impl Show for PlayStreamError with output(
+pub impl Show for PlayStreamError with fn output(
   self : PlayStreamError,
   logger : &Logger,
 ) -> Unit {
@@ -179,7 +179,7 @@ pub impl Show for PlayStreamError with output(
 }
 
 ///|
-pub impl Show for PauseStreamError with output(
+pub impl Show for PauseStreamError with fn output(
   self : PauseStreamError,
   logger : &Logger,
 ) -> Unit {
@@ -187,17 +187,20 @@ pub impl Show for PauseStreamError with output(
 }
 
 ///|
-pub impl Show for StreamError with output(self : StreamError, logger : &Logger) -> Unit {
+pub impl Show for StreamError with fn output(
+  self : StreamError,
+  logger : &Logger,
+) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for Data with output(self : Data, logger : &Logger) -> Unit {
+pub impl Show for Data with fn output(self : Data, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for DeviceIdError with output(
+pub impl Show for DeviceIdError with fn output(
   self : DeviceIdError,
   logger : &Logger,
 ) -> Unit {
@@ -205,12 +208,12 @@ pub impl Show for DeviceIdError with output(
 }
 
 ///|
-pub impl Show for DeviceId with output(self : DeviceId, logger : &Logger) -> Unit {
+pub impl Show for DeviceId with fn output(self : DeviceId, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for HostUnavailable with output(
+pub impl Show for HostUnavailable with fn output(
   self : HostUnavailable,
   logger : &Logger,
 ) -> Unit {
@@ -218,17 +221,17 @@ pub impl Show for HostUnavailable with output(
 }
 
 ///|
-pub impl Show for HostId with output(self : HostId, logger : &Logger) -> Unit {
+pub impl Show for HostId with fn output(self : HostId, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for BufferSize with output(self : BufferSize, logger : &Logger) -> Unit {
+pub impl Show for BufferSize with fn output(self : BufferSize, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
 
 ///|
-pub impl Show for StreamConfig with output(
+pub impl Show for StreamConfig with fn output(
   self : StreamConfig,
   logger : &Logger,
 ) -> Unit {
@@ -236,7 +239,7 @@ pub impl Show for StreamConfig with output(
 }
 
 ///|
-pub impl Show for SupportedBufferSize with output(
+pub impl Show for SupportedBufferSize with fn output(
   self : SupportedBufferSize,
   logger : &Logger,
 ) -> Unit {
@@ -244,7 +247,7 @@ pub impl Show for SupportedBufferSize with output(
 }
 
 ///|
-pub impl Show for SampleFormat with output(
+pub impl Show for SampleFormat with fn output(
   self : SampleFormat,
   logger : &Logger,
 ) -> Unit {
@@ -252,7 +255,7 @@ pub impl Show for SampleFormat with output(
 }
 
 ///|
-pub impl Show for SupportedStreamConfig with output(
+pub impl Show for SupportedStreamConfig with fn output(
   self : SupportedStreamConfig,
   logger : &Logger,
 ) -> Unit {
@@ -260,7 +263,7 @@ pub impl Show for SupportedStreamConfig with output(
 }
 
 ///|
-pub impl Show for SupportedStreamConfigRange with output(
+pub impl Show for SupportedStreamConfigRange with fn output(
   self : SupportedStreamConfigRange,
   logger : &Logger,
 ) -> Unit {
