@@ -6,6 +6,12 @@ import {
 supported_targets = "native"
 
 options(
+  link: {
+    "native": {
+      "cc": "scripts/moon_cc.sh",
+      "cc-link-flags": "-framework CoreAudio -framework CoreFoundation -framework AudioToolbox",
+    },
+  },
   "native-stub": [ "coreaudio_stub.c" ],
   targets: {
     "coreaudio_configs_wbtest.mbt": [ "native" ],

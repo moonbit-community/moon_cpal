@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef memcpy
+#undef memcpy
+#endif
 #include "moonbit.h"
 
 // -----------------------------------------------------------------------------
