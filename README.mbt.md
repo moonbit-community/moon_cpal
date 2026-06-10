@@ -20,12 +20,12 @@ CPAL-like audio I/O for MoonBit (native-only).
 
 ## Install
 
-Add dependency in `moon.mod.json`:
+Add dependency in `moon.mod`:
 
 ```json
 {
   "deps": {
-    "moonbit-community/moon_cpal": "0.11.5"
+    "moonbit-community/moon_cpal": "0.11.6"
   }
 }
 ```
