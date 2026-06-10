@@ -1,13 +1,13 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "moonbit-community/moon_cpal/platform"
+package "Milky2018/moon_cpal/platform"
 
 import {
-  "moonbit-community/moon_cpal/alsa",
-  "moonbit-community/moon_cpal/core",
-  "moonbit-community/moon_cpal/jack",
-  "moonbit-community/moon_cpal/macos",
-  "moonbit-community/moon_cpal/null",
-  "moonbit-community/moon_cpal/wasapi",
+  "Milky2018/moon_cpal/alsa",
+  "Milky2018/moon_cpal/core",
+  "Milky2018/moon_cpal/jack",
+  "Milky2018/moon_cpal/macos",
+  "Milky2018/moon_cpal/null",
+  "Milky2018/moon_cpal/wasapi",
   "moonbitlang/core/debug",
 }
 

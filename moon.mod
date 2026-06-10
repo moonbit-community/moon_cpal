@@ -1,4 +1,4 @@
-name = "moonbit-community/moon_cpal"
+name = "Milky2018/moon_cpal"
 
 version = "0.11.6"
 

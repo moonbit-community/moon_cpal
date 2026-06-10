@@ -1,5 +1,5 @@
 import {
-  "moonbit-community/moon_cpal",
+  "Milky2018/moon_cpal",
 }
 
 supported_targets = "native"
