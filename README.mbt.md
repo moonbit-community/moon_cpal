@@ -25,7 +25,7 @@ Add dependency in `moon.mod`:
 ```json
 {
   "deps": {
-    "Milky2018/moon_cpal": "0.11.6"
+    "Milky2018/moon_cpal": "0.11.7"
   }
 }
 ```
