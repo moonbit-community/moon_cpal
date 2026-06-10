@@ -1,5 +1,3 @@
 import {
   "moonbit-community/moon_cpal",
 }
-
-supported_targets = "native"

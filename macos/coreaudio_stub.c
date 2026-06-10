@@ -2,9 +2,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef memcpy
-#undef memcpy
-#endif
 #include "moonbit.h"
 
 // -----------------------------------------------------------------------------
@@ -271,9 +268,6 @@ int32_t moon_cpal_ca_stream_owner_close(void *owner) {
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef memcpy
-#undef memcpy
-#endif
 #include "moonbit.h"
 
 static int32_t ca_err(OSStatus st) {
