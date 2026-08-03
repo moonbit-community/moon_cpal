@@ -98,7 +98,7 @@ pub fn string_to_utf8_bytes(s : String) -> Bytes {
     }
   }
   if n <= 0 {
-    return Bytes::default()
+    return Default::default()
   }
 
   // Pass 2: write bytes.

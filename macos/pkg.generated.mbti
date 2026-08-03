@@ -94,4 +94,3 @@ type StreamOwner
 pub type DeviceId = UInt
 
 // Traits
-

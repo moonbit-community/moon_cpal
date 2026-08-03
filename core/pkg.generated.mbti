@@ -563,4 +563,3 @@ pub impl SizedSample for Int16
 pub impl SizedSample for UInt16
 pub impl SizedSample for Float
 pub impl SizedSample for Double
-

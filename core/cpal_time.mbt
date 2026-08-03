@@ -137,7 +137,7 @@ fn StreamInstant::from_nanos_bigint(total : @bigint.BigInt) -> StreamInstant? {
   let mut rem = @bigint.BigInt::sub(total, @bigint.BigInt::mul(secs, b1e9))
 
   // Adjust to keep remainder non-negative (Euclidean division normalization).
-  if @bigint.BigInt::op_lt(rem, @bigint.BigInt::from_int(0)) {
+  if rem < @bigint.BigInt::from_int(0) {
     secs = @bigint.BigInt::sub(secs, @bigint.BigInt::from_int(1))
     rem = @bigint.BigInt::add(rem, b1e9)
   }

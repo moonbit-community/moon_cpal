@@ -56,4 +56,3 @@ pub trait StreamTrait {
   fn close(Self) -> Unit
 }
 pub impl StreamTrait for @spec.Stream
-
