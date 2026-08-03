@@ -7,7 +7,10 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <stdatomic.h>
+
+typedef volatile LONG atomic_int;
+#define atomic_load(ptr) ((int32_t)InterlockedCompareExchange((ptr), 0, 0))
+#define atomic_store(ptr, value) ((void)InterlockedExchange((ptr), (LONG)(value)))
 
 typedef struct moon_cpal_null_stream_t {
   int is_input;
