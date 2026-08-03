@@ -321,7 +321,8 @@ fn main {
     match host.default_output_device() {
       None => {
         println("no default output device; cannot run loopback capture")
-        panic()
+        println("no usable capture path; skipping WASAPI stream smoke")
+        return
       }
       Some(dev) => {
         let supported = try dev.default_output_config() catch {
