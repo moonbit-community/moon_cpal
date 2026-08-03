@@ -1,6 +1,6 @@
 name = "Milky2018/moon_cpal"
 
-version = "0.11.7"
+version = "0.11.8"
 
 readme = "README.mbt.md"
 
