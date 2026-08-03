@@ -25,3 +25,17 @@
 
 #endif
 
+void moon_cpal_wasapi_guid_anchor(void) {
+#if defined(_WIN32)
+  volatile const void *refs[] = {
+      (const void *)&IID_IAudioClient,
+      (const void *)&IID_IAudioClient2,
+      (const void *)&IID_IAudioRenderClient,
+      (const void *)&IID_IAudioCaptureClient,
+      (const void *)&IID_IMMEndpoint,
+      (const void *)&IID_IMMDeviceEnumerator,
+      (const void *)&CLSID_MMDeviceEnumerator,
+  };
+  (void)refs;
+#endif
+}

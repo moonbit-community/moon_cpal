@@ -82,12 +82,15 @@ static int buf_has_line(const char *buf, size_t len, const char *line, size_t li
 #include <propvarutil.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+void moon_cpal_wasapi_guid_anchor(void);
+
 // CPAL upstream prefers initializing COM in STA mode (COINIT_APARTMENTTHREADED) while allowing
 // RPC_E_CHANGED_MODE if another library already initialized COM with a different apartment model.
 //
 // Returns 1 on success (including RPC_E_CHANGED_MODE), 0 on failure. When returning 1, sets
 // `*out_did_uninit` to 1 iff the caller should call CoUninitialize().
 static HRESULT wasapi_com_init(int *out_did_uninit) {
+  moon_cpal_wasapi_guid_anchor();
   if (out_did_uninit != NULL) {
     *out_did_uninit = 0;
   }

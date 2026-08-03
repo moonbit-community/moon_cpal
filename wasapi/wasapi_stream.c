@@ -14,6 +14,8 @@
 #include <mmdeviceapi.h>
 #include <avrt.h>
 
+void moon_cpal_wasapi_guid_anchor(void);
+
 typedef struct moon_cpal_wasapi_stream_t {
   int is_input;
   int is_loopback;
@@ -64,6 +66,7 @@ typedef struct moon_cpal_wasapi_stream_t {
 // Returns S_OK on success (including RPC_E_CHANGED_MODE). When returning S_OK, sets
 // `*out_did_uninit` to 1 iff the caller should call CoUninitialize().
 static HRESULT wasapi_com_init(int *out_did_uninit) {
+  moon_cpal_wasapi_guid_anchor();
   if (out_did_uninit != NULL) {
     *out_did_uninit = 0;
   }
