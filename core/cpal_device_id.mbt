@@ -74,7 +74,7 @@ pub fn DeviceId::to_string(self : DeviceId) -> String {
 
 ///|
 pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
-  let parts = Array()
+  let parts : Array[StringView] = []
   for p in s.split(":") {
     parts.push(p)
   }
