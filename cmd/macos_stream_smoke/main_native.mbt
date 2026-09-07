@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-extern "C" fn sleep(secs : UInt) -> UInt = "sleep"
+extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
 
 ///|
 extern "C" fn sin(x : Double) -> Double = "sin"
@@ -126,14 +126,14 @@ fn main {
             } noraise {
               _ => ()
             }
-            ignore(sleep(1))
+            sleep_ms(1000)
             try stream.pause() catch {
               e => println("output stream pause failed: \{e}")
             } noraise {
               _ => ()
             }
             let paused = calls[0]
-            ignore(sleep(1))
+            sleep_ms(1000)
             if calls[0] > paused + 1 {
               println(
                 "output callbacks continued after pause (before=\{paused} after=\{calls[0]})",
@@ -212,14 +212,14 @@ fn main {
             } noraise {
               _ => ()
             }
-            ignore(sleep(1))
+            sleep_ms(1000)
             try stream.pause() catch {
               e => println("input stream pause failed: \{e}")
             } noraise {
               _ => ()
             }
             let paused = calls[0]
-            ignore(sleep(1))
+            sleep_ms(1000)
             if calls[0] > paused + 1 {
               println(
                 "input callbacks continued after pause (before=\{paused} after=\{calls[0]})",
