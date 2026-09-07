@@ -269,3 +269,102 @@ pub impl Show for SupportedStreamConfigRange with fn output(
 ) -> Unit {
   show_from_debug(self, logger)
 }
+
+///|
+pub extend BackendSpecificError with Show::{output}
+
+///|
+pub extend BufferSize with Show::{to_string, output}
+
+///|
+pub extend BuildStreamError with Show::{output}
+
+///|
+pub extend Data with Show::{to_string, output}
+
+///|
+pub extend DefaultStreamConfigError with Show::{output}
+
+///|
+pub extend DeviceDescription with Show::{output}
+
+///|
+pub extend DeviceDescriptionBuilder with Show::{to_string, output}
+
+///|
+pub extend DeviceId with Show::{output}
+
+///|
+pub extend DeviceIdError with Show::{output}
+
+///|
+pub extend DeviceNameError with Show::{output}
+
+///|
+pub extend DeviceType with Show::{output}
+
+///|
+pub extend DevicesError with Show::{output}
+
+///|
+pub extend Duration with Show::{to_string, output}
+
+///|
+pub extend HostId with Show::{output}
+
+///|
+pub extend HostUnavailable with Show::{output}
+
+///|
+pub extend I24 with Show::{to_string, output}
+
+///|
+pub extend InputCallbackInfo with Show::{to_string, output}
+
+///|
+pub extend InputStreamTimestamp with Show::{to_string, output}
+
+///|
+pub extend InterfaceType with Show::{output}
+
+///|
+pub extend NativeOs with Show::{to_string, output}
+
+///|
+pub extend OutputCallbackInfo with Show::{to_string, output}
+
+///|
+pub extend OutputStreamTimestamp with Show::{to_string, output}
+
+///|
+pub extend PauseStreamError with Show::{output}
+
+///|
+pub extend PlayStreamError with Show::{output}
+
+///|
+pub extend SampleFormat with Show::{output}
+
+///|
+pub extend StreamConfig with Show::{to_string, output}
+
+///|
+pub extend StreamError with Show::{output}
+
+///|
+pub extend StreamInstant with Show::{to_string, output}
+
+///|
+pub extend SupportedBufferSize with Show::{to_string, output}
+
+///|
+pub extend SupportedStreamConfig with Show::{to_string, output}
+
+///|
+pub extend SupportedStreamConfigRange with Show::{to_string, output}
+
+///|
+pub extend SupportedStreamConfigsError with Show::{output}
+
+///|
+pub extend U24 with Show::{to_string, output}

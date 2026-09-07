@@ -136,7 +136,7 @@ fn osstatus_kind(status : Int) -> Int {
 
 ///|
 fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int) -> String {
-  let res = StringBuilder::new()
+  let res = StringBuilder()
   let len = if length < bytes.length() { length } else { bytes.length() }
   let mut i = 0
   while i < len {
@@ -274,7 +274,7 @@ fn sample_rate_ranges(
     raise_osstatus("ca_sample_rate_ranges", got)
   }
   let got = if got < n { got } else { n }
-  let out = Array::new(capacity=got)
+  let out = Array(capacity=got)
   for i in 0..<got {
     out.push((mins[i], maxs[i]))
   }
@@ -321,7 +321,7 @@ fn supported_configs(
     }
   }
   if contains_different {
-    let out = Array::new(capacity=ranges.length())
+    let out = Array(capacity=ranges.length())
     for i in 0..<ranges.length() {
       let (minv, maxv) = ranges[i]
       out.push(

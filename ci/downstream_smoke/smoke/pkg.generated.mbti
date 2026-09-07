@@ -11,4 +11,3 @@ pub fn downstream_dependency_compiles() -> Int
 // Type aliases
 
 // Traits
-

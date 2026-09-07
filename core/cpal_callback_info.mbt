@@ -30,7 +30,7 @@ pub fn InputStreamTimestamp::InputStreamTimestamp(
   callback : StreamInstant,
   capture : StreamInstant,
 ) -> InputStreamTimestamp {
-  { callback, capture }
+  { callback, capture, }
 }
 
 ///|
@@ -67,7 +67,7 @@ pub fn OutputStreamTimestamp::OutputStreamTimestamp(
   callback : StreamInstant,
   playback : StreamInstant,
 ) -> OutputStreamTimestamp {
-  { callback, playback }
+  { callback, playback, }
 }
 
 ///|
@@ -145,3 +145,27 @@ pub fn OutputCallbackInfo::timestamp(
 ) -> OutputStreamTimestamp {
   self.timestamp
 }
+
+///|
+pub extend InputCallbackInfo with Debug::{to_repr}
+
+///|
+pub extend InputCallbackInfo with Eq::{not_equal, equal}
+
+///|
+pub extend InputStreamTimestamp with Debug::{to_repr}
+
+///|
+pub extend InputStreamTimestamp with Eq::{not_equal, equal}
+
+///|
+pub extend OutputCallbackInfo with Debug::{to_repr}
+
+///|
+pub extend OutputCallbackInfo with Eq::{not_equal, equal}
+
+///|
+pub extend OutputStreamTimestamp with Debug::{to_repr}
+
+///|
+pub extend OutputStreamTimestamp with Eq::{not_equal, equal}

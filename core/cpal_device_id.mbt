@@ -49,7 +49,7 @@ pub struct DeviceId {
 
 ///|
 pub fn DeviceId::DeviceId(host_id : HostId, device_id : String) -> DeviceId {
-  { host_id, device_id }
+  { host_id, device_id, }
 }
 
 ///|
@@ -74,7 +74,7 @@ pub fn DeviceId::to_string(self : DeviceId) -> String {
 
 ///|
 pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
-  let parts = Array::new()
+  let parts = Array()
   for p in s.split(":") {
     parts.push(p)
   }
@@ -89,7 +89,7 @@ pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
     Some(h) => h
     None => raise UnsupportedPlatform
   }
-  let dev = StringBuilder::new()
+  let dev = StringBuilder()
   for i = 1; i < parts.length(); i = i + 1 {
     if i > 1 {
       dev.write_char(':')
@@ -105,3 +105,15 @@ pub fn DeviceId::from_string(s : String) -> DeviceId raise DeviceIdError {
   }
   DeviceId(host_id, dev.to_string())
 }
+
+///|
+pub extend DeviceId with Debug::{to_repr}
+
+///|
+pub extend DeviceId with Eq::{not_equal, equal}
+
+///|
+pub extend DeviceIdError with Debug::{to_repr}
+
+///|
+pub extend DeviceIdError with Eq::{not_equal, equal}

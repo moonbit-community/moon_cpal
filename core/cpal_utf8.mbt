@@ -20,7 +20,7 @@
 
 ///|
 pub fn utf8_bytes_to_string(bytes : Bytes, length : Int) -> String {
-  let res = StringBuilder::new()
+  let res = StringBuilder()
   let len = if length < bytes.length() { length } else { bytes.length() }
   let mut i = 0
   while i < len {
@@ -98,7 +98,7 @@ pub fn string_to_utf8_bytes(s : String) -> Bytes {
     }
   }
   if n <= 0 {
-    return Bytes::default()
+    return b""
   }
 
   // Pass 2: write bytes.

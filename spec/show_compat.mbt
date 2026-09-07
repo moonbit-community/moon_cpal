@@ -39,3 +39,15 @@ pub impl Show for Stream with fn output(self : Stream, logger : &Logger) -> Unit
 pub impl Show for Data with fn output(self : Data, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
+
+///|
+pub extend Data with Show::{to_string, output}
+
+///|
+pub extend Device with Show::{to_string, output}
+
+///|
+pub extend Host with Show::{to_string, output}
+
+///|
+pub extend Stream with Show::{to_string, output}

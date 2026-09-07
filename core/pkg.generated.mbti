@@ -87,6 +87,10 @@ pub suberror BuildStreamError {
   StreamIdOverflow
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn BuildStreamError::equal(Self, Self) -> Bool
+pub fn BuildStreamError::not_equal(Self, Self) -> Bool
+pub fn BuildStreamError::output(Self, &Logger) -> Unit
+pub fn BuildStreamError::to_repr(Self) -> @debug.Repr
 pub fn BuildStreamError::to_string(Self) -> String
 pub impl Show for BuildStreamError
 
@@ -96,6 +100,10 @@ pub suberror DefaultStreamConfigError {
   StreamTypeNotSupported
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn DefaultStreamConfigError::equal(Self, Self) -> Bool
+pub fn DefaultStreamConfigError::not_equal(Self, Self) -> Bool
+pub fn DefaultStreamConfigError::output(Self, &Logger) -> Unit
+pub fn DefaultStreamConfigError::to_repr(Self) -> @debug.Repr
 pub fn DefaultStreamConfigError::to_string(Self) -> String
 pub impl Show for DefaultStreamConfigError
 
@@ -103,24 +111,40 @@ pub suberror DeviceIdError {
   UnsupportedPlatform
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn DeviceIdError::equal(Self, Self) -> Bool
+pub fn DeviceIdError::not_equal(Self, Self) -> Bool
+pub fn DeviceIdError::output(Self, &Logger) -> Unit
+pub fn DeviceIdError::to_repr(Self) -> @debug.Repr
 pub fn DeviceIdError::to_string(Self) -> String
 pub impl Show for DeviceIdError
 
 pub suberror DeviceNameError {
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn DeviceNameError::equal(Self, Self) -> Bool
+pub fn DeviceNameError::not_equal(Self, Self) -> Bool
+pub fn DeviceNameError::output(Self, &Logger) -> Unit
+pub fn DeviceNameError::to_repr(Self) -> @debug.Repr
 pub fn DeviceNameError::to_string(Self) -> String
 pub impl Show for DeviceNameError
 
 pub suberror DevicesError {
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn DevicesError::equal(Self, Self) -> Bool
+pub fn DevicesError::not_equal(Self, Self) -> Bool
+pub fn DevicesError::output(Self, &Logger) -> Unit
+pub fn DevicesError::to_repr(Self) -> @debug.Repr
 pub fn DevicesError::to_string(Self) -> String
 pub impl Show for DevicesError
 
 pub suberror HostUnavailable {
   HostUnavailable
 } derive(Eq, @debug.Debug)
+pub fn HostUnavailable::equal(Self, Self) -> Bool
+pub fn HostUnavailable::not_equal(Self, Self) -> Bool
+pub fn HostUnavailable::output(Self, &Logger) -> Unit
+pub fn HostUnavailable::to_repr(Self) -> @debug.Repr
 pub fn HostUnavailable::to_string(Self) -> String
 pub impl Show for HostUnavailable
 
@@ -128,6 +152,10 @@ pub suberror PauseStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn PauseStreamError::equal(Self, Self) -> Bool
+pub fn PauseStreamError::not_equal(Self, Self) -> Bool
+pub fn PauseStreamError::output(Self, &Logger) -> Unit
+pub fn PauseStreamError::to_repr(Self) -> @debug.Repr
 pub fn PauseStreamError::to_string(Self) -> String
 pub impl Show for PauseStreamError
 
@@ -135,6 +163,10 @@ pub suberror PlayStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn PlayStreamError::equal(Self, Self) -> Bool
+pub fn PlayStreamError::not_equal(Self, Self) -> Bool
+pub fn PlayStreamError::output(Self, &Logger) -> Unit
+pub fn PlayStreamError::to_repr(Self) -> @debug.Repr
 pub fn PlayStreamError::to_string(Self) -> String
 pub impl Show for PlayStreamError
 
@@ -144,6 +176,10 @@ pub suberror StreamError {
   BufferUnderrun
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn StreamError::equal(Self, Self) -> Bool
+pub fn StreamError::not_equal(Self, Self) -> Bool
+pub fn StreamError::output(Self, &Logger) -> Unit
+pub fn StreamError::to_repr(Self) -> @debug.Repr
 pub fn StreamError::to_string(Self) -> String
 pub impl Show for StreamError
 
@@ -153,6 +189,10 @@ pub suberror SupportedStreamConfigsError {
   InvalidArgument
   BackendSpecific(BackendSpecificError)
 } derive(Eq, @debug.Debug)
+pub fn SupportedStreamConfigsError::equal(Self, Self) -> Bool
+pub fn SupportedStreamConfigsError::not_equal(Self, Self) -> Bool
+pub fn SupportedStreamConfigsError::output(Self, &Logger) -> Unit
+pub fn SupportedStreamConfigsError::to_repr(Self) -> @debug.Repr
 pub fn SupportedStreamConfigsError::to_string(Self) -> String
 pub impl Show for SupportedStreamConfigsError
 
@@ -162,7 +202,11 @@ pub struct BackendSpecificError {
 } derive(Eq, @debug.Debug)
 pub fn BackendSpecificError::BackendSpecificError(String) -> Self
 pub fn BackendSpecificError::description(Self) -> String
+pub fn BackendSpecificError::equal(Self, Self) -> Bool
 pub fn BackendSpecificError::new(String) -> Self
+pub fn BackendSpecificError::not_equal(Self, Self) -> Bool
+pub fn BackendSpecificError::output(Self, &Logger) -> Unit
+pub fn BackendSpecificError::to_repr(Self) -> @debug.Repr
 pub fn BackendSpecificError::to_string(Self) -> String
 pub impl Show for BackendSpecificError
 
@@ -171,7 +215,12 @@ pub enum BufferSize {
   Fixed(Int)
 } derive(Eq, @debug.Debug)
 pub fn BufferSize::default() -> Self
+pub fn BufferSize::equal(Self, Self) -> Bool
 pub fn BufferSize::fixed(Int) -> Self
+pub fn BufferSize::not_equal(Self, Self) -> Bool
+pub fn BufferSize::output(Self, &Logger) -> Unit
+pub fn BufferSize::to_repr(Self) -> @debug.Repr
+pub fn BufferSize::to_string(Self) -> String
 pub impl Show for BufferSize
 
 pub struct Data {
@@ -181,9 +230,14 @@ pub struct Data {
 pub fn Data::Data(SampleFormat, FixedArray[Byte]) -> Self
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::clear(Self) -> Unit
+pub fn Data::equal(Self, Self) -> Bool
 pub fn Data::len(Self) -> Int
 pub fn Data::new(SampleFormat, FixedArray[Byte]) -> Self
+pub fn Data::not_equal(Self, Self) -> Bool
+pub fn Data::output(Self, &Logger) -> Unit
 pub fn Data::sample_format(Self) -> SampleFormat
+pub fn Data::to_repr(Self) -> @debug.Repr
+pub fn Data::to_string(Self) -> String
 pub fn Data::try_as_f32(Self) -> Array[Float]?
 pub fn Data::try_as_f64(Self) -> Array[Double]?
 pub fn Data::try_as_i16(Self) -> Array[Int16]?
@@ -225,13 +279,17 @@ pub fn DeviceDescription::address(Self) -> String?
 pub fn DeviceDescription::device_type(Self) -> DeviceType
 pub fn DeviceDescription::direction(Self) -> DeviceDirection
 pub fn DeviceDescription::driver(Self) -> String?
+pub fn DeviceDescription::equal(Self, Self) -> Bool
 pub fn DeviceDescription::extended(Self) -> Array[String]
 pub fn DeviceDescription::interface_type(Self) -> InterfaceType
 pub fn DeviceDescription::manufacturer(Self) -> String?
 pub fn DeviceDescription::name(Self) -> String
 pub fn DeviceDescription::new(String, manufacturer? : String?, driver? : String?, device_type? : DeviceType, interface_type? : InterfaceType, direction? : DeviceDirection, address? : String?, extended? : Array[String]) -> Self
+pub fn DeviceDescription::not_equal(Self, Self) -> Bool
+pub fn DeviceDescription::output(Self, &Logger) -> Unit
 pub fn DeviceDescription::supports_input(Self) -> Bool
 pub fn DeviceDescription::supports_output(Self) -> Bool
+pub fn DeviceDescription::to_repr(Self) -> @debug.Repr
 pub fn DeviceDescription::to_string(Self) -> String
 pub impl Show for DeviceDescription
 
@@ -252,10 +310,15 @@ pub fn DeviceDescriptionBuilder::build(Self) -> DeviceDescription
 pub fn DeviceDescriptionBuilder::device_type(Self, DeviceType) -> Self
 pub fn DeviceDescriptionBuilder::direction(Self, DeviceDirection) -> Self
 pub fn DeviceDescriptionBuilder::driver(Self, String) -> Self
+pub fn DeviceDescriptionBuilder::equal(Self, Self) -> Bool
 pub fn DeviceDescriptionBuilder::extended(Self, Array[String]) -> Self
 pub fn DeviceDescriptionBuilder::interface_type(Self, InterfaceType) -> Self
 pub fn DeviceDescriptionBuilder::manufacturer(Self, String) -> Self
 pub fn DeviceDescriptionBuilder::new(String) -> Self
+pub fn DeviceDescriptionBuilder::not_equal(Self, Self) -> Bool
+pub fn DeviceDescriptionBuilder::output(Self, &Logger) -> Unit
+pub fn DeviceDescriptionBuilder::to_repr(Self) -> @debug.Repr
+pub fn DeviceDescriptionBuilder::to_string(Self) -> String
 pub impl Show for DeviceDescriptionBuilder
 
 pub enum DeviceDirection {
@@ -265,8 +328,11 @@ pub enum DeviceDirection {
   Unknown
 } derive(Eq, @debug.Debug)
 pub fn DeviceDirection::duplex() -> Self
+pub fn DeviceDirection::equal(Self, Self) -> Bool
 pub fn DeviceDirection::input() -> Self
+pub fn DeviceDirection::not_equal(Self, Self) -> Bool
 pub fn DeviceDirection::output() -> Self
+pub fn DeviceDirection::to_repr(Self) -> @debug.Repr
 pub fn DeviceDirection::to_string(Self) -> String
 pub fn DeviceDirection::unknown() -> Self
 pub impl Show for DeviceDirection
@@ -277,9 +343,13 @@ pub struct DeviceId {
 } derive(Eq, @debug.Debug)
 pub fn DeviceId::DeviceId(HostId, String) -> Self
 pub fn DeviceId::device_id(Self) -> String
+pub fn DeviceId::equal(Self, Self) -> Bool
 pub fn DeviceId::from_string(String) -> Self raise DeviceIdError
 pub fn DeviceId::host_id(Self) -> HostId
 pub fn DeviceId::new(HostId, String) -> Self
+pub fn DeviceId::not_equal(Self, Self) -> Bool
+pub fn DeviceId::output(Self, &Logger) -> Unit
+pub fn DeviceId::to_repr(Self) -> @debug.Repr
 pub fn DeviceId::to_string(Self) -> String
 pub impl Show for DeviceId
 
@@ -298,12 +368,16 @@ pub enum DeviceType {
 } derive(Eq, @debug.Debug)
 pub fn DeviceType::dock() -> Self
 pub fn DeviceType::earpiece() -> Self
+pub fn DeviceType::equal(Self, Self) -> Bool
 pub fn DeviceType::handset() -> Self
 pub fn DeviceType::headphones() -> Self
 pub fn DeviceType::headset() -> Self
 pub fn DeviceType::hearing_aid() -> Self
 pub fn DeviceType::microphone() -> Self
+pub fn DeviceType::not_equal(Self, Self) -> Bool
+pub fn DeviceType::output(Self, &Logger) -> Unit
 pub fn DeviceType::speaker() -> Self
+pub fn DeviceType::to_repr(Self) -> @debug.Repr
 pub fn DeviceType::to_string(Self) -> String
 pub fn DeviceType::tuner() -> Self
 pub fn DeviceType::unknown() -> Self
@@ -315,8 +389,13 @@ pub struct Duration {
   nanos : Int
 } derive(Eq, @debug.Debug)
 pub fn Duration::Duration(UInt64, Int) -> Self
+pub fn Duration::equal(Self, Self) -> Bool
 pub fn Duration::from_secs(UInt64) -> Self
 pub fn Duration::new(UInt64, Int) -> Self
+pub fn Duration::not_equal(Self, Self) -> Bool
+pub fn Duration::output(Self, &Logger) -> Unit
+pub fn Duration::to_repr(Self) -> @debug.Repr
+pub fn Duration::to_string(Self) -> String
 pub impl Show for Duration
 
 pub(all) enum HostId {
@@ -332,10 +411,14 @@ pub(all) enum HostId {
   WebAudio
   AudioWorklet
 } derive(Eq, @debug.Debug)
+pub fn HostId::equal(Self, Self) -> Bool
 pub fn HostId::from_string(String) -> Self?
 pub fn HostId::from_view(StringView) -> Self?
 pub fn HostId::name(Self) -> String
+pub fn HostId::not_equal(Self, Self) -> Bool
+pub fn HostId::output(Self, &Logger) -> Unit
 pub fn HostId::parse(String) -> Self raise HostUnavailable
+pub fn HostId::to_repr(Self) -> @debug.Repr
 pub fn HostId::to_string(Self) -> String
 pub impl Show for HostId
 
@@ -343,8 +426,18 @@ pub struct I24 {
   raw : Int
 } derive(Eq, @debug.Debug)
 pub fn I24::I24(Int) -> Self
+pub fn I24::equal(Self, Self) -> Bool
+pub fn I24::equilibrium() -> Self
+pub fn I24::format(Self) -> SampleFormat
+pub fn I24::from_f32(Float) -> Self
+pub fn I24::from_sample(Float) -> Self
 pub fn I24::new(Int) -> Self
+pub fn I24::not_equal(Self, Self) -> Bool
+pub fn I24::output(Self, &Logger) -> Unit
+pub fn I24::to_f32(Self) -> Float
 pub fn I24::to_int(Self) -> Int
+pub fn I24::to_repr(Self) -> @debug.Repr
+pub fn I24::to_string(Self) -> String
 pub impl FromSample for I24
 pub impl Sample for I24
 pub impl SizedSample for I24
@@ -354,8 +447,13 @@ pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
 } derive(Eq, @debug.Debug)
 pub fn InputCallbackInfo::InputCallbackInfo(InputStreamTimestamp) -> Self
+pub fn InputCallbackInfo::equal(Self, Self) -> Bool
 pub fn InputCallbackInfo::new(InputStreamTimestamp) -> Self
+pub fn InputCallbackInfo::not_equal(Self, Self) -> Bool
+pub fn InputCallbackInfo::output(Self, &Logger) -> Unit
 pub fn InputCallbackInfo::timestamp(Self) -> InputStreamTimestamp
+pub fn InputCallbackInfo::to_repr(Self) -> @debug.Repr
+pub fn InputCallbackInfo::to_string(Self) -> String
 pub impl Show for InputCallbackInfo
 
 pub struct InputStreamTimestamp {
@@ -365,7 +463,12 @@ pub struct InputStreamTimestamp {
 pub fn InputStreamTimestamp::InputStreamTimestamp(StreamInstant, StreamInstant) -> Self
 pub fn InputStreamTimestamp::callback(Self) -> StreamInstant
 pub fn InputStreamTimestamp::capture(Self) -> StreamInstant
+pub fn InputStreamTimestamp::equal(Self, Self) -> Bool
 pub fn InputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
+pub fn InputStreamTimestamp::not_equal(Self, Self) -> Bool
+pub fn InputStreamTimestamp::output(Self, &Logger) -> Unit
+pub fn InputStreamTimestamp::to_repr(Self) -> @debug.Repr
+pub fn InputStreamTimestamp::to_string(Self) -> String
 pub impl Show for InputStreamTimestamp
 
 pub enum InterfaceType {
@@ -388,13 +491,17 @@ pub fn InterfaceType::aggregate() -> Self
 pub fn InterfaceType::bluetooth() -> Self
 pub fn InterfaceType::built_in() -> Self
 pub fn InterfaceType::display_port() -> Self
+pub fn InterfaceType::equal(Self, Self) -> Bool
 pub fn InterfaceType::fire_wire() -> Self
 pub fn InterfaceType::hdmi() -> Self
 pub fn InterfaceType::line() -> Self
 pub fn InterfaceType::network() -> Self
+pub fn InterfaceType::not_equal(Self, Self) -> Bool
+pub fn InterfaceType::output(Self, &Logger) -> Unit
 pub fn InterfaceType::pci() -> Self
 pub fn InterfaceType::spdif() -> Self
 pub fn InterfaceType::thunderbolt() -> Self
+pub fn InterfaceType::to_repr(Self) -> @debug.Repr
 pub fn InterfaceType::to_string(Self) -> String
 pub fn InterfaceType::unknown() -> Self
 pub fn InterfaceType::usb() -> Self
@@ -407,14 +514,24 @@ pub(all) enum NativeOs {
   Windows
   Linux
 } derive(Eq, @debug.Debug)
+pub fn NativeOs::equal(Self, Self) -> Bool
+pub fn NativeOs::not_equal(Self, Self) -> Bool
+pub fn NativeOs::output(Self, &Logger) -> Unit
+pub fn NativeOs::to_repr(Self) -> @debug.Repr
+pub fn NativeOs::to_string(Self) -> String
 pub impl Show for NativeOs
 
 pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
 } derive(Eq, @debug.Debug)
 pub fn OutputCallbackInfo::OutputCallbackInfo(OutputStreamTimestamp) -> Self
+pub fn OutputCallbackInfo::equal(Self, Self) -> Bool
 pub fn OutputCallbackInfo::new(OutputStreamTimestamp) -> Self
+pub fn OutputCallbackInfo::not_equal(Self, Self) -> Bool
+pub fn OutputCallbackInfo::output(Self, &Logger) -> Unit
 pub fn OutputCallbackInfo::timestamp(Self) -> OutputStreamTimestamp
+pub fn OutputCallbackInfo::to_repr(Self) -> @debug.Repr
+pub fn OutputCallbackInfo::to_string(Self) -> String
 pub impl Show for OutputCallbackInfo
 
 pub struct OutputStreamTimestamp {
@@ -423,8 +540,13 @@ pub struct OutputStreamTimestamp {
 } derive(Eq, @debug.Debug)
 pub fn OutputStreamTimestamp::OutputStreamTimestamp(StreamInstant, StreamInstant) -> Self
 pub fn OutputStreamTimestamp::callback(Self) -> StreamInstant
+pub fn OutputStreamTimestamp::equal(Self, Self) -> Bool
 pub fn OutputStreamTimestamp::new(StreamInstant, StreamInstant) -> Self
+pub fn OutputStreamTimestamp::not_equal(Self, Self) -> Bool
+pub fn OutputStreamTimestamp::output(Self, &Logger) -> Unit
 pub fn OutputStreamTimestamp::playback(Self) -> StreamInstant
+pub fn OutputStreamTimestamp::to_repr(Self) -> @debug.Repr
+pub fn OutputStreamTimestamp::to_string(Self) -> String
 pub impl Show for OutputStreamTimestamp
 
 pub(all) enum SampleFormat {
@@ -445,12 +567,16 @@ pub(all) enum SampleFormat {
   DsdU32
 } derive(Eq, @debug.Debug)
 pub fn SampleFormat::bits_per_sample(Self) -> Int
+pub fn SampleFormat::equal(Self, Self) -> Bool
 pub fn SampleFormat::is_dsd(Self) -> Bool
 pub fn SampleFormat::is_float(Self) -> Bool
 pub fn SampleFormat::is_int(Self) -> Bool
 pub fn SampleFormat::is_uint(Self) -> Bool
+pub fn SampleFormat::not_equal(Self, Self) -> Bool
+pub fn SampleFormat::output(Self, &Logger) -> Unit
 pub fn SampleFormat::sample_size(Self) -> Int
 pub fn SampleFormat::to_debug_string(Self) -> String
+pub fn SampleFormat::to_repr(Self) -> @debug.Repr
 pub fn SampleFormat::to_string(Self) -> String
 pub impl Show for SampleFormat
 
@@ -460,7 +586,12 @@ pub struct StreamConfig {
   buffer_size : BufferSize
 } derive(Eq, @debug.Debug)
 pub fn StreamConfig::StreamConfig(Int, Int, BufferSize) -> Self
+pub fn StreamConfig::equal(Self, Self) -> Bool
 pub fn StreamConfig::new(Int, Int, BufferSize) -> Self
+pub fn StreamConfig::not_equal(Self, Self) -> Bool
+pub fn StreamConfig::output(Self, &Logger) -> Unit
+pub fn StreamConfig::to_repr(Self) -> @debug.Repr
+pub fn StreamConfig::to_string(Self) -> String
 pub impl Show for StreamConfig
 
 pub struct StreamInstant {
@@ -470,8 +601,13 @@ pub struct StreamInstant {
 pub fn StreamInstant::StreamInstant(Int64, Int) -> Self
 pub fn StreamInstant::add(Self, Duration) -> Self?
 pub fn StreamInstant::duration_since(Self, Self) -> Duration?
+pub fn StreamInstant::equal(Self, Self) -> Bool
 pub fn StreamInstant::new(Int64, Int) -> Self
+pub fn StreamInstant::not_equal(Self, Self) -> Bool
+pub fn StreamInstant::output(Self, &Logger) -> Unit
 pub fn StreamInstant::sub(Self, Duration) -> Self?
+pub fn StreamInstant::to_repr(Self) -> @debug.Repr
+pub fn StreamInstant::to_string(Self) -> String
 pub impl Show for StreamInstant
 
 pub(all) enum SupportedBufferSize {
@@ -479,6 +615,11 @@ pub(all) enum SupportedBufferSize {
   Unknown
 } derive(Eq, @debug.Debug)
 pub fn SupportedBufferSize::contains(Self, Int) -> Bool
+pub fn SupportedBufferSize::equal(Self, Self) -> Bool
+pub fn SupportedBufferSize::not_equal(Self, Self) -> Bool
+pub fn SupportedBufferSize::output(Self, &Logger) -> Unit
+pub fn SupportedBufferSize::to_repr(Self) -> @debug.Repr
+pub fn SupportedBufferSize::to_string(Self) -> String
 pub impl Show for SupportedBufferSize
 
 pub struct SupportedStreamConfig {
@@ -491,9 +632,14 @@ pub fn SupportedStreamConfig::SupportedStreamConfig(Int, Int, SupportedBufferSiz
 pub fn SupportedStreamConfig::buffer_size(Self) -> SupportedBufferSize
 pub fn SupportedStreamConfig::channels(Self) -> Int
 pub fn SupportedStreamConfig::config(Self) -> StreamConfig
+pub fn SupportedStreamConfig::equal(Self, Self) -> Bool
 pub fn SupportedStreamConfig::new(Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfig::not_equal(Self, Self) -> Bool
+pub fn SupportedStreamConfig::output(Self, &Logger) -> Unit
 pub fn SupportedStreamConfig::sample_format(Self) -> SampleFormat
 pub fn SupportedStreamConfig::sample_rate(Self) -> Int
+pub fn SupportedStreamConfig::to_repr(Self) -> @debug.Repr
+pub fn SupportedStreamConfig::to_string(Self) -> String
 pub impl Show for SupportedStreamConfig
 
 pub struct SupportedStreamConfigRange {
@@ -507,10 +653,15 @@ pub fn SupportedStreamConfigRange::SupportedStreamConfigRange(Int, Int, Int, Sup
 pub fn SupportedStreamConfigRange::buffer_size(Self) -> SupportedBufferSize
 pub fn SupportedStreamConfigRange::channels(Self) -> Int
 pub fn SupportedStreamConfigRange::cmp_default_heuristics(Self, Self) -> Int
+pub fn SupportedStreamConfigRange::equal(Self, Self) -> Bool
 pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int
 pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int
 pub fn SupportedStreamConfigRange::new(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfigRange::not_equal(Self, Self) -> Bool
+pub fn SupportedStreamConfigRange::output(Self, &Logger) -> Unit
 pub fn SupportedStreamConfigRange::sample_format(Self) -> SampleFormat
+pub fn SupportedStreamConfigRange::to_repr(Self) -> @debug.Repr
+pub fn SupportedStreamConfigRange::to_string(Self) -> String
 pub fn SupportedStreamConfigRange::try_with_sample_rate(Self, Int) -> SupportedStreamConfig?
 pub fn SupportedStreamConfigRange::with_max_sample_rate(Self) -> SupportedStreamConfig
 pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int) -> SupportedStreamConfig
@@ -520,8 +671,18 @@ pub struct U24 {
   raw : Int
 } derive(Eq, @debug.Debug)
 pub fn U24::U24(Int) -> Self
+pub fn U24::equal(Self, Self) -> Bool
+pub fn U24::equilibrium() -> Self
+pub fn U24::format(Self) -> SampleFormat
+pub fn U24::from_f32(Float) -> Self
+pub fn U24::from_sample(Float) -> Self
 pub fn U24::new(Int) -> Self
+pub fn U24::not_equal(Self, Self) -> Bool
+pub fn U24::output(Self, &Logger) -> Unit
+pub fn U24::to_f32(Self) -> Float
 pub fn U24::to_int(Self) -> Int
+pub fn U24::to_repr(Self) -> @debug.Repr
+pub fn U24::to_string(Self) -> String
 pub impl FromSample for U24
 pub impl Sample for U24
 pub impl SizedSample for U24
@@ -563,4 +724,3 @@ pub impl SizedSample for Int16
 pub impl SizedSample for UInt16
 pub impl SizedSample for Float
 pub impl SizedSample for Double
-

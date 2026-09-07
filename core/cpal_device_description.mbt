@@ -370,7 +370,7 @@ pub fn DeviceDirection::to_string(self : DeviceDirection) -> String {
 
 ///|
 pub fn DeviceDescription::to_string(self : DeviceDescription) -> String {
-  let sb = StringBuilder::new()
+  let sb = StringBuilder()
   sb.write_string(self.name)
   match self.manufacturer {
     None => ()
@@ -604,3 +604,33 @@ pub fn direction_from_counts(
   }
   direction_from_caps(has_input, has_output)
 }
+
+///|
+pub extend DeviceDescription with Debug::{to_repr}
+
+///|
+pub extend DeviceDescription with Eq::{not_equal, equal}
+
+///|
+pub extend DeviceDescriptionBuilder with Debug::{to_repr}
+
+///|
+pub extend DeviceDescriptionBuilder with Eq::{not_equal, equal}
+
+///|
+pub extend DeviceDirection with Debug::{to_repr}
+
+///|
+pub extend DeviceDirection with Eq::{not_equal, equal}
+
+///|
+pub extend DeviceType with Debug::{to_repr}
+
+///|
+pub extend DeviceType with Eq::{not_equal, equal}
+
+///|
+pub extend InterfaceType with Debug::{to_repr}
+
+///|
+pub extend InterfaceType with Eq::{not_equal, equal}

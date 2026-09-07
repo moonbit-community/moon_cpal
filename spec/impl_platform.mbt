@@ -40,7 +40,7 @@ pub struct Data {
 
 ///|
 pub fn default_host() -> Host {
-  { inner: @platform.default_host() }
+  { inner: @platform.default_host(), }
 }
 
 ///|
@@ -55,12 +55,12 @@ pub fn all_hosts() -> Array[@core.HostId] {
 
 ///|
 pub fn host_from_id(id : @core.HostId) -> Host raise @core.HostUnavailable {
-  { inner: @platform.host_from_id(id) }
+  { inner: @platform.host_from_id(id), }
 }
 
 ///|
 pub fn try_host_from_id(id : @core.HostId) -> Host? {
-  @platform.try_host_from_id(id).map(fn(h) { { inner: h } })
+  @platform.try_host_from_id(id).map(fn(h) { { inner: h, } })
 }
 
 ///|
@@ -70,14 +70,14 @@ pub fn Host::id(self : Host) -> @core.HostId {
 
 ///|
 pub fn Host::devices(self : Host) -> Iter[Device] raise @core.DevicesError {
-  @platform.Host::devices(self.inner).map(fn(d) { { inner: d } })
+  @platform.Host::devices(self.inner).map(fn(d) { { inner: d, } })
 }
 
 ///|
 pub fn Host::device_by_id(self : Host, id : @core.DeviceId) -> Device? {
   match @platform.Host::device_by_id(self.inner, id) {
     None => None
-    Some(d) => Some({ inner: d })
+    Some(d) => Some({ inner: d, })
   }
 }
 
@@ -85,21 +85,21 @@ pub fn Host::device_by_id(self : Host, id : @core.DeviceId) -> Device? {
 pub fn Host::input_devices(
   self : Host,
 ) -> Iter[Device] raise @core.DevicesError {
-  @platform.Host::input_devices(self.inner).map(fn(d) { { inner: d } })
+  @platform.Host::input_devices(self.inner).map(fn(d) { { inner: d, } })
 }
 
 ///|
 pub fn Host::output_devices(
   self : Host,
 ) -> Iter[Device] raise @core.DevicesError {
-  @platform.Host::output_devices(self.inner).map(fn(d) { { inner: d } })
+  @platform.Host::output_devices(self.inner).map(fn(d) { { inner: d, } })
 }
 
 ///|
 pub fn Host::default_output_device(self : Host) -> Device? {
   match @platform.Host::default_output_device(self.inner) {
     None => None
-    Some(d) => Some({ inner: d })
+    Some(d) => Some({ inner: d, })
   }
 }
 
@@ -107,7 +107,7 @@ pub fn Host::default_output_device(self : Host) -> Device? {
 pub fn Host::default_input_device(self : Host) -> Device? {
   match @platform.Host::default_input_device(self.inner) {
     None => None
-    Some(d) => Some({ inner: d })
+    Some(d) => Some({ inner: d, })
   }
 }
 
@@ -177,11 +177,11 @@ pub fn Device::build_output_stream(
   let inner_stream = @platform.Device::build_output_stream(
     self.inner,
     config,
-    fn(d, info) { data_callback({ inner: d }, info) },
+    fn(d, info) { data_callback({ inner: d, }, info) },
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -197,11 +197,11 @@ pub fn Device::build_output_stream_raw(
     self.inner,
     config,
     sample_format,
-    fn(d, info) { data_callback({ inner: d }, info) },
+    fn(d, info) { data_callback({ inner: d, }, info) },
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -312,7 +312,7 @@ pub fn Device::build_output_stream_f32(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -343,7 +343,7 @@ pub fn Device::build_output_stream_i16(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -374,7 +374,7 @@ pub fn Device::build_output_stream_u16(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -405,7 +405,7 @@ pub fn Device::build_output_stream_u8(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -419,11 +419,11 @@ pub fn Device::build_input_stream(
   let inner_stream = @platform.Device::build_input_stream(
     self.inner,
     config,
-    fn(d, info) { data_callback({ inner: d }, info) },
+    fn(d, info) { data_callback({ inner: d, }, info) },
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -439,11 +439,11 @@ pub fn Device::build_input_stream_raw(
     self.inner,
     config,
     sample_format,
-    fn(d, info) { data_callback({ inner: d }, info) },
+    fn(d, info) { data_callback({ inner: d, }, info) },
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -467,7 +467,7 @@ pub fn Device::build_input_stream_f32(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -491,7 +491,7 @@ pub fn Device::build_input_stream_i16(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -515,7 +515,7 @@ pub fn Device::build_input_stream_u16(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -539,7 +539,7 @@ pub fn Device::build_input_stream_u8(
     error_callback,
     timeout,
   )
-  { inner: inner_stream }
+  { inner: inner_stream, }
 }
 
 ///|
@@ -656,3 +656,27 @@ pub fn Data::write_i64(self : Data, samples : Array[Int64]) -> Bool {
 pub fn Data::write_f64(self : Data, samples : Array[Double]) -> Bool {
   @core.Data::write_f64(self.inner, samples)
 }
+
+///|
+pub extend Data with Debug::{to_repr}
+
+///|
+pub extend Data with Eq::{not_equal, equal}
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}
+
+///|
+pub extend Stream with Debug::{to_repr}
+
+///|
+pub extend Stream with Eq::{not_equal, equal}

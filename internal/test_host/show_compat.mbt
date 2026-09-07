@@ -34,3 +34,12 @@ pub impl Show for Device with fn output(self : Device, logger : &Logger) -> Unit
 pub impl Show for StreamKind with fn output(self : StreamKind, logger : &Logger) -> Unit {
   show_from_debug(self, logger)
 }
+
+///|
+pub extend Device with Show::{to_string, output}
+
+///|
+pub extend Host with Show::{to_string, output}
+
+///|
+pub extend StreamKind with Show::{to_string, output}

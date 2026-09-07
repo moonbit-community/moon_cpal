@@ -31,13 +31,13 @@ pub struct Device {
 
 ///|
 pub fn default_host() -> Host {
-  { _unit: () }
+  { _unit: (), }
 }
 
 ///|
 fn default_device() -> Device {
   // Mirrors typical ALSA "default" PCM.
-  { id: "default", desc: None, direction: @core.DeviceDirection::duplex() }
+  { id: "default", desc: None, direction: @core.DeviceDirection::duplex(), }
 }
 
 ///|
@@ -50,7 +50,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
       let id = v.trim().to_owned()
       if id.length() > 0 {
         // Each line is: "<id>\t<dir>\t<desc_escaped>".
-        let fields = Array::new()
+        let fields = Array()
         for p in id.split("\t") {
           fields.push(p)
         }
@@ -83,7 +83,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
         } else {
           Some(unescape(desc_esc))
         }
-        out.push({ id: pcm_id, desc, direction: dir })
+        out.push({ id: pcm_id, desc, direction: dir, })
       }
     }
     if out.length() == 0 {
@@ -197,7 +197,7 @@ pub fn Device::supports_output(_self : Device) -> Bool {
 
 ///|
 fn unescape(s : String) -> String {
-  let sb = StringBuilder::new()
+  let sb = StringBuilder()
   let mut i = 0
   while i < s.length() {
     let cu = s.code_unit_at(i).to_int()
@@ -428,3 +428,15 @@ fn default_config(
     best.with_max_sample_rate()
   }
 }
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}

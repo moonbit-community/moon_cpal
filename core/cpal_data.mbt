@@ -37,7 +37,7 @@ pub fn Data::Data(
   sample_format : SampleFormat,
   bytes : FixedArray[Byte],
 ) -> Data {
-  { sample_format, bytes }
+  { sample_format, bytes, }
 }
 
 ///|
@@ -183,7 +183,7 @@ pub fn Data::try_as_i8(self : Data) -> Array[Int]? {
     return None
   }
   let out : Array[Int] = []
-  for b in self.bytes.op_as_view() {
+  for b in self.bytes[:] {
     let w = b.to_int()
     out.push(if w >= 128 { w - 256 } else { w })
   }
@@ -195,7 +195,7 @@ pub fn Data::try_as_u8(self : Data) -> Array[Byte]? {
   if self.sample_format != U8 {
     return None
   }
-  Some(self.bytes.op_as_view().to_owned())
+  Some(self.bytes[:].to_owned())
 }
 
 ///|
@@ -755,3 +755,9 @@ pub fn Data::write_f64(self : Data, samples : Array[Double]) -> Bool {
   }
   true
 }
+
+///|
+pub extend Data with Debug::{to_repr}
+
+///|
+pub extend Data with Eq::{not_equal, equal}

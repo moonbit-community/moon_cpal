@@ -30,11 +30,11 @@ pub struct Device {
 } derive(Debug, Eq)
 
 ///|
-let _unused_device_for_lint : Device = { _unit: () }
+let _unused_device_for_lint : Device = { _unit: (), }
 
 ///|
 pub fn default_host() -> Host {
-  { _unit: () }
+  { _unit: (), }
 }
 
 ///|
@@ -109,3 +109,15 @@ pub fn Device::default_output_config(
     "null default_output_config: unimplemented",
   )
 }
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}

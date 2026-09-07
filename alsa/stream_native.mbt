@@ -318,7 +318,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_errno("alsa_stream_build_output", st)
   }
-  { kind: Output, handle: out[0], owner: alsa_stream_owner_new(out[0]) }
+  { kind: Output, handle: out[0], owner: alsa_stream_owner_new(out[0]), }
 }
 
 ///|
@@ -410,7 +410,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_errno("alsa_stream_build_input", st)
   }
-  { kind: Input, handle: out[0], owner: alsa_stream_owner_new(out[0]) }
+  { kind: Input, handle: out[0], owner: alsa_stream_owner_new(out[0]), }
 }
 
 ///|

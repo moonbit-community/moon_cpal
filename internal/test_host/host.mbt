@@ -30,7 +30,7 @@ pub struct Device {
 
 ///|
 pub fn Device::Device() -> Device {
-  { _unit: () }
+  { _unit: (), }
 }
 
 ///|
@@ -40,7 +40,7 @@ pub fn Device::new() -> Device {
 
 ///|
 pub fn default_host() -> Host {
-  { _unit: () }
+  { _unit: (), }
 }
 
 ///|
@@ -117,3 +117,15 @@ pub fn Device::default_output_config(
 ) -> @core.SupportedStreamConfig {
   Device::default_input_config(_self)
 }
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}

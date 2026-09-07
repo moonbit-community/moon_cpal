@@ -64,7 +64,7 @@ pub fn StreamConfig::StreamConfig(
   sample_rate : SampleRate,
   buffer_size : BufferSize,
 ) -> StreamConfig {
-  { channels, sample_rate, buffer_size }
+  { channels, sample_rate, buffer_size, }
 }
 
 ///|
@@ -133,7 +133,7 @@ pub fn SupportedStreamConfig::SupportedStreamConfig(
   buffer_size : SupportedBufferSize,
   sample_format : SampleFormat,
 ) -> SupportedStreamConfig {
-  { channels, sample_rate, buffer_size, sample_format }
+  { channels, sample_rate, buffer_size, sample_format, }
 }
 
 ///|
@@ -204,7 +204,7 @@ pub fn SupportedStreamConfigRange::SupportedStreamConfigRange(
   buffer_size : SupportedBufferSize,
   sample_format : SampleFormat,
 ) -> SupportedStreamConfigRange {
-  { channels, min_sample_rate, max_sample_rate, buffer_size, sample_format }
+  { channels, min_sample_rate, max_sample_rate, buffer_size, sample_format, }
 }
 
 ///|
@@ -314,3 +314,39 @@ pub fn common_sample_rates() -> Array[SampleRate] {
     96000, 176400, 192000, 352800, 384000, 705600, 768000, 1411200, 1536000,
   ]
 }
+
+///|
+pub extend BufferSize with Debug::{to_repr}
+
+///|
+pub extend BufferSize with Eq::{not_equal, equal}
+
+///|
+pub extend SampleFormat with Debug::{to_repr}
+
+///|
+pub extend SampleFormat with Eq::{not_equal, equal}
+
+///|
+pub extend StreamConfig with Debug::{to_repr}
+
+///|
+pub extend StreamConfig with Eq::{not_equal, equal}
+
+///|
+pub extend SupportedBufferSize with Debug::{to_repr}
+
+///|
+pub extend SupportedBufferSize with Eq::{not_equal, equal}
+
+///|
+pub extend SupportedStreamConfig with Debug::{to_repr}
+
+///|
+pub extend SupportedStreamConfig with Eq::{not_equal, equal}
+
+///|
+pub extend SupportedStreamConfigRange with Debug::{to_repr}
+
+///|
+pub extend SupportedStreamConfigRange with Eq::{not_equal, equal}

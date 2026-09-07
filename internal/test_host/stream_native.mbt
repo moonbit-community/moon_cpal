@@ -229,7 +229,7 @@ pub fn Device::build_output_stream_raw(
   if h == 0 {
     raise_build_status("test_host build_output_stream", -1)
   }
-  { kind: Output, owner: null_stream_owner_new(h) }
+  { kind: Output, owner: null_stream_owner_new(h), }
 }
 
 ///|
@@ -287,7 +287,7 @@ pub fn Device::build_input_stream_raw(
   if h == 0 {
     raise_build_status("test_host build_input_stream", -1)
   }
-  { kind: Input, owner: null_stream_owner_new(h) }
+  { kind: Input, owner: null_stream_owner_new(h), }
 }
 
 ///|

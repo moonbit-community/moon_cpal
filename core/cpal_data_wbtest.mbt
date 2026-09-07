@@ -60,7 +60,7 @@ test "data: clear uses equilibrium bytes" {
   let data = Data(U8, bytes)
   data.clear()
   @debug.debug_inspect(
-    data.bytes().op_as_view().to_owned(),
+    data.bytes()[:].to_owned(),
     content=(
       #|[0x80, 0x80, 0x80, 0x80]
     ),
@@ -71,7 +71,7 @@ test "data: clear uses equilibrium bytes" {
   let u16 = Data(U16, u16_bytes)
   u16.clear()
   @debug.debug_inspect(
-    u16.bytes().op_as_view().to_owned(),
+    u16.bytes()[:].to_owned(),
     content=(
       #|[0x00, 0x80, 0x00, 0x80]
     ),

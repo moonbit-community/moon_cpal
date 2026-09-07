@@ -53,3 +53,18 @@ pub impl @debug.Debug for Stream with fn to_repr(self : Stream) -> @debug.Repr {
 pub impl Show for Stream with fn output(self : Stream, logger : &Logger) -> Unit {
   logger.write_string("\{self.kind}(\{self.handle})")
 }
+
+///|
+pub extend Stream with Debug::{to_repr}
+
+///|
+pub extend Stream with Eq::{not_equal, equal}
+
+///|
+pub extend Stream with Show::{to_string, output}
+
+///|
+pub extend StreamKind with Debug::{to_repr}
+
+///|
+pub extend StreamKind with Eq::{not_equal, equal}

@@ -34,17 +34,17 @@ pub struct Device {
 
 ///|
 pub fn default_host() -> Host {
-  { _unit: () }
+  { _unit: (), }
 }
 
 ///|
 fn default_output_device() -> Device {
-  { id: "cpal_client_out", direction: @core.DeviceDirection::output() }
+  { id: "cpal_client_out", direction: @core.DeviceDirection::output(), }
 }
 
 ///|
 fn default_input_device() -> Device {
-  { id: "cpal_client_in", direction: @core.DeviceDirection::input() }
+  { id: "cpal_client_in", direction: @core.DeviceDirection::input(), }
 }
 
 ///|
@@ -207,3 +207,15 @@ fn supported_configs(_self : Device) -> Array[@core.SupportedStreamConfigRange] 
     }
   }
 }
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}

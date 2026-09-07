@@ -54,12 +54,17 @@ pub fn Device::build_output_stream_raw(Self, @core.StreamConfig, @core.SampleFor
 pub fn Device::default_input_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
 pub fn Device::default_output_config(Self) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError
 pub fn Device::description(Self) -> @core.DeviceDescription raise CoreAudioError
+pub fn Device::equal(Self, Self) -> Bool
 pub fn Device::id(Self) -> @core.DeviceId
 pub fn Device::name(Self) -> String raise CoreAudioError
+pub fn Device::not_equal(Self, Self) -> Bool
+pub fn Device::output(Self, &Logger) -> Unit
 pub fn Device::supported_input_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
 pub fn Device::supported_output_configs(Self) -> Array[@core.SupportedStreamConfigRange] raise CoreAudioError
 pub fn Device::supports_input(Self) -> Bool
 pub fn Device::supports_output(Self) -> Bool
+pub fn Device::to_repr(Self) -> @debug.Repr
+pub fn Device::to_string(Self) -> String
 pub impl Show for Device
 
 pub struct Host {
@@ -68,6 +73,11 @@ pub struct Host {
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::devices(Self) -> Array[Device] raise CoreAudioError
+pub fn Host::equal(Self, Self) -> Bool
+pub fn Host::not_equal(Self, Self) -> Bool
+pub fn Host::output(Self, &Logger) -> Unit
+pub fn Host::to_repr(Self) -> @debug.Repr
+pub fn Host::to_string(Self) -> String
 pub impl Show for Host
 
 pub struct Stream {
@@ -76,8 +86,13 @@ pub struct Stream {
   owner : StreamOwner
 }
 pub fn Stream::close(Self) -> Unit
+pub fn Stream::equal(Self, Self) -> Bool
+pub fn Stream::not_equal(Self, Self) -> Bool
+pub fn Stream::output(Self, &Logger) -> Unit
 pub fn Stream::pause(Self) -> Unit raise @core.PauseStreamError
 pub fn Stream::play(Self) -> Unit raise @core.PlayStreamError
+pub fn Stream::to_repr(Self) -> @debug.Repr
+pub fn Stream::to_string(Self) -> String
 pub impl Eq for Stream
 pub impl Show for Stream
 pub impl @debug.Debug for Stream
@@ -86,6 +101,11 @@ pub enum StreamKind {
   Output
   Input
 } derive(Eq, @debug.Debug)
+pub fn StreamKind::equal(Self, Self) -> Bool
+pub fn StreamKind::not_equal(Self, Self) -> Bool
+pub fn StreamKind::output(Self, &Logger) -> Unit
+pub fn StreamKind::to_repr(Self) -> @debug.Repr
+pub fn StreamKind::to_string(Self) -> String
 pub impl Show for StreamKind
 
 type StreamOwner
@@ -94,4 +114,3 @@ type StreamOwner
 pub type DeviceId = UInt
 
 // Traits
-

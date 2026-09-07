@@ -89,24 +89,24 @@ struct ProbeSnapshot {
 
 ///|
 fn empty_buffer() -> ProbeBuffer {
-  { kind: "unknown", min_frames: 0, max_frames: 0 }
+  { kind: "unknown", min_frames: 0, max_frames: 0, }
 }
 
 ///|
 fn empty_config() -> ProbeConfig {
-  { channels: 0, sample_rate: 0, sample_format: "", buffer: empty_buffer() }
+  { channels: 0, sample_rate: 0, sample_format: "", buffer: empty_buffer(), }
 }
 
 ///|
 fn empty_build() -> ProbeBuild {
-  { raw_ok: false, has_typed_probe: false, typed_kind: "", typed_ok: false }
+  { raw_ok: false, has_typed_probe: false, typed_kind: "", typed_ok: false, }
 }
 
 ///|
 fn probe_buffer(b : @moon_cpal.SupportedBufferSize) -> ProbeBuffer {
   match b {
     Unknown => empty_buffer()
-    Range(min=mn, max=mx) => { kind: "range", min_frames: mn, max_frames: mx }
+    Range(min=mn, max=mx) => { kind: "range", min_frames: mn, max_frames: mx, }
   }
 }
 
@@ -392,7 +392,7 @@ fn probe_default_output_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
           let (has_typed_probe, typed_kind, typed_ok) = probe_typed_output_build(
             dev, cfg, sample_format,
           )
-          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok })
+          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok, })
         }
       }
   }
@@ -413,7 +413,7 @@ fn probe_default_input_build(d : @moon_cpal.Device?) -> (Bool, ProbeBuild) {
           let (has_typed_probe, typed_kind, typed_ok) = probe_typed_input_build(
             dev, cfg, sample_format,
           )
-          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok })
+          (true, { raw_ok, has_typed_probe, typed_kind, typed_ok, })
         }
       }
   }
@@ -541,5 +541,5 @@ fn snapshot() -> ProbeSnapshot {
 
 ///|
 fn main {
-  println(snapshot().to_json().stringify())
+  println(ToJson::to_json(snapshot()).stringify())
 }

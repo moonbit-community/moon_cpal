@@ -36,3 +36,12 @@ pub impl Show for Stream with fn output(self : Stream, logger : &Logger) -> Unit
   logger.write_string(self.kind.to_string())
   logger.write_string(")")
 }
+
+///|
+pub extend Stream with Show::{to_string, output}
+
+///|
+pub extend StreamKind with Debug::{to_repr}
+
+///|
+pub extend StreamKind with Eq::{not_equal, equal}

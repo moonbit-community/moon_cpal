@@ -38,3 +38,9 @@ pub fn native_os() -> NativeOs {
     _ => Unknown
   }
 }
+
+///|
+pub extend NativeOs with Debug::{to_repr}
+
+///|
+pub extend NativeOs with Eq::{not_equal, equal}

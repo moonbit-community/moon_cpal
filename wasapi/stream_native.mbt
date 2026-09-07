@@ -212,7 +212,7 @@ pub fn Device::build_output_stream_raw(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_output", st)
   }
-  { kind: Output, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
+  { kind: Output, handle: out[0], owner: wasapi_stream_owner_new(out[0]), }
 }
 
 ///|
@@ -285,7 +285,7 @@ pub fn Device::build_input_stream_raw(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_input", st)
   }
-  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
+  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]), }
 }
 
 ///|
@@ -376,7 +376,7 @@ pub fn Device::build_loopback_input_stream(
   if st < 0 {
     raise_build_hresult("wasapi_stream_build_input(loopback)", st)
   }
-  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]) }
+  { kind: Input, handle: out[0], owner: wasapi_stream_owner_new(out[0]), }
 }
 
 ///|

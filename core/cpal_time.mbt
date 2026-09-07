@@ -44,7 +44,7 @@ pub fn Duration::Duration(secs : UInt64, nanos : Int) -> Duration {
     secs = new_secs
     nanos = nanos - carry * billion
   }
-  { secs, nanos }
+  { secs, nanos, }
 }
 
 ///|
@@ -82,7 +82,7 @@ pub fn StreamInstant::StreamInstant(secs : Int64, nanos : Int) -> StreamInstant 
     secs = secs - borrow.to_int64()
     nanos = nanos + borrow * billion
   }
-  { secs, nanos }
+  { secs, nanos, }
 }
 
 ///|
@@ -127,7 +127,7 @@ pub fn StreamInstant::duration_since(
   }
   let secs_u64 = @bigint.BigInt::to_uint64(secs_b)
   let nanos_i = @bigint.BigInt::to_int(nanos_b)
-  Some({ secs: secs_u64, nanos: nanos_i })
+  Some({ secs: secs_u64, nanos: nanos_i, })
 }
 
 ///|
@@ -137,7 +137,7 @@ fn StreamInstant::from_nanos_bigint(total : @bigint.BigInt) -> StreamInstant? {
   let mut rem = @bigint.BigInt::sub(total, @bigint.BigInt::mul(secs, b1e9))
 
   // Adjust to keep remainder non-negative (Euclidean division normalization).
-  if @bigint.BigInt::op_lt(rem, @bigint.BigInt::from_int(0)) {
+  if rem < @bigint.BigInt::from_int(0) {
     secs = @bigint.BigInt::sub(secs, @bigint.BigInt::from_int(1))
     rem = @bigint.BigInt::add(rem, b1e9)
   }
@@ -175,3 +175,15 @@ pub fn StreamInstant::sub(
   let b = duration.as_nanos_bigint()
   StreamInstant::from_nanos_bigint(@bigint.BigInt::sub(a, b))
 }
+
+///|
+pub extend Duration with Debug::{to_repr}
+
+///|
+pub extend Duration with Eq::{not_equal, equal}
+
+///|
+pub extend StreamInstant with Debug::{to_repr}
+
+///|
+pub extend StreamInstant with Eq::{not_equal, equal}

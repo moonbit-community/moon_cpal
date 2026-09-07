@@ -76,7 +76,7 @@ test "wasapi fixed buffer 0 is stream_config_not_supported (unit)" {
     inspect(true, content="true")
     return
   }
-  let dev : Device = { id: "does_not_matter" }
+  let dev : Device = { id: "does_not_matter", }
   let sc = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(0))
   try
     dev.build_output_stream_raw(

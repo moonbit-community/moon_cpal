@@ -705,3 +705,21 @@ pub fn Stream::close(self : Stream) -> Unit {
     Wasapi(s) => s.close()
   }
 }
+
+///|
+pub extend Device with Debug::{to_repr}
+
+///|
+pub extend Device with Eq::{not_equal, equal}
+
+///|
+pub extend Host with Debug::{to_repr}
+
+///|
+pub extend Host with Eq::{not_equal, equal}
+
+///|
+pub extend Stream with Debug::{to_repr}
+
+///|
+pub extend Stream with Eq::{not_equal, equal}

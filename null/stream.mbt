@@ -23,7 +23,7 @@ pub struct Stream {
 } derive(Debug, Eq)
 
 ///|
-let _unused_stream_for_lint : Stream = { _unit: () }
+let _unused_stream_for_lint : Stream = { _unit: (), }
 
 ///|
 pub fn Stream::play(_self : Stream) -> Unit raise @core.PlayStreamError {
@@ -43,3 +43,9 @@ pub fn Stream::pause(_self : Stream) -> Unit raise @core.PauseStreamError {
 pub fn Stream::close(_self : Stream) -> Unit {
   ()
 }
+
+///|
+pub extend Stream with Debug::{to_repr}
+
+///|
+pub extend Stream with Eq::{not_equal, equal}

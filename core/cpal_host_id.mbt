@@ -154,3 +154,15 @@ pub fn HostId::parse(s : String) -> HostId raise HostUnavailable {
 pub fn host_unavailable() -> HostUnavailable {
   HostUnavailable
 }
+
+///|
+pub extend HostId with Debug::{to_repr}
+
+///|
+pub extend HostId with Eq::{not_equal, equal}
+
+///|
+pub extend HostUnavailable with Debug::{to_repr}
+
+///|
+pub extend HostUnavailable with Eq::{not_equal, equal}

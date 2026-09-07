@@ -326,3 +326,57 @@ pub fn stream_error_buffer_underrun() -> StreamError {
 pub fn stream_error_backend_specific(description : String) -> StreamError {
   BackendSpecific(BackendSpecificError(description))
 }
+
+///|
+pub extend BackendSpecificError with Debug::{to_repr}
+
+///|
+pub extend BackendSpecificError with Eq::{not_equal, equal}
+
+///|
+pub extend BuildStreamError with Debug::{to_repr}
+
+///|
+pub extend BuildStreamError with Eq::{not_equal, equal}
+
+///|
+pub extend DefaultStreamConfigError with Debug::{to_repr}
+
+///|
+pub extend DefaultStreamConfigError with Eq::{not_equal, equal}
+
+///|
+pub extend DeviceNameError with Debug::{to_repr}
+
+///|
+pub extend DeviceNameError with Eq::{not_equal, equal}
+
+///|
+pub extend DevicesError with Debug::{to_repr}
+
+///|
+pub extend DevicesError with Eq::{not_equal, equal}
+
+///|
+pub extend PauseStreamError with Debug::{to_repr}
+
+///|
+pub extend PauseStreamError with Eq::{not_equal, equal}
+
+///|
+pub extend PlayStreamError with Debug::{to_repr}
+
+///|
+pub extend PlayStreamError with Eq::{not_equal, equal}
+
+///|
+pub extend StreamError with Debug::{to_repr}
+
+///|
+pub extend StreamError with Eq::{not_equal, equal}
+
+///|
+pub extend SupportedStreamConfigsError with Debug::{to_repr}
+
+///|
+pub extend SupportedStreamConfigsError with Eq::{not_equal, equal}

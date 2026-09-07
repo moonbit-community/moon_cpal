@@ -53,7 +53,7 @@ pub fn I24::new(raw : Int) -> I24 {
 
 ///|
 pub fn I24::I24(raw : Int) -> I24 {
-  { raw: Int::clamp(raw, min=i24_min, max=i24_max) }
+  { raw: Int::clamp(raw, min=i24_min, max=i24_max), }
 }
 
 ///|
@@ -68,7 +68,7 @@ pub fn U24::new(raw : Int) -> U24 {
 
 ///|
 pub fn U24::U24(raw : Int) -> U24 {
-  { raw: Int::clamp(raw, min=u24_min, max=u24_max) }
+  { raw: Int::clamp(raw, min=u24_min, max=u24_max), }
 }
 
 ///|
@@ -316,3 +316,33 @@ pub impl SizedSample for U24 with fn format(_self : U24) -> SampleFormat {
 pub impl FromSample for U24 with fn from_sample(x : Float) -> U24 {
   Sample::from_f32(x)
 }
+
+///|
+pub extend I24 with Debug::{to_repr}
+
+///|
+pub extend I24 with Eq::{not_equal, equal}
+
+///|
+pub extend I24 with FromSample::{from_sample}
+
+///|
+pub extend I24 with Sample::{to_f32, from_f32, equilibrium}
+
+///|
+pub extend I24 with SizedSample::{format}
+
+///|
+pub extend U24 with Debug::{to_repr}
+
+///|
+pub extend U24 with Eq::{not_equal, equal}
+
+///|
+pub extend U24 with FromSample::{from_sample}
+
+///|
+pub extend U24 with Sample::{to_f32, from_f32, equilibrium}
+
+///|
+pub extend U24 with SizedSample::{format}
