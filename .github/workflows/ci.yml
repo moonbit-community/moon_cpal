@@ -91,6 +91,8 @@ jobs:
   test-windows-native:
     name: native (windows, WASAPI)
     runs-on: windows-latest
+    env:
+      CL: /std:c11
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
