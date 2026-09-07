@@ -97,6 +97,7 @@ jobs:
       - name: Install MoonBit
         shell: pwsh
         run: |
+          $env:MOONBIT_INSTALL_VERSION = "nightly"
           iwr -useb https://cli.moonbitlang.com/install/powershell.ps1 | iex
           $mb = "$env:USERPROFILE\.moon\bin"
           $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
