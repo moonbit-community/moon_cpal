@@ -19,7 +19,7 @@ jobs:
       - name: Install MoonBit
         shell: bash
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s nightly
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s latest
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
       - name: Install ALSA deps + loopback
@@ -70,7 +70,7 @@ jobs:
       - name: Install MoonBit
         shell: bash
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s nightly
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s latest
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
           "$HOME/.moon/bin/moon" version
       - name: Build all packages (native)
@@ -97,7 +97,7 @@ jobs:
       - name: Install MoonBit
         shell: pwsh
         run: |
-          $env:MOONBIT_INSTALL_VERSION = "nightly"
+          $env:MOONBIT_INSTALL_VERSION = "latest"
           iwr -useb https://cli.moonbitlang.com/install/powershell.ps1 | iex
           $mb = "$env:USERPROFILE\.moon\bin"
           $mb | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append

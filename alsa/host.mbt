@@ -50,7 +50,7 @@ pub fn Host::devices(_self : Host) -> Array[Device] {
       let id = v.trim().to_owned()
       if id.length() > 0 {
         // Each line is: "<id>\t<dir>\t<desc_escaped>".
-        let fields = Array()
+        let fields = []
         for p in id.split("\t") {
           fields.push(p)
         }
