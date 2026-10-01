@@ -50,8 +50,10 @@ jobs:
         shell: bash
         run: |
           cd ci/downstream_smoke
-          moon check --target native
+          moon check --deny-warn --target native
           moon build --target native
+      - name: moon fmt (no diff)
+        run: moon fmt --check
       - name: Run unit tests
         run: moon test --target native
       - name: Enumerate hosts/devices (non-audio)
@@ -79,7 +81,7 @@ jobs:
         shell: bash
         run: |
           cd ci/downstream_smoke
-          moon check --target native
+          moon check --deny-warn --target native
           moon build --target native
       - name: Run unit tests
         run: moon test --target native --release
@@ -112,7 +114,7 @@ jobs:
         shell: pwsh
         run: |
           Set-Location ci/downstream_smoke
-          moon check --target native
+          moon check --deny-warn --target native
           moon build --target native
       - name: Install virtual audio device (VB-CABLE)
         shell: pwsh
