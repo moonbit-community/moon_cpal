@@ -14,7 +14,7 @@
 
 ///|
 test "platform default_host (native)" {
-  let h = default_host()
+  let h = @platform.default_host()
   let expected = match @core.native_os() {
     Macos => @core.HostId::CoreAudio
     Linux => Alsa
@@ -25,13 +25,13 @@ test "platform default_host (native)" {
   // Match upstream: platform `HostId` includes `Null` only on unsupported targets.
   match @core.native_os() {
     Unknown =>
-      try host_from_id(Null) catch {
+      try @platform.host_from_id(Null) catch {
         _ => inspect(false, content="true")
       } noraise {
         _ => inspect(true, content="true")
       }
     _ =>
-      try host_from_id(Null) catch {
+      try @platform.host_from_id(Null) catch {
         _ => inspect(true, content="true")
       } noraise {
         _ => inspect(false, content="true")
@@ -41,8 +41,8 @@ test "platform default_host (native)" {
 
 ///|
 test "platform available_hosts + host_from_id (native)" {
-  let hs = available_hosts()
-  let all = all_hosts()
+  let hs = @platform.available_hosts()
+  let all = @platform.all_hosts()
   // `available_hosts()` must be a subset of `all_hosts()`.
   for id in hs {
     inspect(all.contains(id), content="true")
@@ -83,7 +83,7 @@ test "platform available_hosts + host_from_id (native)" {
 
   // All advertised hosts should be constructible.
   for id in all {
-    try host_from_id(id) catch {
+    try @platform.host_from_id(id) catch {
       _ => inspect(false, content="true")
     } noraise {
       _ => inspect(true, content="true")
@@ -93,8 +93,8 @@ test "platform available_hosts + host_from_id (native)" {
 
 ///|
 test "platform device_by_id + supports + in/out device filters" {
-  for host_id in available_hosts() {
-    let host = try host_from_id(host_id) catch {
+  for host_id in @platform.available_hosts() {
+    let host = try @platform.host_from_id(host_id) catch {
       _ => continue
     } noraise {
       h => h
@@ -144,8 +144,8 @@ test "platform device_by_id + supports + in/out device filters" {
     }
 
     // input_devices/output_devices == devices().filter(supports_*)
-    let expected_in : Array[Device] = []
-    let expected_out : Array[Device] = []
+    let expected_in : Array[@platform.Device] = []
+    let expected_out : Array[@platform.Device] = []
     for d in ds {
       if d.supports_input() {
         expected_in.push(d)
@@ -171,8 +171,8 @@ test "platform device_by_id + supports + in/out device filters" {
 
 ///|
 test "platform default devices are present in devices() (best-effort)" {
-  for host_id in available_hosts() {
-    let host = try host_from_id(host_id) catch {
+  for host_id in @platform.available_hosts() {
+    let host = try @platform.host_from_id(host_id) catch {
       _ => continue
     } noraise {
       h => h

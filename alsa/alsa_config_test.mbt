@@ -18,7 +18,7 @@ test "alsa default config matches supported configs (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @alsa.default_host()
   match host.default_output_device() {
     None => inspect(true, content="true")
     Some(dev) => {
@@ -62,7 +62,7 @@ test "alsa supported configs include sane buffer size ranges (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @alsa.default_host()
   match host.default_output_device() {
     None => inspect(true, content="true")
     Some(dev) => {
@@ -96,7 +96,7 @@ test "alsa enumeration keeps null PCM when present (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @alsa.default_host()
   let devs = host.devices()
   let mut saw_default = false
   let mut saw_null = false

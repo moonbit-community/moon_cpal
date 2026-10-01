@@ -34,7 +34,7 @@ test "alsa output stream: no callbacks before play; pause/close stops callbacks 
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @alsa.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(true, content="true")

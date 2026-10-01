@@ -28,8 +28,8 @@ fn wait_until(ok : () -> Bool, total_ms : Int, step_ms : Int) -> Bool {
 
 ///|
 test "platform output stream callback starts after play and stops after pause/close (best-effort)" {
-  for host_id in available_hosts() {
-    let host = try host_from_id(host_id) catch {
+  for host_id in @platform.available_hosts() {
+    let host = try @platform.host_from_id(host_id) catch {
       _ => continue
     } noraise {
       h => h

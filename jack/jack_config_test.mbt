@@ -18,7 +18,7 @@ test "jack supported configs reflect server sample rate/buffer size (best-effort
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @jack.default_host()
   match host.default_output_device() {
     None => inspect(true, content="true")
     Some(dev) => {
@@ -70,7 +70,7 @@ test "jack default devices expose config queries for both stream types (best-eff
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @jack.default_host()
   let devs = host.devices()
   if devs.length() == 0 {
     inspect(true, content="true")

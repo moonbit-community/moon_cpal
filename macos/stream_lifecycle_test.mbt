@@ -34,7 +34,7 @@ test "coreaudio output stream: no callbacks before play; pause/close stops callb
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @macos.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(true, content="true")

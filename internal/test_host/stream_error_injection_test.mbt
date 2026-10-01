@@ -14,7 +14,7 @@
 
 ///|
 test "test_host stream: injected stream error is delivered once (best-effort)" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(false, content="true")
@@ -76,7 +76,7 @@ test "test_host stream: injected stream error is delivered once (best-effort)" {
 
 ///|
 test "test_host stream: injected device-not-available mapping" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_input_device() {
     None => {
       inspect(false, content="true")
@@ -129,7 +129,7 @@ test "test_host stream: injected device-not-available mapping" {
 
 ///|
 test "test_host stream: close prevents pending injected error (best-effort)" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(false, content="true")
@@ -178,7 +178,7 @@ test "test_host stream: close prevents pending injected error (best-effort)" {
 
 ///|
 test "test_host stream: injected error does not fire before play (best-effort)" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(false, content="true")

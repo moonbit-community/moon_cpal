@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-fn assert_full_write_api_exists(data : Data) -> Unit {
+fn assert_full_write_api_exists(data : @spec.Data) -> Unit {
   let i8s : Array[Int] = []
   let u8s : Array[Byte] = []
   let u16s : Array[UInt16] = []

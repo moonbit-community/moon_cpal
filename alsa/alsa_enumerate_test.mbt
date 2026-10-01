@@ -17,7 +17,7 @@ test "alsa: devices includes default (linux-only)" {
   if @core.native_os() != Linux {
     return
   }
-  let h = default_host()
+  let h = @alsa.default_host()
   let ds = h.devices()
   inspect(ds.length() > 0, content="true")
   let mut has_default = false
@@ -36,7 +36,7 @@ test "alsa: default devices are always Some (linux-only)" {
     inspect(true, content="true")
     return
   }
-  let h = default_host()
+  let h = @alsa.default_host()
   match h.default_output_device() {
     None => inspect(false, content="false")
     Some(d) => inspect(d.id == "default", content="true")
@@ -53,7 +53,7 @@ test "alsa: name + description fields (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let h = default_host()
+  let h = @alsa.default_host()
   let ds = h.devices()
   if ds.length() == 0 {
     inspect(true, content="true")
@@ -103,7 +103,7 @@ test "alsa: physical hw/plughw ids come in pairs (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let h = default_host()
+  let h = @alsa.default_host()
   let ds = h.devices()
   let ids : Array[String] = []
   for d in ds {
