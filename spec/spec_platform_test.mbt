@@ -14,16 +14,16 @@
 
 ///|
 test "spec default_host routes to platform" {
-  let h1 = default_host()
+  let h1 = @spec.default_host()
   let h2 = @platform.default_host()
   inspect(h1.id() == @platform.Host::id(h2), content="true")
 }
 
 ///|
 test "spec host_from_id roundtrip for available hosts" {
-  let hs = available_hosts()
+  let hs = @spec.available_hosts()
   for id in hs {
-    let h = try! host_from_id(id)
+    let h = try! @spec.host_from_id(id)
     inspect(h.id() == id, content="true")
   }
 }
@@ -31,7 +31,7 @@ test "spec host_from_id roundtrip for available hosts" {
 ///|
 test "spec host_from_id rejects unavailable host ids (native only)" {
   let os = @core.native_os()
-  let hs = available_hosts()
+  let hs = @spec.available_hosts()
   fn has(xs : Array[@core.HostId], x : @core.HostId) -> Bool {
     for y in xs {
       if y == x {
@@ -52,7 +52,7 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
     inspect(true, content="true")
     return
   }
-  try host_from_id(bad) catch {
+  try @spec.host_from_id(bad) catch {
     HostUnavailable => inspect(true, content="true")
   } noraise {
     _ => inspect(false, content="true")
@@ -61,8 +61,8 @@ test "spec host_from_id rejects unavailable host ids (native only)" {
 
 ///|
 test "spec device id + supports + device_by_id (best-effort)" {
-  for host_id in available_hosts() {
-    let host = try! host_from_id(host_id)
+  for host_id in @spec.available_hosts() {
+    let host = try! @spec.host_from_id(host_id)
     let ds = try host.devices() catch {
       _ => []
     } noraise {
@@ -103,7 +103,7 @@ test "spec device id + supports + device_by_id (best-effort)" {
 
 ///|
 test "spec: raw + typed stream builders (best-effort)" {
-  let host = default_host()
+  let host = @spec.default_host()
   let out = match host.default_output_device() {
     None => {
       inspect(true, content="true")

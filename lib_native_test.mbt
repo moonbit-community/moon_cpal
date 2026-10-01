@@ -14,11 +14,11 @@
 
 ///|
 test "root API routes to spec platform dispatch" {
-  let h = default_host()
+  let h = @moon_cpal.default_host()
   let id = h.id()
-  let all = all_hosts()
+  let all = @moon_cpal.all_hosts()
   inspect(all.contains(id), content="true")
-  let avail = available_hosts()
+  let avail = @moon_cpal.available_hosts()
   if avail.length() > 0 {
     inspect(avail.contains(id), content="true")
   } else {
@@ -29,16 +29,16 @@ test "root API routes to spec platform dispatch" {
 
 ///|
 test "root API exports sample_cast helper" {
-  let zero_u16 : UInt16 = Sample::equilibrium()
-  let z : Float = sample_cast(zero_u16)
+  let zero_u16 : UInt16 = @moon_cpal.Sample::equilibrium()
+  let z : Float = @moon_cpal.sample_cast(zero_u16)
   inspect(z, content="0")
-  let a : Int16 = sample_cast(0.5)
+  let a : Int16 = @moon_cpal.sample_cast(0.5)
   inspect(a.to_int() > 0, content="true")
 }
 
 ///|
 test "root API exports common_sample_rates table" {
-  let rs = common_sample_rates()
+  let rs = @moon_cpal.common_sample_rates()
   inspect(rs.length() > 0, content="true")
   inspect(rs.contains(44_100), content="true")
 }

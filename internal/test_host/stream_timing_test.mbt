@@ -30,7 +30,7 @@ fn wait_until(counter : Array[Int], min_count : Int, timeout_ms : Int) -> Bool {
 
 ///|
 test "test_host stream: no callbacks before play; pause stops callbacks (best-effort)" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(false, content="true")
@@ -100,7 +100,7 @@ test "test_host stream: no callbacks before play; pause stops callbacks (best-ef
 
 ///|
 test "test_host stream: close stops callbacks; play after close fails" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_input_device() {
     None => {
       inspect(false, content="true")
@@ -151,7 +151,7 @@ test "test_host stream: close stops callbacks; play after close fails" {
 
 ///|
 test "test_host stream: play resumes after pause (best-effort)" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_output_device() {
     None => {
       inspect(false, content="true")
@@ -216,7 +216,7 @@ test "test_host stream: play resumes after pause (best-effort)" {
 
 ///|
 test "test_host stream: pause after close fails" {
-  let host = default_host()
+  let host = @test_host.default_host()
   let dev = match host.default_input_device() {
     None => {
       inspect(false, content="true")

@@ -18,17 +18,17 @@ test "traits: HostTrait/DeviceTrait/StreamTrait roundtrip (best-effort)" {
   let _id = host.id()
 
   // Exercise trait dispatch.
-  let _ = HostTrait::default_output_device(host)
-  match HostTrait::default_output_device(host) {
+  let _ = @traits.HostTrait::default_output_device(host)
+  match @traits.HostTrait::default_output_device(host) {
     None => inspect(true, content="true")
     Some(dev) => {
-      let _ = DeviceTrait::supports_output(dev)
-      let _ = try DeviceTrait::id(dev) catch {
+      let _ = @traits.DeviceTrait::supports_output(dev)
+      let _ = try @traits.DeviceTrait::id(dev) catch {
         _ => @core.DeviceId(_id, "")
       } noraise {
         x => x
       }
-      let cfg = try DeviceTrait::default_output_config(dev) catch {
+      let cfg = try @traits.DeviceTrait::default_output_config(dev) catch {
         _ => None
       } noraise {
         x => Some(x)
@@ -38,7 +38,7 @@ test "traits: HostTrait/DeviceTrait/StreamTrait roundtrip (best-effort)" {
         Some(cfg) => {
           let sc = cfg.config()
           let stream = try
-            DeviceTrait::build_output_stream_raw(
+            @traits.DeviceTrait::build_output_stream_raw(
               dev,
               sc,
               cfg.sample_format(),
@@ -55,17 +55,17 @@ test "traits: HostTrait/DeviceTrait/StreamTrait roundtrip (best-effort)" {
             None => inspect(true, content="true")
             Some(s) => {
               // Stream lifecycle calls should not crash.
-              try StreamTrait::play(s) catch {
+              try @traits.StreamTrait::play(s) catch {
                 _ => ()
               } noraise {
                 _ => ()
               }
-              try StreamTrait::pause(s) catch {
+              try @traits.StreamTrait::pause(s) catch {
                 _ => ()
               } noraise {
                 _ => ()
               }
-              StreamTrait::close(s)
+              @traits.StreamTrait::close(s)
               inspect(true, content="true")
             }
           }

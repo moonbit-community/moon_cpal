@@ -22,7 +22,7 @@
 ///|
 test "macos stream smoke: play output" {
   try {
-    let host = default_host()
+    let host = @macos.default_host()
     match host.default_output_device() {
       None => ()
       Some(dev) => {
@@ -55,7 +55,7 @@ test "macos stream smoke: play output" {
 ///|
 test "macos stream smoke: record input" {
   try {
-    let host = default_host()
+    let host = @macos.default_host()
     match host.default_input_device() {
       None => ()
       Some(dev) => {
@@ -88,7 +88,7 @@ test "macos stream smoke: record input" {
 ///|
 test "macos stream smoke: record via output device" {
   try {
-    let host = default_host()
+    let host = @macos.default_host()
     match host.default_output_device() {
       None => ()
       Some(dev) => {

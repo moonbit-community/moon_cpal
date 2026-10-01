@@ -18,7 +18,7 @@ test "wasapi output configs reflect device mix format (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @wasapi.default_host()
   match host.default_output_device() {
     None =>
       // Some environments may not expose a default render endpoint.
@@ -58,9 +58,9 @@ test "wasapi data_flow gating (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let host = default_host()
+  let host = @wasapi.default_host()
   for dev in host.devices() {
-    match data_flow_tag(dev.id) {
+    match @wasapi.data_flow_tag(dev.id) {
       None => ()
       Some(tag) =>
         if tag == 1 {
@@ -85,7 +85,7 @@ test "wasapi default devices appear in enumeration (best-effort)" {
     inspect(true, content="true")
     return
   }
-  let devices = default_host().devices()
+  let devices = @wasapi.default_host().devices()
   let has_id = fn(id : String) {
     let mut found = false
     for d in devices {
@@ -96,11 +96,11 @@ test "wasapi default devices appear in enumeration (best-effort)" {
     }
     found
   }
-  match default_host().default_output_device() {
+  match @wasapi.default_host().default_output_device() {
     Some(d) => inspect(has_id(d.id), content="true")
     None => inspect(true, content="true")
   }
-  match default_host().default_input_device() {
+  match @wasapi.default_host().default_input_device() {
     Some(d) => inspect(has_id(d.id), content="true")
     None => inspect(true, content="true")
   }
