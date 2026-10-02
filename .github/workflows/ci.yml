@@ -141,4 +141,14 @@ jobs:
         run: moon run --target native cmd/enumerate -q
       - name: Run WASAPI smoke (real I/O)
         shell: pwsh
-        run: moon run --target native cmd/wasapi_stream_smoke -q
+        run: |
+          # Hosted runners have no audio endpoint unless the VB-CABLE install above
+          # succeeded; the smoke needs a real device, so skip it (visibly) when
+          # WASAPI enumerates none instead of failing the job.
+          $enum = moon run --target native cmd/enumerate -q | Out-String
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($enum -match '(?m)^\s*devices:\s*0\s*$') {
+            Write-Host "::notice title=WASAPI smoke skipped::No WASAPI audio device on this runner; real-I/O smoke not run."
+            exit 0
+          }
+          moon run --target native cmd/wasapi_stream_smoke -q
