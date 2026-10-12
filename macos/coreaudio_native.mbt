@@ -16,126 +16,126 @@
 /// CoreAudio device discovery (macOS, native backend only).
 ///
 /// This is intentionally a small, testable slice: device enumeration and names.
-pub type DeviceId = UInt
+pub type DeviceId = UInt32
 
 ///|
-extern "C" fn ca_default_output_device_id() -> UInt = "moon_cpal_ca_default_output_device_id"
+extern "C" fn ca_default_output_device_id() -> UInt32 = "moon_cpal_ca_default_output_device_id"
 
 ///|
-extern "C" fn ca_default_input_device_id() -> UInt = "moon_cpal_ca_default_input_device_id"
+extern "C" fn ca_default_input_device_id() -> UInt32 = "moon_cpal_ca_default_input_device_id"
 
 ///|
-extern "C" fn ca_device_count() -> Int = "moon_cpal_ca_device_count"
+extern "C" fn ca_device_count() -> Int32 = "moon_cpal_ca_device_count"
 
 ///|
 #borrow(out)
-extern "C" fn ca_get_devices(out : FixedArray[UInt], max : Int) -> Int = "moon_cpal_ca_get_devices"
+extern "C" fn ca_get_devices(out : FixedArray[UInt32], max : Int32) -> Int32 = "moon_cpal_ca_get_devices"
 
 ///|
-extern "C" fn ca_device_name_utf8_len(device_id : UInt) -> Int = "moon_cpal_ca_device_name_utf8_len"
+extern "C" fn ca_device_name_utf8_len(device_id : UInt32) -> Int32 = "moon_cpal_ca_device_name_utf8_len"
 
 ///|
 #borrow(out)
 extern "C" fn ca_device_name_utf8(
-  device_id : UInt,
+  device_id : UInt32,
   out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_ca_device_name_utf8"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_device_name_utf8"
 
 ///|
-extern "C" fn ca_device_uid_utf8_len(device_id : UInt) -> Int = "moon_cpal_ca_device_uid_utf8_len"
+extern "C" fn ca_device_uid_utf8_len(device_id : UInt32) -> Int32 = "moon_cpal_ca_device_uid_utf8_len"
 
 ///|
 #borrow(out)
 extern "C" fn ca_device_uid_utf8(
-  device_id : UInt,
+  device_id : UInt32,
   out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_ca_device_uid_utf8"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_device_uid_utf8"
 
 ///|
-extern "C" fn ca_device_manufacturer_utf8_len(device_id : UInt) -> Int = "moon_cpal_ca_device_manufacturer_utf8_len"
+extern "C" fn ca_device_manufacturer_utf8_len(device_id : UInt32) -> Int32 = "moon_cpal_ca_device_manufacturer_utf8_len"
 
 ///|
 #borrow(out)
 extern "C" fn ca_device_manufacturer_utf8(
-  device_id : UInt,
+  device_id : UInt32,
   out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_ca_device_manufacturer_utf8"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_device_manufacturer_utf8"
 
 ///|
-extern "C" fn ca_device_transport_type_u32(device_id : UInt) -> UInt = "moon_cpal_ca_device_transport_type_u32"
+extern "C" fn ca_device_transport_type_u32(device_id : UInt32) -> UInt32 = "moon_cpal_ca_device_transport_type_u32"
 
 ///|
-extern "C" fn ca_device_is_aggregate(device_id : UInt) -> Int = "moon_cpal_ca_device_is_aggregate"
+extern "C" fn ca_device_is_aggregate(device_id : UInt32) -> Int32 = "moon_cpal_ca_device_is_aggregate"
 
 ///|
-extern "C" fn ca_device_interface_type_tag(device_id : UInt) -> Int = "moon_cpal_ca_device_interface_type_tag"
+extern "C" fn ca_device_interface_type_tag(device_id : UInt32) -> Int32 = "moon_cpal_ca_device_interface_type_tag"
 
 ///|
-extern "C" fn ca_input_channel_count(device_id : UInt) -> Int = "moon_cpal_ca_input_channel_count"
+extern "C" fn ca_input_channel_count(device_id : UInt32) -> Int32 = "moon_cpal_ca_input_channel_count"
 
 ///|
-extern "C" fn ca_output_channel_count(device_id : UInt) -> Int = "moon_cpal_ca_output_channel_count"
+extern "C" fn ca_output_channel_count(device_id : UInt32) -> Int32 = "moon_cpal_ca_output_channel_count"
 
 ///|
-extern "C" fn ca_input_sample_rate_ranges_count(device_id : UInt) -> Int = "moon_cpal_ca_input_sample_rate_ranges_count"
+extern "C" fn ca_input_sample_rate_ranges_count(device_id : UInt32) -> Int32 = "moon_cpal_ca_input_sample_rate_ranges_count"
 
 ///|
-extern "C" fn ca_output_sample_rate_ranges_count(device_id : UInt) -> Int = "moon_cpal_ca_output_sample_rate_ranges_count"
+extern "C" fn ca_output_sample_rate_ranges_count(device_id : UInt32) -> Int32 = "moon_cpal_ca_output_sample_rate_ranges_count"
 
 ///|
 #borrow(out_mins, out_maxs)
 extern "C" fn ca_input_sample_rate_ranges(
-  device_id : UInt,
+  device_id : UInt32,
   out_mins : FixedArray[Double],
   out_maxs : FixedArray[Double],
-  max : Int,
-) -> Int = "moon_cpal_ca_input_sample_rate_ranges"
+  max : Int32,
+) -> Int32 = "moon_cpal_ca_input_sample_rate_ranges"
 
 ///|
 #borrow(out_mins, out_maxs)
 extern "C" fn ca_output_sample_rate_ranges(
-  device_id : UInt,
+  device_id : UInt32,
   out_mins : FixedArray[Double],
   out_maxs : FixedArray[Double],
-  max : Int,
-) -> Int = "moon_cpal_ca_output_sample_rate_ranges"
+  max : Int32,
+) -> Int32 = "moon_cpal_ca_output_sample_rate_ranges"
 
 ///|
 #borrow(out)
 extern "C" fn ca_buffer_frame_size_range(
-  device_id : UInt,
-  out : FixedArray[UInt],
-  out_len : Int,
-) -> Int = "moon_cpal_ca_buffer_frame_size_range"
+  device_id : UInt32,
+  out : FixedArray[UInt32],
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_buffer_frame_size_range"
 
 ///|
 #borrow(out)
 extern "C" fn ca_default_stream_config(
-  device_id : UInt,
-  input : Int,
-  out : FixedArray[UInt],
-  out_len : Int,
-) -> Int = "moon_cpal_ca_default_stream_config"
+  device_id : UInt32,
+  input : Int32,
+  out : FixedArray[UInt32],
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_default_stream_config"
 
 ///|
 extern "C" fn ca_set_nominal_sample_rate(
-  device_id : UInt,
+  device_id : UInt32,
   sample_rate : Double,
-) -> Int = "moon_cpal_ca_set_nominal_sample_rate"
+) -> Int32 = "moon_cpal_ca_set_nominal_sample_rate"
 
 ///|
-extern "C" fn ca_osstatus_kind(status : Int) -> Int = "moon_cpal_ca_osstatus_kind"
+extern "C" fn ca_osstatus_kind(status : Int32) -> Int32 = "moon_cpal_ca_osstatus_kind"
 
 ///|
-fn osstatus_kind(status : Int) -> Int {
+fn osstatus_kind(status : Int32) -> Int32 {
   ca_osstatus_kind(status)
 }
 
 ///|
-fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int) -> String {
+fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int32) -> String {
   let res = StringBuilder()
   let len = if length < bytes.length() { length } else { bytes.length() }
   let mut i = 0
@@ -181,7 +181,7 @@ fn utf8_bytes_to_mbt_string(bytes : Bytes, length : Int) -> String {
 fn get_buffer_frame_size_range(
   device_id : DeviceId,
 ) -> @core.SupportedBufferSize raise CoreAudioError {
-  let out = FixedArray::make(2, (0 : UInt))
+  let out = FixedArray::make(2, (0 : UInt32))
   let st = ca_buffer_frame_size_range(device_id, out, 2)
   if st < 0 {
     raise_osstatus("ca_buffer_frame_size_range", st)
@@ -193,7 +193,7 @@ fn get_buffer_frame_size_range(
 fn get_buffer_frame_size_range_default(
   device_id : DeviceId,
 ) -> @core.SupportedBufferSize raise @core.DefaultStreamConfigError {
-  let out = FixedArray::make(2, (0 : UInt))
+  let out = FixedArray::make(2, (0 : UInt32))
   let st = ca_buffer_frame_size_range(device_id, out, 2)
   if st < 0 {
     raise_default_osstatus("ca_buffer_frame_size_range", st)
@@ -208,7 +208,7 @@ fn default_stream_config(
 ) -> @core.SupportedStreamConfig raise @core.DefaultStreamConfigError {
   // Layout: [sample_rate, channels, sample_format_tag]
   // - sample_format_tag: 1 => F32, 2 => I16, other => unsupported
-  let out = FixedArray::make(3, (0 : UInt))
+  let out = FixedArray::make(3, (0 : UInt32))
   let st = ca_default_stream_config(
     device_id,
     if input {
@@ -236,7 +236,7 @@ fn default_stream_config(
 ///|
 fn set_nominal_sample_rate(
   device_id : DeviceId,
-  sample_rate : Int,
+  sample_rate : Int32,
 ) -> Unit raise CoreAudioError {
   if sample_rate <= 0 {
     raise CoreAudioError("ca_set_nominal_sample_rate", -50)
@@ -386,7 +386,7 @@ pub fn device_ids() -> Array[DeviceId] raise CoreAudioError {
   if n == 0 {
     return []
   }
-  let buf = FixedArray::make(n, (0 : UInt))
+  let buf = FixedArray::make(n, (0 : UInt32))
   let got = ca_get_devices(buf, n)
   if got < 0 {
     raise_osstatus("ca_get_devices", got)
@@ -469,7 +469,7 @@ pub fn device_manufacturer(device_id : DeviceId) -> String? {
 }
 
 ///|
-pub fn device_transport_type_u32(device_id : DeviceId) -> UInt {
+pub fn device_transport_type_u32(device_id : DeviceId) -> UInt32 {
   ca_device_transport_type_u32(device_id)
 }
 
@@ -479,7 +479,7 @@ pub fn device_is_aggregate(device_id : DeviceId) -> Bool {
 }
 
 ///|
-pub fn device_interface_type_tag(device_id : DeviceId) -> Int {
+pub fn device_interface_type_tag(device_id : DeviceId) -> Int32 {
   ca_device_interface_type_tag(device_id)
 }
 

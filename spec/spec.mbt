@@ -347,7 +347,7 @@ pub fn Data::sample_format(self : Data) -> @core.SampleFormat {
 
 ///|
 #declaration_only
-pub fn Data::len(self : Data) -> Int {
+pub fn Data::len(self : Data) -> Int32 {
   ...
 }
 
@@ -389,7 +389,7 @@ pub fn Data::clear(self : Data) -> Unit {
 
 ///|
 #declaration_only
-pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i8(self : Data, samples : Array[Int32]) -> Bool {
   ...
 }
 
@@ -425,13 +425,13 @@ pub fn Data::write_i24(self : Data, samples : Array[@core.I24]) -> Bool {
 
 ///|
 #declaration_only
-pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
+pub fn Data::write_u32(self : Data, samples : Array[UInt32]) -> Bool {
   ...
 }
 
 ///|
 #declaration_only
-pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i32(self : Data, samples : Array[Int32]) -> Bool {
   ...
 }
 

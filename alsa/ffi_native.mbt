@@ -52,8 +52,8 @@ extern "C" fn alsa_devices_utf8() -> Bytes = "moon_cpal_alsa_devices_utf8"
 #owned(device_id_utf8)
 extern "C" fn alsa_supported_configs_bin(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  is_input : UInt,
+  device_id_len : Int32,
+  is_input : UInt32,
 ) -> Bytes = "moon_cpal_alsa_supported_configs_bin"
 
 ///|
@@ -64,16 +64,16 @@ pub fn devices_utf8() -> Bytes {
 ///|
 pub fn supported_configs_bin(id : String, is_input : Bool) -> Bytes {
   if id.length() == 0 {
-    return Bytes::make(0, (0 : Int).to_byte())
+    return Bytes::make(0, (0 : Int32).to_byte())
   }
   let b = @core.string_to_ascii_bytes(id)
   alsa_supported_configs_bin(
     b,
     b.length(),
     if is_input {
-      (1 : UInt)
+      (1 : UInt32)
     } else {
-      (0 : UInt)
+      (0 : UInt32)
     },
   )
 }

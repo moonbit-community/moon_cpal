@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-fn expected_device_id(device_id : UInt) -> @core.DeviceId {
+fn expected_device_id(device_id : UInt32) -> @core.DeviceId {
   match device_uid(device_id) {
     Some(uid) if uid.trim().length() > 0 => DeviceId(CoreAudio, uid)
     _ => DeviceId(CoreAudio, "")

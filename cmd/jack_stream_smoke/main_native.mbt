@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
+extern "C" fn sleep_ms(ms : Int32) -> Unit = "moon_cpal_sleep_ms"
 
 ///|
 fn fill_silence_f32(data : @core.Data) -> Unit {
@@ -125,7 +125,7 @@ fn main {
   }
 
   // Output stream should always produce callbacks once the server is running.
-  let calls : Array[Int] = [0]
+  let calls : Array[Int32] = [0]
   let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
   let out = try
     out_dev.build_output_stream(
@@ -195,7 +195,7 @@ fn main {
     }
     Some(d) => d
   }
-  let in_calls : Array[Int] = [0]
+  let in_calls : Array[Int32] = [0]
   let in_stream = try
     in_dev.build_input_stream(
       cfg,

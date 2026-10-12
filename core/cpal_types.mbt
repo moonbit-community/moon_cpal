@@ -19,13 +19,13 @@
 /// "pure core" types used by upstream unit tests.
 
 ///|
-pub type ChannelCount = Int
+pub type ChannelCount = Int32
 
 ///|
-pub type SampleRate = Int
+pub type SampleRate = Int32
 
 ///|
-pub type FrameCount = Int
+pub type FrameCount = Int32
 
 ///|
 /// The buffer size requests the callback size for audio streams.

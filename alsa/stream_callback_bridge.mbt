@@ -16,7 +16,7 @@
 /// Trampolines used to bridge native ALSA stream worker threads (C) to MoonBit closures.
 
 ///|
-fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
+fn sample_format_from_tag(tag : UInt32) -> @core.SampleFormat {
   match tag {
     1 => F32
     2 => I16
@@ -35,12 +35,12 @@ fn sample_format_from_tag(tag : UInt) -> @core.SampleFormat {
 ///|
 fn call_output_data_callback(
   data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
-  sample_format_tag : UInt,
+  sample_format_tag : UInt32,
   bytes : FixedArray[Byte],
   callback_secs : Int64,
-  callback_nanos : Int,
+  callback_nanos : Int32,
   playback_secs : Int64,
-  playback_nanos : Int,
+  playback_nanos : Int32,
 ) -> Unit {
   let fmt = sample_format_from_tag(sample_format_tag)
   let data = @core.Data(fmt, bytes)
@@ -55,12 +55,12 @@ fn call_output_data_callback(
 let call_output_data_callback_fr : FuncRef[
   (
     (@core.Data, @core.OutputCallbackInfo) -> Unit,
-    UInt,
+    UInt32,
     FixedArray[Byte],
     Int64,
-    Int,
+    Int32,
     Int64,
-    Int,
+    Int32,
   ) -> Unit,
 ] = fn(
   data_callback,
@@ -80,12 +80,12 @@ let call_output_data_callback_fr : FuncRef[
 ///|
 fn call_input_data_callback(
   data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
-  sample_format_tag : UInt,
+  sample_format_tag : UInt32,
   bytes : FixedArray[Byte],
   callback_secs : Int64,
-  callback_nanos : Int,
+  callback_nanos : Int32,
   capture_secs : Int64,
-  capture_nanos : Int,
+  capture_nanos : Int32,
 ) -> Unit {
   let fmt = sample_format_from_tag(sample_format_tag)
   let data = @core.Data(fmt, bytes)
@@ -100,12 +100,12 @@ fn call_input_data_callback(
 let call_input_data_callback_fr : FuncRef[
   (
     (@core.Data, @core.InputCallbackInfo) -> Unit,
-    UInt,
+    UInt32,
     FixedArray[Byte],
     Int64,
-    Int,
+    Int32,
     Int64,
-    Int,
+    Int32,
   ) -> Unit,
 ] = fn(
   data_callback,
@@ -125,8 +125,8 @@ let call_input_data_callback_fr : FuncRef[
 ///|
 fn call_stream_error_callback(
   error_callback : (@core.StreamError) -> Unit,
-  op_tag : Int,
-  status : Int,
+  op_tag : Int32,
+  status : Int32,
 ) -> Unit {
   let op = match op_tag {
     1 => "snd_pcm_writei"
@@ -141,7 +141,10 @@ fn call_stream_error_callback(
 }
 
 ///|
-fn alsa_stream_error_from_errno(status : Int, op : String) -> @core.StreamError {
+fn alsa_stream_error_from_errno(
+  status : Int32,
+  op : String,
+) -> @core.StreamError {
   // Best-effort errno mapping (Linux): match common CPAL error variants.
   //
   // Note: `status` is typically a negative errno value (e.g. -ENODEV, -EPIPE).
@@ -161,7 +164,7 @@ fn alsa_stream_error_from_errno(status : Int, op : String) -> @core.StreamError 
 
 ///|
 let call_stream_error_callback_fr : FuncRef[
-  ((@core.StreamError) -> Unit, Int, Int) -> Unit,
+  ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
 ] = fn(error_callback, op_tag, status) {
   call_stream_error_callback(error_callback, op_tag, status)
 }

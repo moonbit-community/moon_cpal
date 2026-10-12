@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-fn wait_until(ok : () -> Bool, total_ms : Int, step_ms : Int) -> Bool {
+fn wait_until(ok : () -> Bool, total_ms : Int32, step_ms : Int32) -> Bool {
   let step = if step_ms <= 0 { 1 } else { step_ms }
   let mut left = if total_ms <= 0 { 0 } else { total_ms }
   while left > 0 {

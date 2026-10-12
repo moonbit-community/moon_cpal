@@ -205,7 +205,7 @@ pub fn Device::build_output_stream_raw(
 }
 
 ///|
-fn make_f32_zeros(n : Int) -> Array[Float] {
+fn make_f32_zeros(n : Int32) -> Array[Float] {
   let out : Array[Float] = []
   let mut i = 0
   while i < n {
@@ -225,7 +225,7 @@ fn fill_f32_zeros(xs : Array[Float]) -> Unit {
 }
 
 ///|
-fn make_i16_zeros(n : Int) -> Array[Int16] {
+fn make_i16_zeros(n : Int32) -> Array[Int16] {
   let out : Array[Int16] = []
   let mut i = 0
   while i < n {
@@ -245,11 +245,11 @@ fn fill_i16_zeros(xs : Array[Int16]) -> Unit {
 }
 
 ///|
-fn make_u16_zeros(n : Int) -> Array[UInt16] {
+fn make_u16_zeros(n : Int32) -> Array[UInt16] {
   let out : Array[UInt16] = []
   let mut i = 0
   while i < n {
-    out.push((0x8000 : Int).to_uint16())
+    out.push((0x8000 : Int32).to_uint16())
     i = i + 1
   }
   out
@@ -259,17 +259,17 @@ fn make_u16_zeros(n : Int) -> Array[UInt16] {
 fn fill_u16_zeros(xs : Array[UInt16]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = (0x8000 : Int).to_uint16()
+    xs[i] = (0x8000 : Int32).to_uint16()
     i = i + 1
   }
 }
 
 ///|
-fn make_u8_zeros(n : Int) -> Array[Byte] {
+fn make_u8_zeros(n : Int32) -> Array[Byte] {
   let out : Array[Byte] = []
   let mut i = 0
   while i < n {
-    out.push(Int::to_byte(0x80))
+    out.push(Int32::to_byte(0x80))
     i = i + 1
   }
   out
@@ -279,7 +279,7 @@ fn make_u8_zeros(n : Int) -> Array[Byte] {
 fn fill_u8_zeros(xs : Array[Byte]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = Int::to_byte(0x80)
+    xs[i] = Int32::to_byte(0x80)
     i = i + 1
   }
 }
@@ -563,7 +563,7 @@ pub fn Data::sample_format(self : Data) -> @core.SampleFormat {
 }
 
 ///|
-pub fn Data::len(self : Data) -> Int {
+pub fn Data::len(self : Data) -> Int32 {
   @core.Data::len(self.inner)
 }
 
@@ -598,7 +598,7 @@ pub fn Data::clear(self : Data) -> Unit {
 }
 
 ///|
-pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i8(self : Data, samples : Array[Int32]) -> Bool {
   @core.Data::write_i8(self.inner, samples)
 }
 
@@ -628,12 +628,12 @@ pub fn Data::write_i24(self : Data, samples : Array[@core.I24]) -> Bool {
 }
 
 ///|
-pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
+pub fn Data::write_u32(self : Data, samples : Array[UInt32]) -> Bool {
   @core.Data::write_u32(self.inner, samples)
 }
 
 ///|
-pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i32(self : Data, samples : Array[Int32]) -> Bool {
   @core.Data::write_i32(self.inner, samples)
 }
 

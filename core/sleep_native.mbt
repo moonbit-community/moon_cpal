@@ -16,10 +16,10 @@
 /// Minimal native sleep helper used by best-effort integration tests.
 
 ///|
-extern "C" fn sleep_millis_u32(ms : UInt) -> Unit = "moon_cpal_sleep_millis"
+extern "C" fn sleep_millis_u32(ms : UInt32) -> Unit = "moon_cpal_sleep_millis"
 
 ///|
-pub fn sleep_millis(ms : Int) -> Unit {
+pub fn sleep_millis(ms : Int32) -> Unit {
   if ms <= 0 {
     return
   }

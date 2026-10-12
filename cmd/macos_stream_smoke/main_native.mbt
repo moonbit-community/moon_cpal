@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
+extern "C" fn sleep_ms(ms : Int32) -> Unit = "moon_cpal_sleep_ms"
 
 ///|
 extern "C" fn sin(x : Double) -> Double = "sin"
@@ -34,7 +34,7 @@ fn main {
         let cfg = supported.config()
         println("building output stream: \{supported}")
         let phase : Array[Double] = [0.0]
-        let calls : Array[Int] = [0]
+        let calls : Array[Int32] = [0]
         let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
         let sr = cfg.sample_rate.to_double()
         let ch = cfg.channels
@@ -160,7 +160,7 @@ fn main {
         let supported = ranges[0].with_max_sample_rate()
         let cfg = supported.config()
         println("building input stream: \{supported}")
-        let calls : Array[Int] = [0]
+        let calls : Array[Int32] = [0]
         let printed : Array[Bool] = [false]
         let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
         try

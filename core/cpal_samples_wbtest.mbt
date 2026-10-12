@@ -43,8 +43,8 @@ test "sized_sample format mapping" {
   inspect(SizedSample::format((0.0 : Float)), content="F32")
   inspect(SizedSample::format((0.0 : Double)), content="F64")
   inspect(SizedSample::format(Int16::from_int(0)), content="I16")
-  inspect(SizedSample::format(Int::to_uint16(0)), content="U16")
-  inspect(SizedSample::format(Int::to_byte(0)), content="U8")
+  inspect(SizedSample::format(Int32::to_uint16(0)), content="U16")
+  inspect(SizedSample::format(Int32::to_byte(0)), content="U8")
   inspect(SizedSample::format(I24::I24(0)), content="I24")
   inspect(SizedSample::format(U24::U24(0)), content="U24")
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-fn coreaudio_interface_type_from_tag(tag : Int) -> @core.InterfaceType {
+fn coreaudio_interface_type_from_tag(tag : Int32) -> @core.InterfaceType {
   match tag {
     1 => @core.InterfaceType::built_in()
     2 => @core.InterfaceType::usb()

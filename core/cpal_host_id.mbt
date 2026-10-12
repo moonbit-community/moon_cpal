@@ -64,7 +64,7 @@ pub fn HostId::name(self : HostId) -> String {
 }
 
 ///|
-fn ascii_lower(c : Char) -> Int {
+fn ascii_lower(c : Char) -> Int32 {
   let x = c.to_int()
   if 65 <= x && x <= 90 {
     x + 32

@@ -82,12 +82,12 @@ pub fn Device::description(
   self : Device,
 ) -> @core.DeviceDescription raise CoreAudioError {
   let name = device_name(self.id)
-  let input_count : Int? = try supported_input_configs(self.id) catch {
+  let input_count : Int32? = try supported_input_configs(self.id) catch {
     _ => None
   } noraise {
     xs => Some(xs.length())
   }
-  let output_count : Int? = try supported_output_configs(self.id) catch {
+  let output_count : Int32? = try supported_output_configs(self.id) catch {
     _ => None
   } noraise {
     xs => Some(xs.length())

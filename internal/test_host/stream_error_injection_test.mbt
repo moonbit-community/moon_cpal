@@ -23,9 +23,9 @@ test "test_host stream: injected stream error is delivered once (best-effort)" {
     Some(d) => d
   }
   let cfg = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(64))
-  let calls : Array[Int] = [0]
-  let errs : Array[Int] = [0]
-  let calls_at_err : Array[Int] = [0]
+  let calls : Array[Int32] = [0]
+  let errs : Array[Int32] = [0]
+  let calls_at_err : Array[Int32] = [0]
   let last = FixedArray::make(1, @core.stream_error_backend_specific("init"))
   let stream = try
     dev.build_output_stream(
@@ -85,8 +85,8 @@ test "test_host stream: injected device-not-available mapping" {
     Some(d) => d
   }
   let cfg = @core.StreamConfig(1, 48000, @core.BufferSize::fixed(64))
-  let calls : Array[Int] = [0]
-  let errs : Array[Int] = [0]
+  let calls : Array[Int32] = [0]
+  let errs : Array[Int32] = [0]
   let last = FixedArray::make(1, @core.stream_error_backend_specific("init"))
   let stream = try
     dev.build_input_stream(
@@ -138,8 +138,8 @@ test "test_host stream: close prevents pending injected error (best-effort)" {
     Some(d) => d
   }
   let cfg = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(64))
-  let calls : Array[Int] = [0]
-  let errs : Array[Int] = [0]
+  let calls : Array[Int32] = [0]
+  let errs : Array[Int32] = [0]
   let stream = try
     dev.build_output_stream(
       cfg,
@@ -187,8 +187,8 @@ test "test_host stream: injected error does not fire before play (best-effort)" 
     Some(d) => d
   }
   let cfg = @core.StreamConfig(2, 48000, @core.BufferSize::fixed(64))
-  let calls : Array[Int] = [0]
-  let errs : Array[Int] = [0]
+  let calls : Array[Int32] = [0]
+  let errs : Array[Int32] = [0]
   let stream = try
     dev.build_output_stream(
       cfg,

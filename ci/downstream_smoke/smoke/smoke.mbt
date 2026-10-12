@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-pub fn downstream_dependency_compiles() -> Int {
+pub fn downstream_dependency_compiles() -> Int32 {
   let hosts = @moon_cpal.available_hosts()
   let _h = @moon_cpal.default_host()
   hosts.length()

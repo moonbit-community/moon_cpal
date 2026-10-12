@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-pub fn SampleFormat::sample_size(self : SampleFormat) -> Int {
+pub fn SampleFormat::sample_size(self : SampleFormat) -> Int32 {
   match self {
     I8 => 1
     U8 => 1
@@ -34,7 +34,7 @@ pub fn SampleFormat::sample_size(self : SampleFormat) -> Int {
 }
 
 ///|
-pub fn SampleFormat::bits_per_sample(self : SampleFormat) -> Int {
+pub fn SampleFormat::bits_per_sample(self : SampleFormat) -> Int32 {
   match self {
     I8 => 8
     U8 => 8

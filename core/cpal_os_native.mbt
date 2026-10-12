@@ -27,7 +27,7 @@ pub(all) enum NativeOs {
 } derive(Debug, Eq)
 
 ///|
-extern "C" fn native_os_tag() -> Int = "moon_cpal_os_tag"
+extern "C" fn native_os_tag() -> Int32 = "moon_cpal_os_tag"
 
 ///|
 pub fn native_os() -> NativeOs {

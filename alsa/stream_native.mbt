@@ -25,76 +25,80 @@
 #owned(device_id_utf8, data_callback, error_callback)
 extern "C" fn alsa_stream_build_output(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
+  device_id_len : Int32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.OutputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_alsa_stream_build_output"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_alsa_stream_build_output"
 
 ///|
 #borrow(out_handles)
 #owned(device_id_utf8, data_callback, error_callback)
 extern "C" fn alsa_stream_build_input(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
+  device_id_len : Int32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.InputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_alsa_stream_build_input"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_alsa_stream_build_input"
 
 ///|
 extern "C" fn alsa_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_alsa_stream_owner_new"
 
 ///|
 #borrow(owner)
-extern "C" fn alsa_stream_owner_play(owner : StreamOwner) -> Int = "moon_cpal_alsa_stream_owner_play"
+extern "C" fn alsa_stream_owner_play(owner : StreamOwner) -> Int32 = "moon_cpal_alsa_stream_owner_play"
 
 ///|
 #borrow(owner)
-extern "C" fn alsa_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_alsa_stream_owner_pause"
+extern "C" fn alsa_stream_owner_pause(owner : StreamOwner) -> Int32 = "moon_cpal_alsa_stream_owner_pause"
 
 ///|
 #borrow(owner)
-extern "C" fn alsa_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_alsa_stream_owner_close"
+extern "C" fn alsa_stream_owner_close(owner : StreamOwner) -> Int32 = "moon_cpal_alsa_stream_owner_close"
 
 ///|
 fn[A] raise_build_errno(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.BuildStreamError {
   raise alsa_build_error_from_errno(status, op)
 }
@@ -102,7 +106,7 @@ fn[A] raise_build_errno(
 ///|
 fn[A] raise_play_errno(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PlayStreamError {
   raise alsa_play_error_from_errno(status, op)
 }
@@ -110,14 +114,14 @@ fn[A] raise_play_errno(
 ///|
 fn[A] raise_pause_errno(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PauseStreamError {
   raise alsa_pause_error_from_errno(status, op)
 }
 
 ///|
 fn alsa_build_error_from_errno(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.BuildStreamError {
   // Best-effort errno mapping (Linux).
@@ -154,7 +158,7 @@ fn build_error_from_supported_configs_error(
 
 ///|
 fn alsa_play_error_from_errno(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.PlayStreamError {
   if status == -2 || status == -1 || status == -13 || status == -19 {
@@ -166,7 +170,7 @@ fn alsa_play_error_from_errno(
 
 ///|
 fn alsa_pause_error_from_errno(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.PauseStreamError {
   if status == -2 || status == -1 || status == -13 || status == -19 {
@@ -177,35 +181,35 @@ fn alsa_pause_error_from_errno(
 }
 
 ///|
-fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
+fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt32? {
   match r.sample_format() {
-    F32 => Some((1 : UInt))
-    I16 => Some((2 : UInt))
-    U16 => Some((3 : UInt))
-    U8 => Some((4 : UInt))
-    I32 => Some((5 : UInt))
-    U32 => Some((6 : UInt))
-    I24 => Some((7 : UInt))
-    U24 => Some((8 : UInt))
-    F64 => Some((9 : UInt))
-    I8 => Some((10 : UInt))
+    F32 => Some((1 : UInt32))
+    I16 => Some((2 : UInt32))
+    U16 => Some((3 : UInt32))
+    U8 => Some((4 : UInt32))
+    I32 => Some((5 : UInt32))
+    U32 => Some((6 : UInt32))
+    I24 => Some((7 : UInt32))
+    U24 => Some((8 : UInt32))
+    F64 => Some((9 : UInt32))
+    I8 => Some((10 : UInt32))
     _ => None
   }
 }
 
 ///|
-fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
+fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt32? {
   match fmt {
-    F32 => Some((1 : UInt))
-    I16 => Some((2 : UInt))
-    U16 => Some((3 : UInt))
-    U8 => Some((4 : UInt))
-    I32 => Some((5 : UInt))
-    U32 => Some((6 : UInt))
-    I24 => Some((7 : UInt))
-    U24 => Some((8 : UInt))
-    F64 => Some((9 : UInt))
-    I8 => Some((10 : UInt))
+    F32 => Some((1 : UInt32))
+    I16 => Some((2 : UInt32))
+    U16 => Some((3 : UInt32))
+    U8 => Some((4 : UInt32))
+    I32 => Some((5 : UInt32))
+    U32 => Some((6 : UInt32))
+    I24 => Some((7 : UInt32))
+    U24 => Some((8 : UInt32))
+    F64 => Some((9 : UInt32))
+    I8 => Some((10 : UInt32))
     _ => None
   }
 }
@@ -252,7 +256,7 @@ fn choose_default_range(
 }
 
 ///|
-fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt32 {
   match config.buffer_size {
     Default => 0
     Fixed(n) => if n > 0 { n.reinterpret_as_uint() } else { 0 }

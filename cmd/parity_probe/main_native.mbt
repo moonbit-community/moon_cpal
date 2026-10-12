@@ -15,23 +15,23 @@
 ///|
 struct ProbeBuffer {
   kind : String
-  min_frames : Int
-  max_frames : Int
+  min_frames : Int32
+  max_frames : Int32
 } derive(ToJson)
 
 ///|
 struct ProbeConfig {
-  channels : Int
-  sample_rate : Int
+  channels : Int32
+  sample_rate : Int32
   sample_format : String
   buffer : ProbeBuffer
 } derive(ToJson)
 
 ///|
 struct ProbeConfigRange {
-  channels : Int
-  min_sample_rate : Int
-  max_sample_rate : Int
+  channels : Int32
+  min_sample_rate : Int32
+  max_sample_rate : Int32
   sample_format : String
   buffer : ProbeBuffer
 } derive(ToJson)
@@ -164,7 +164,7 @@ fn fill_output_i16_silence(xs : Array[Int16]) -> Unit {
 fn fill_output_u16_silence(xs : Array[UInt16]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = (0x8000 : Int).to_uint16()
+    xs[i] = (0x8000 : Int32).to_uint16()
     i = i + 1
   }
 }
@@ -173,7 +173,7 @@ fn fill_output_u16_silence(xs : Array[UInt16]) -> Unit {
 fn fill_output_u8_silence(xs : Array[Byte]) -> Unit {
   let mut i = 0
   while i < xs.length() {
-    xs[i] = Int::to_byte(0x80)
+    xs[i] = Int32::to_byte(0x80)
     i = i + 1
   }
 }

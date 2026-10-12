@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
+extern "C" fn sleep_ms(ms : Int32) -> Unit = "moon_cpal_sleep_ms"
 
 ///|
 fn fill_silence(data : @core.Data) -> Unit {
@@ -52,9 +52,9 @@ fn main {
   let mut out_ok = false
   for dev in devices {
     println("trying output device: \{dev.name()}")
-    let calls : Array[Int] = [0]
+    let calls : Array[Int32] = [0]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
-    let first_frames : Array[Int] = [0]
+    let first_frames : Array[Int32] = [0]
     let cfg = try dev.default_output_config() catch {
       e => {
         println("default output config failed: \{e}")
@@ -133,7 +133,7 @@ fn main {
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
           )
-          let fixed_calls : Array[Int] = [0]
+          let fixed_calls : Array[Int32] = [0]
           let fixed_stream = try
             dev.build_output_stream(
               fixed_cfg,
@@ -182,10 +182,10 @@ fn main {
   let mut in_ok = false
   for dev in devices {
     println("trying input device: \{dev.name()}")
-    let calls : Array[Int] = [0]
+    let calls : Array[Int32] = [0]
     let printed : Array[Bool] = [false]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
-    let first_frames : Array[Int] = [0]
+    let first_frames : Array[Int32] = [0]
     let cfg = try dev.default_input_config() catch {
       e => {
         println("default input config failed: \{e}")
@@ -275,7 +275,7 @@ fn main {
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
           )
-          let fixed_calls : Array[Int] = [0]
+          let fixed_calls : Array[Int32] = [0]
           let fixed_stream = try
             dev.build_input_stream(
               fixed_cfg,

@@ -36,7 +36,7 @@ test "data: try_as_i16 and try_as_u16" {
   let i16_data = Data(I16, i16_bytes)
   @debug.debug_inspect(i16_data.try_as_i16(), content="Some([-1])")
   let u16_bytes = FixedArray::from_array(
-    [Int::to_byte(0x34), Int::to_byte(0x12)][:],
+    [Int32::to_byte(0x34), Int32::to_byte(0x12)][:],
   )
   let u16_data = Data(U16, u16_bytes)
   match u16_data.try_as_u16() {
@@ -47,7 +47,7 @@ test "data: try_as_i16 and try_as_u16" {
 
 ///|
 test "data: format mismatch returns None" {
-  let bytes = FixedArray::from_array([Int::to_byte(0), Int::to_byte(0)][:])
+  let bytes = FixedArray::from_array([Int32::to_byte(0), Int32::to_byte(0)][:])
   let data = Data(I16, bytes)
   @debug.debug_inspect(data.try_as_f32(), content="None")
 }
@@ -55,7 +55,7 @@ test "data: format mismatch returns None" {
 ///|
 test "data: clear uses equilibrium bytes" {
   let bytes = FixedArray::from_array(
-    [Int::to_byte(1), Int::to_byte(2), Int::to_byte(3), Int::to_byte(4)][:],
+    [Int32::to_byte(1), Int32::to_byte(2), Int32::to_byte(3), Int32::to_byte(4)][:],
   )
   let data = Data(U8, bytes)
   data.clear()
@@ -66,7 +66,7 @@ test "data: clear uses equilibrium bytes" {
     ),
   )
   let u16_bytes = FixedArray::from_array(
-    [Int::to_byte(1), Int::to_byte(2), Int::to_byte(3), Int::to_byte(4)][:],
+    [Int32::to_byte(1), Int32::to_byte(2), Int32::to_byte(3), Int32::to_byte(4)][:],
   )
   let u16 = Data(U16, u16_bytes)
   u16.clear()
@@ -80,7 +80,7 @@ test "data: clear uses equilibrium bytes" {
 
 ///|
 test "data: write_f32 roundtrip" {
-  let data = Data(F32, FixedArray::make(8, Int::to_byte(0)))
+  let data = Data(F32, FixedArray::make(8, Int32::to_byte(0)))
   inspect(data.write_f32([(0.5 : Float), (-1.0 : Float)]), content="true")
   match data.try_as_f32() {
     None => inspect(false, content="true")
@@ -94,15 +94,15 @@ test "data: write_f32 roundtrip" {
 
 ///|
 test "data: write_i16/write_u16/write_u8 roundtrip" {
-  let i16 = Data(I16, FixedArray::make(4, Int::to_byte(0)))
+  let i16 = Data(I16, FixedArray::make(4, Int32::to_byte(0)))
   inspect(
     i16.write_i16([Int16::from_int(-1), Int16::from_int(123)]),
     content="true",
   )
   @debug.debug_inspect(i16.try_as_i16(), content="Some([-1, 123])")
-  let u16 = Data(U16, FixedArray::make(4, Int::to_byte(0)))
+  let u16 = Data(U16, FixedArray::make(4, Int32::to_byte(0)))
   inspect(
-    u16.write_u16([(0x1234 : Int).to_uint16(), (0xabcd : Int).to_uint16()]),
+    u16.write_u16([(0x1234 : Int32).to_uint16(), (0xabcd : Int32).to_uint16()]),
     content="true",
   )
   match u16.try_as_u16() {
@@ -113,13 +113,13 @@ test "data: write_i16/write_u16/write_u8 roundtrip" {
         content="[4660, 43981]",
       )
   }
-  let u8 = Data(U8, FixedArray::make(4, Int::to_byte(0)))
+  let u8 = Data(U8, FixedArray::make(4, Int32::to_byte(0)))
   inspect(
     u8.write_u8([
-      Int::to_byte(5),
-      Int::to_byte(6),
-      Int::to_byte(7),
-      Int::to_byte(8),
+      Int32::to_byte(5),
+      Int32::to_byte(6),
+      Int32::to_byte(7),
+      Int32::to_byte(8),
     ]),
     content="true",
   )
@@ -133,10 +133,10 @@ test "data: write_i16/write_u16/write_u8 roundtrip" {
 
 ///|
 test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
-  let i8 = Data(I8, FixedArray::make(3, Int::to_byte(0)))
+  let i8 = Data(I8, FixedArray::make(3, Int32::to_byte(0)))
   inspect(i8.write_i8([-128, 0, 127]), content="true")
   @debug.debug_inspect(i8.try_as_i8(), content="Some([-128, 0, 127])")
-  let i24 = Data(I24, FixedArray::make(8, Int::to_byte(0)))
+  let i24 = Data(I24, FixedArray::make(8, Int32::to_byte(0)))
   inspect(i24.write_i24([I24(-1), I24(8_388_607)]), content="true")
   match i24.try_as_i24() {
     None => inspect(false, content="true")
@@ -146,7 +146,7 @@ test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
         content="[-1, 8388607]",
       )
   }
-  let u24 = Data(U24, FixedArray::make(8, Int::to_byte(0)))
+  let u24 = Data(U24, FixedArray::make(8, Int32::to_byte(0)))
   inspect(u24.write_u24([U24(0), U24(16_777_215)]), content="true")
   match u24.try_as_u24() {
     None => inspect(false, content="true")
@@ -156,29 +156,29 @@ test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
         content="[0, 16777215]",
       )
   }
-  let i32 = Data(I32, FixedArray::make(8, Int::to_byte(0)))
+  let i32 = Data(I32, FixedArray::make(8, Int32::to_byte(0)))
   inspect(i32.write_i32([-2_147_483_648, 2_147_483_647]), content="true")
   @debug.debug_inspect(
     i32.try_as_i32(),
     content="Some([-2147483648, 2147483647])",
   )
-  let u32 = Data(U32, FixedArray::make(8, Int::to_byte(0)))
-  inspect(u32.write_u32([(0 : UInt), (0xffff_ffff : UInt)]), content="true")
+  let u32 = Data(U32, FixedArray::make(8, Int32::to_byte(0)))
+  inspect(u32.write_u32([(0 : UInt32), (0xffff_ffff : UInt32)]), content="true")
   match u32.try_as_u32() {
     None => inspect(false, content="true")
     Some(xs) => {
       inspect(xs.length(), content="2")
-      inspect(xs[0] == (0 : UInt), content="true")
-      inspect(xs[1] == (0xffff_ffff : UInt), content="true")
+      inspect(xs[0] == (0 : UInt32), content="true")
+      inspect(xs[1] == (0xffff_ffff : UInt32), content="true")
     }
   }
-  let i64 = Data(I64, FixedArray::make(16, Int::to_byte(0)))
+  let i64 = Data(I64, FixedArray::make(16, Int32::to_byte(0)))
   inspect(
-    i64.write_i64([(-1 : Int).to_int64(), (123456789 : Int).to_int64()]),
+    i64.write_i64([(-1 : Int32).to_int64(), (123456789 : Int32).to_int64()]),
     content="true",
   )
   @debug.debug_inspect(i64.try_as_i64(), content="Some([-1, 123456789])")
-  let u64 = Data(U64, FixedArray::make(16, Int::to_byte(0)))
+  let u64 = Data(U64, FixedArray::make(16, Int32::to_byte(0)))
   inspect(
     u64.write_u64([(0 : UInt64), (0xffff_ffff_ffff_ffff : UInt64)]),
     content="true",
@@ -191,7 +191,7 @@ test "data: i8/i24/u24/i32/u32/i64/u64/f64 roundtrip (best-effort)" {
       inspect(xs[1] == (0xffff_ffff_ffff_ffff : UInt64), content="true")
     }
   }
-  let f64 = Data(F64, FixedArray::make(16, Int::to_byte(0)))
+  let f64 = Data(F64, FixedArray::make(16, Int32::to_byte(0)))
   inspect(f64.write_f64([(0.5 : Double), (-1.0 : Double)]), content="true")
   match f64.try_as_f64() {
     None => inspect(false, content="true")
