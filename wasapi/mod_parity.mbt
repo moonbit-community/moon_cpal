@@ -20,13 +20,13 @@
 /// - AUDCLNT_E_DEVICE_IN_USE      (0x8889000A)
 
 ///|
-fn wasapi_is_device_not_available_hresult(status : Int) -> Bool {
+fn wasapi_is_device_not_available_hresult(status : Int32) -> Bool {
   status == -2004287484 || status == -2004287478
 }
 
 ///|
 fn wasapi_stream_error_from_hresult(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.StreamError {
   if wasapi_is_device_not_available_hresult(status) {
@@ -38,7 +38,7 @@ fn wasapi_stream_error_from_hresult(
 
 ///|
 fn wasapi_build_error_from_hresult(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.BuildStreamError {
   // Best-effort mapping from HRESULT to CPAL-like BuildStreamError.
@@ -59,7 +59,7 @@ fn wasapi_build_error_from_hresult(
 
 ///|
 fn wasapi_play_error_from_hresult(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.PlayStreamError {
   if wasapi_is_device_not_available_hresult(status) {
@@ -71,7 +71,7 @@ fn wasapi_play_error_from_hresult(
 
 ///|
 fn wasapi_pause_error_from_hresult(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.PauseStreamError {
   if wasapi_is_device_not_available_hresult(status) {

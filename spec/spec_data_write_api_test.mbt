@@ -14,14 +14,14 @@
 
 ///|
 fn assert_full_write_api_exists(data : @spec.Data) -> Unit {
-  let i8s : Array[Int] = []
+  let i8s : Array[Int32] = []
   let u8s : Array[Byte] = []
   let u16s : Array[UInt16] = []
   let i16s : Array[Int16] = []
   let u24s : Array[@core.U24] = []
   let i24s : Array[@core.I24] = []
-  let u32s : Array[UInt] = []
-  let i32s : Array[Int] = []
+  let u32s : Array[UInt32] = []
+  let i32s : Array[Int32] = []
   let f32s : Array[Float] = []
   let u64s : Array[UInt64] = []
   let i64s : Array[Int64] = []

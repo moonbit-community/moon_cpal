@@ -22,7 +22,7 @@
 extern "C" fn jack_default_config_bin() -> Bytes = "moon_cpal_jack_default_config_bin"
 
 ///|
-fn u32_le_to_int(b : Bytes, off : Int) -> Int {
+fn u32_le_to_int(b : Bytes, off : Int32) -> Int32 {
   if off + 4 > b.length() {
     return 0
   }
@@ -34,7 +34,7 @@ fn u32_le_to_int(b : Bytes, off : Int) -> Int {
 }
 
 ///|
-pub fn default_server_config() -> (Int, Int)? {
+pub fn default_server_config() -> (Int32, Int32)? {
   let b = jack_default_config_bin()
   if b.length() < 8 {
     return None

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-fn cmp_bool(a : Bool, b : Bool) -> Int {
+fn cmp_bool(a : Bool, b : Bool) -> Int32 {
   if a == b {
     0
   } else if a {
@@ -24,7 +24,7 @@ fn cmp_bool(a : Bool, b : Bool) -> Int {
 }
 
 ///|
-fn cmp_int(a : Int, b : Int) -> Int {
+fn cmp_int(a : Int32, b : Int32) -> Int32 {
   if a < b {
     -1
   } else if a > b {
@@ -35,11 +35,11 @@ fn cmp_int(a : Int, b : Int) -> Int {
 }
 
 ///|
-fn cmp_sample_format(a : SampleFormat, b : SampleFormat) -> Int {
+fn cmp_sample_format(a : SampleFormat, b : SampleFormat) -> Int32 {
   // For the heuristics we only need equality checks against the preferred formats.
   // To keep the implementation simple and portable, we compare by a stable ranking
   // derived from the upstream priority list.
-  fn rank(fmt : SampleFormat) -> Int {
+  fn rank(fmt : SampleFormat) -> Int32 {
     match fmt {
       F32 => 7
       I32 => 6
@@ -65,7 +65,7 @@ fn cmp_sample_format(a : SampleFormat, b : SampleFormat) -> Int {
 pub fn SupportedStreamConfigRange::cmp_default_heuristics(
   self : SupportedStreamConfigRange,
   other : SupportedStreamConfigRange,
-) -> Int {
+) -> Int32 {
   let cmp_stereo = cmp_bool(self.channels == 2, other.channels == 2)
   if cmp_stereo != 0 {
     return cmp_stereo

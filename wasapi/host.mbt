@@ -134,7 +134,7 @@ fn wasapi_interface_type_from_jack_subtype(
 
 ///|
 fn wasapi_types_from_form_factor(
-  form_factor : UInt,
+  form_factor : UInt32,
 ) -> (@core.DeviceType, @core.InterfaceType?) {
   match form_factor.reinterpret_as_int() {
     // RemoteNetworkDevice
@@ -276,8 +276,8 @@ pub fn Device::supports_output(_self : Device) -> Bool {
 }
 
 ///|
-fn clamp_u32_to_frame_count(u : UInt) -> Int {
-  let lim = (2147483647 : Int).reinterpret_as_uint()
+fn clamp_u32_to_frame_count(u : UInt32) -> Int32 {
+  let lim = (2147483647 : Int32).reinterpret_as_uint()
   if u <= lim {
     u.reinterpret_as_int()
   } else {
@@ -286,7 +286,7 @@ fn clamp_u32_to_frame_count(u : UInt) -> Int {
 }
 
 ///|
-fn wasapi_sample_format_from_tag(fmt_tag : UInt) -> @core.SampleFormat? {
+fn wasapi_sample_format_from_tag(fmt_tag : UInt32) -> @core.SampleFormat? {
   match fmt_tag {
     1 => Some(F32)
     2 => Some(I16)

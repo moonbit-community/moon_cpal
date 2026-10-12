@@ -27,75 +27,79 @@
 #borrow(out_handles)
 #owned(data_callback, error_callback)
 extern "C" fn ca_stream_build_output(
-  device_id : UInt,
+  device_id : UInt32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.OutputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_ca_stream_build_output"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_stream_build_output"
 
 ///|
 #borrow(out_handles)
 #owned(data_callback, error_callback)
 extern "C" fn ca_stream_build_input(
-  device_id : UInt,
+  device_id : UInt32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.InputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_ca_stream_build_input"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_ca_stream_build_input"
 
 ///|
 extern "C" fn ca_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_ca_stream_owner_new"
 
 ///|
 #borrow(owner)
-extern "C" fn ca_stream_owner_play(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_play"
+extern "C" fn ca_stream_owner_play(owner : StreamOwner) -> Int32 = "moon_cpal_ca_stream_owner_play"
 
 ///|
 #borrow(owner)
-extern "C" fn ca_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_pause"
+extern "C" fn ca_stream_owner_pause(owner : StreamOwner) -> Int32 = "moon_cpal_ca_stream_owner_pause"
 
 ///|
 #borrow(owner)
-extern "C" fn ca_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_ca_stream_owner_close"
+extern "C" fn ca_stream_owner_close(owner : StreamOwner) -> Int32 = "moon_cpal_ca_stream_owner_close"
 
 ///|
 fn[A] raise_build_osstatus(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.BuildStreamError {
   match osstatus_kind(status) {
     1 => raise @core.build_stream_error_device_not_available()
@@ -111,7 +115,7 @@ fn[A] raise_build_osstatus(
 ///|
 fn[A] raise_play_osstatus(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PlayStreamError {
   match osstatus_kind(status) {
     1 => raise @core.play_stream_error_device_not_available()
@@ -125,7 +129,7 @@ fn[A] raise_play_osstatus(
 ///|
 fn[A] raise_pause_osstatus(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PauseStreamError {
   match osstatus_kind(status) {
     1 => raise @core.pause_stream_error_device_not_available()
@@ -141,19 +145,19 @@ fn[A] raise_pause_osstatus(
 ///|
 
 ///|
-fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt? {
+fn format_tag_from_range(r : @core.SupportedStreamConfigRange) -> UInt32? {
   match r.sample_format() {
-    F32 => Some((1 : UInt))
-    I16 => Some((2 : UInt))
+    F32 => Some((1 : UInt32))
+    I16 => Some((2 : UInt32))
     _ => None
   }
 }
 
 ///|
-fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
+fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt32? {
   match fmt {
-    F32 => Some((1 : UInt))
-    I16 => Some((2 : UInt))
+    F32 => Some((1 : UInt32))
+    I16 => Some((2 : UInt32))
     _ => None
   }
 }
@@ -244,7 +248,7 @@ fn coreaudio_input_candidate_ranges(
 }
 
 ///|
-fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt32 {
   match config.buffer_size {
     Default => 0
     Fixed(n) => if n > 0 { n.reinterpret_as_uint() } else { 0 }

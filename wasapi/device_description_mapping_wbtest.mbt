@@ -50,13 +50,13 @@ test "wasapi interface type: jack subtype mapping" {
 
 ///|
 test "wasapi device type: form factor mapping" {
-  let (dt1, it1) = wasapi_types_from_form_factor((1 : UInt))
+  let (dt1, it1) = wasapi_types_from_form_factor((1 : UInt32))
   inspect(dt1, content="Speaker")
   @debug.debug_inspect(it1, content="None")
-  let (dt3, it3) = wasapi_types_from_form_factor((3 : UInt))
+  let (dt3, it3) = wasapi_types_from_form_factor((3 : UInt32))
   inspect(dt3, content="Headphones")
   @debug.debug_inspect(it3, content="None")
-  let (dt8, it8) = wasapi_types_from_form_factor((8 : UInt))
+  let (dt8, it8) = wasapi_types_from_form_factor((8 : UInt32))
   inspect(dt8, content="Unknown")
   @debug.debug_inspect(it8, content="Some(Spdif)")
 }

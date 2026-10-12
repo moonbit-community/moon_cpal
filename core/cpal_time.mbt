@@ -18,7 +18,7 @@
 /// Upstream uses `std::time::Duration` (non-negative). Here we keep the same invariant.
 pub struct Duration {
   secs : UInt64
-  nanos : Int // 0 <= nanos < 1_000_000_000
+  nanos : Int32 // 0 <= nanos < 1_000_000_000
 } derive(Debug, Eq)
 
 ///|
@@ -27,7 +27,7 @@ pub fn Duration::from_secs(secs : UInt64) -> Duration {
 }
 
 ///|
-pub fn Duration::Duration(secs : UInt64, nanos : Int) -> Duration {
+pub fn Duration::Duration(secs : UInt64, nanos : Int32) -> Duration {
   if nanos < 0 {
     panic()
   }
@@ -48,7 +48,7 @@ pub fn Duration::Duration(secs : UInt64, nanos : Int) -> Duration {
 }
 
 ///|
-pub fn Duration::new(secs : UInt64, nanos : Int) -> Duration {
+pub fn Duration::new(secs : UInt64, nanos : Int32) -> Duration {
   Duration(secs, nanos)
 }
 
@@ -64,11 +64,14 @@ fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
 /// Monotonic timestamp associated with a stream.
 pub struct StreamInstant {
   secs : Int64
-  nanos : Int // normalized to 0 <= nanos < 1_000_000_000
+  nanos : Int32 // normalized to 0 <= nanos < 1_000_000_000
 } derive(Debug, Eq)
 
 ///|
-pub fn StreamInstant::StreamInstant(secs : Int64, nanos : Int) -> StreamInstant {
+pub fn StreamInstant::StreamInstant(
+  secs : Int64,
+  nanos : Int32,
+) -> StreamInstant {
   // Keep the representation normalized; this matches common upstream usage and keeps arithmetic sane.
   let mut secs = secs
   let mut nanos = nanos
@@ -86,7 +89,7 @@ pub fn StreamInstant::StreamInstant(secs : Int64, nanos : Int) -> StreamInstant 
 }
 
 ///|
-pub fn StreamInstant::new(secs : Int64, nanos : Int) -> StreamInstant {
+pub fn StreamInstant::new(secs : Int64, nanos : Int32) -> StreamInstant {
   StreamInstant(secs, nanos)
 }
 

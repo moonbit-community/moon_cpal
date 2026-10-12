@@ -23,92 +23,96 @@
 #owned(data_callback, error_callback)
 extern "C" fn null_stream_build_output(
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.OutputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_null_stream_build_output"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_null_stream_build_output"
 
 ///|
 #borrow(out_handles)
 #owned(data_callback, error_callback)
 extern "C" fn null_stream_build_input(
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.InputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_null_stream_build_input"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_null_stream_build_input"
 
 ///|
 extern "C" fn null_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_null_stream_owner_new"
 
 ///|
 #borrow(owner)
-extern "C" fn null_stream_owner_play(owner : StreamOwner) -> Int = "moon_cpal_null_stream_owner_play"
+extern "C" fn null_stream_owner_play(owner : StreamOwner) -> Int32 = "moon_cpal_null_stream_owner_play"
 
 ///|
 #borrow(owner)
-extern "C" fn null_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_null_stream_owner_pause"
+extern "C" fn null_stream_owner_pause(owner : StreamOwner) -> Int32 = "moon_cpal_null_stream_owner_pause"
 
 ///|
 #borrow(owner)
-extern "C" fn null_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_null_stream_owner_close"
+extern "C" fn null_stream_owner_close(owner : StreamOwner) -> Int32 = "moon_cpal_null_stream_owner_close"
 
 ///|
 #borrow(owner)
 extern "C" fn null_stream_owner_inject_error(
   owner : StreamOwner,
-  after_callbacks : Int,
-  op_tag : Int,
-  status : Int,
-) -> Int = "moon_cpal_null_stream_owner_inject_error"
+  after_callbacks : Int32,
+  op_tag : Int32,
+  status : Int32,
+) -> Int32 = "moon_cpal_null_stream_owner_inject_error"
 
 ///|
-fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
+fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt32? {
   match fmt {
-    F32 => Some((1 : UInt))
-    I16 => Some((2 : UInt))
-    U16 => Some((3 : UInt))
-    U8 => Some((4 : UInt))
-    I8 => Some((5 : UInt))
-    I24 => Some((6 : UInt))
-    U24 => Some((7 : UInt))
-    I32 => Some((8 : UInt))
-    U32 => Some((9 : UInt))
-    I64 => Some((10 : UInt))
-    U64 => Some((11 : UInt))
-    F64 => Some((12 : UInt))
+    F32 => Some((1 : UInt32))
+    I16 => Some((2 : UInt32))
+    U16 => Some((3 : UInt32))
+    U8 => Some((4 : UInt32))
+    I8 => Some((5 : UInt32))
+    I24 => Some((6 : UInt32))
+    U24 => Some((7 : UInt32))
+    I32 => Some((8 : UInt32))
+    U32 => Some((9 : UInt32))
+    I64 => Some((10 : UInt32))
+    U64 => Some((11 : UInt32))
+    F64 => Some((12 : UInt32))
     _ => None
   }
 }
@@ -116,7 +120,7 @@ fn format_tag_from_sample_format(fmt : @core.SampleFormat) -> UInt? {
 ///|
 fn[A] raise_build_status(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.BuildStreamError {
   if status == -22 {
     raise @core.build_stream_error_stream_config_not_supported()
@@ -127,7 +131,7 @@ fn[A] raise_build_status(
 ///|
 fn[A] raise_play_status(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PlayStreamError {
   if status != 0 {
     raise @core.play_stream_error_device_not_available()
@@ -138,7 +142,7 @@ fn[A] raise_play_status(
 ///|
 fn[A] raise_pause_status(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PauseStreamError {
   if status != 0 {
     raise @core.pause_stream_error_device_not_available()
@@ -167,9 +171,9 @@ fn validate_config_or_raise(
 }
 
 ///|
-fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt32 {
   match config.buffer_size {
-    Default => (128 : UInt)
+    Default => (128 : UInt32)
     Fixed(n) => n.reinterpret_as_uint()
   }
 }
@@ -318,9 +322,9 @@ pub fn Stream::close(self : Stream) -> Unit {
 /// delivered (best-effort). Errors are delivered at most once per injection request.
 pub fn Stream::inject_error(
   self : Stream,
-  after_callbacks : Int,
-  op_tag : Int,
-  status : Int,
+  after_callbacks : Int32,
+  op_tag : Int32,
+  status : Int32,
 ) -> Unit {
   ignore(
     null_stream_owner_inject_error(self.owner, after_callbacks, op_tag, status),

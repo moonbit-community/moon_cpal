@@ -24,7 +24,7 @@ test "alsa callback timestamps + format tags" {
       got[2] = info.timestamp().playback() == want_pb
     },
     1,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     1,
     2,
     3,
@@ -43,7 +43,7 @@ test "alsa callback timestamps + format tags" {
       got2[2] = info.timestamp().capture() == want_cap
     },
     2,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     5,
     6,
     7,
@@ -58,7 +58,7 @@ test "alsa callback timestamps + format tags" {
   call_output_data_callback(
     fn(d, _info) { got3[0] = d.sample_format() == U8 },
     4,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     1,
     2,
     3,
@@ -69,7 +69,7 @@ test "alsa callback timestamps + format tags" {
   call_input_data_callback(
     fn(d, _info) { got4[0] = d.sample_format() == U16 },
     3,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     5,
     6,
     7,
@@ -80,7 +80,7 @@ test "alsa callback timestamps + format tags" {
   call_output_data_callback(
     fn(d, _info) { got5[0] = d.sample_format() == I32 },
     5,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     1,
     2,
     3,

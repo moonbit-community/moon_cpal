@@ -24,7 +24,7 @@ test "jack callback timestamps + format tags" {
       got[2] = info.timestamp().playback() == want_pb
     },
     1,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     1,
     2,
     3,
@@ -43,7 +43,7 @@ test "jack callback timestamps + format tags" {
       got2[2] = info.timestamp().capture() == want_cap
     },
     1,
-    FixedArray::make(4, Int::to_byte(0)),
+    FixedArray::make(4, Int32::to_byte(0)),
     5,
     6,
     7,

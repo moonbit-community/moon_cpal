@@ -14,8 +14,8 @@
 
 ///|
 pub suberror CoreAudioError {
-  CoreAudioError(String, Int)
-  DeviceNotAvailable(String, Int)
+  CoreAudioError(String, Int32)
+  DeviceNotAvailable(String, Int32)
 }
 
 ///|
@@ -25,7 +25,7 @@ pub suberror CoreAudioError {
 /// across backends, and fall back to a backend-specific error for the rest.
 pub fn supported_configs_error_from_osstatus(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> @core.SupportedStreamConfigsError {
   match osstatus_kind(status) {
     1 => @core.supported_stream_configs_error_device_not_available()
@@ -38,7 +38,7 @@ pub fn supported_configs_error_from_osstatus(
 }
 
 ///|
-fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
+fn[A] raise_osstatus(op : String, status : Int32) -> A raise CoreAudioError {
   match osstatus_kind(status) {
     1 => raise DeviceNotAvailable(op, status)
     _ => raise CoreAudioError(op, status)
@@ -48,7 +48,7 @@ fn[A] raise_osstatus(op : String, status : Int) -> A raise CoreAudioError {
 ///|
 fn[A] raise_default_osstatus(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.DefaultStreamConfigError {
   match osstatus_kind(status) {
     1 => raise @core.default_stream_config_error_device_not_available()

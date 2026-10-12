@@ -19,7 +19,7 @@
 /// and decode them here for portability across toolchains.
 
 ///|
-pub fn utf8_bytes_to_string(bytes : Bytes, length : Int) -> String {
+pub fn utf8_bytes_to_string(bytes : Bytes, length : Int32) -> String {
   let res = StringBuilder()
   let len = if length < bytes.length() { length } else { bytes.length() }
   let mut i = 0
@@ -73,7 +73,7 @@ pub fn string_to_ascii_bytes(s : String) -> Bytes {
     if 0 <= cu && cu < 128 {
       cu.to_byte()
     } else {
-      (63 : Int).to_byte()
+      (63 : Int32).to_byte()
     }
   })
 }
@@ -102,7 +102,7 @@ pub fn string_to_utf8_bytes(s : String) -> Bytes {
   }
 
   // Pass 2: write bytes.
-  let buf = FixedArray::make(n, (0 : Int).to_byte())
+  let buf = FixedArray::make(n, (0 : Int32).to_byte())
   let mut off = 0
   for c in s {
     off = off + buf.set_utf8_char(off, c)

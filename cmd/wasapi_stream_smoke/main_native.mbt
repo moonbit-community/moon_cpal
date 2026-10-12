@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ///|
-extern "C" fn sleep_ms(ms : Int) -> Unit = "moon_cpal_sleep_ms"
+extern "C" fn sleep_ms(ms : Int32) -> Unit = "moon_cpal_sleep_ms"
 
 ///|
 fn fill_silence(data : @core.Data) -> Unit {
@@ -60,9 +60,9 @@ fn main {
     } noraise {
       supported => supported.config()
     }
-    let calls : Array[Int] = [0]
+    let calls : Array[Int32] = [0]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
-    let first_frames : Array[Int] = [0]
+    let first_frames : Array[Int32] = [0]
     try
       dev.build_output_stream(
         cfg,
@@ -132,7 +132,7 @@ fn main {
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
           )
-          let fixed_calls : Array[Int] = [0]
+          let fixed_calls : Array[Int32] = [0]
           let fixed_stream = try
             dev.build_output_stream(
               fixed_cfg,
@@ -189,10 +189,10 @@ fn main {
     } noraise {
       supported => supported.config()
     }
-    let calls : Array[Int] = [0]
+    let calls : Array[Int32] = [0]
     let printed : Array[Bool] = [false]
     let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
-    let first_frames : Array[Int] = [0]
+    let first_frames : Array[Int32] = [0]
     try
       dev.build_input_stream(
         cfg,
@@ -274,7 +274,7 @@ fn main {
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
           )
-          let fixed_calls : Array[Int] = [0]
+          let fixed_calls : Array[Int32] = [0]
           let fixed_stream = try
             dev.build_input_stream(
               fixed_cfg,
@@ -334,9 +334,9 @@ fn main {
         }
         let cfg = supported.config()
         let fmt = supported.sample_format()
-        let calls : Array[Int] = [0]
+        let calls : Array[Int32] = [0]
         let last_cb : Array[@moon_cpal.StreamInstant?] = [None]
-        let first_frames : Array[Int] = [0]
+        let first_frames : Array[Int32] = [0]
         fn on_loopback_data(
           data : @core.Data,
           info : @moon_cpal.InputCallbackInfo,
@@ -442,7 +442,7 @@ fn main {
             cfg.sample_rate,
             @moon_cpal.BufferSize::fixed(first_frames[0]),
           )
-          let fixed_calls : Array[Int] = [0]
+          let fixed_calls : Array[Int32] = [0]
           let fixed_stream = try
             dev.build_input_stream_raw(
               fixed_cfg,

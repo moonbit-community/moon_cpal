@@ -204,17 +204,17 @@ fn unescape(s : String) -> String {
     if cu == 92 && i + 1 < s.length() {
       let n = s.code_unit_at(i + 1).to_int()
       if n == 110 {
-        sb.write_char((10 : Int).unsafe_to_char())
+        sb.write_char((10 : Int32).unsafe_to_char())
         i = i + 2
         continue
       }
       if n == 116 {
-        sb.write_char((9 : Int).unsafe_to_char())
+        sb.write_char((9 : Int32).unsafe_to_char())
         i = i + 2
         continue
       }
       if n == 92 {
-        sb.write_char((92 : Int).unsafe_to_char())
+        sb.write_char((92 : Int32).unsafe_to_char())
         i = i + 2
         continue
       }
@@ -282,7 +282,7 @@ pub fn Device::default_output_config(
 }
 
 ///|
-fn u32_le_to_int(b : Bytes, off : Int) -> Int {
+fn u32_le_to_int(b : Bytes, off : Int32) -> Int32 {
   if off + 4 > b.length() {
     return 0
   }
@@ -294,14 +294,14 @@ fn u32_le_to_int(b : Bytes, off : Int) -> Int {
 }
 
 ///|
-fn i32_le_to_int(b : Bytes, off : Int) -> Int {
+fn i32_le_to_int(b : Bytes, off : Int32) -> Int32 {
   // `Int` is i32 on native targets; our `u32_le_to_int` already reconstructs the 32-bit
   // bit-pattern, which naturally yields an i32 value (including negative errno-style values).
   u32_le_to_int(b, off)
 }
 
 ///|
-fn sample_format_from_bin_tag(tag : Int) -> @core.SampleFormat? {
+fn sample_format_from_bin_tag(tag : Int32) -> @core.SampleFormat? {
   match tag {
     1 => Some(I8)
     2 => Some(U8)

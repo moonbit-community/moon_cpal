@@ -55,7 +55,7 @@ pub fn Data::sample_format(self : Data) -> SampleFormat {
 
 ///|
 /// Number of samples in the buffer (floor if the byte length is not aligned to the sample size).
-pub fn Data::len(self : Data) -> Int {
+pub fn Data::len(self : Data) -> Int32 {
   let sz = self.sample_format.sample_size()
   if sz <= 0 {
     0
@@ -70,7 +70,7 @@ pub fn Data::bytes(self : Data) -> FixedArray[Byte] {
 }
 
 ///|
-fn read_u16_le(bytes : FixedArray[Byte], offset : Int) -> UInt16? {
+fn read_u16_le(bytes : FixedArray[Byte], offset : Int32) -> UInt16? {
   match (bytes.get(offset), bytes.get(offset + 1)) {
     (Some(b0), Some(b1)) => {
       let v = b0.to_int() | (b1.to_int() << 8)
@@ -81,7 +81,7 @@ fn read_u16_le(bytes : FixedArray[Byte], offset : Int) -> UInt16? {
 }
 
 ///|
-fn read_u32_le(bytes : FixedArray[Byte], offset : Int) -> UInt? {
+fn read_u32_le(bytes : FixedArray[Byte], offset : Int32) -> UInt32? {
   match
     (
       bytes.get(offset),
@@ -101,7 +101,7 @@ fn read_u32_le(bytes : FixedArray[Byte], offset : Int) -> UInt? {
 }
 
 ///|
-fn read_u64_le(bytes : FixedArray[Byte], offset : Int) -> UInt64? {
+fn read_u64_le(bytes : FixedArray[Byte], offset : Int32) -> UInt64? {
   match
     (
       bytes.get(offset),
@@ -138,7 +138,7 @@ fn read_u64_le(bytes : FixedArray[Byte], offset : Int) -> UInt64? {
 }
 
 ///|
-fn write_u16_le(bytes : FixedArray[Byte], offset : Int, v : UInt16) -> Bool {
+fn write_u16_le(bytes : FixedArray[Byte], offset : Int32, v : UInt16) -> Bool {
   if offset < 0 || offset + 1 >= bytes.length() {
     return false
   }
@@ -149,7 +149,7 @@ fn write_u16_le(bytes : FixedArray[Byte], offset : Int, v : UInt16) -> Bool {
 }
 
 ///|
-fn write_u32_le(bytes : FixedArray[Byte], offset : Int, v : UInt) -> Bool {
+fn write_u32_le(bytes : FixedArray[Byte], offset : Int32, v : UInt32) -> Bool {
   if offset < 0 || offset + 3 >= bytes.length() {
     return false
   }
@@ -162,7 +162,7 @@ fn write_u32_le(bytes : FixedArray[Byte], offset : Int, v : UInt) -> Bool {
 }
 
 ///|
-fn write_u64_le(bytes : FixedArray[Byte], offset : Int, v : UInt64) -> Bool {
+fn write_u64_le(bytes : FixedArray[Byte], offset : Int32, v : UInt64) -> Bool {
   if offset < 0 || offset + 7 >= bytes.length() {
     return false
   }
@@ -178,11 +178,11 @@ fn write_u64_le(bytes : FixedArray[Byte], offset : Int, v : UInt64) -> Bool {
 }
 
 ///|
-pub fn Data::try_as_i8(self : Data) -> Array[Int]? {
+pub fn Data::try_as_i8(self : Data) -> Array[Int32]? {
   if self.sample_format != I8 {
     return None
   }
-  let out : Array[Int] = []
+  let out : Array[Int32] = []
   for b in self.bytes[:] {
     let w = b.to_int()
     out.push(if w >= 128 { w - 256 } else { w })
@@ -258,7 +258,7 @@ pub fn Data::try_as_u24(self : Data) -> Array[U24]? {
     match read_u32_le(self.bytes, off) {
       None => return None
       Some(bits) => {
-        let raw = (bits & (0x00ff_ffff : UInt)).reinterpret_as_int()
+        let raw = (bits & (0x00ff_ffff : UInt32)).reinterpret_as_int()
         out.push(U24(raw))
       }
     }
@@ -283,9 +283,9 @@ pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
     match read_u32_le(self.bytes, off) {
       None => return None
       Some(bits) => {
-        let u = bits & (0x00ff_ffff : UInt)
-        let raw = if (u & (0x0080_0000 : UInt)) != (0 : UInt) {
-          (u | (0xff00_0000 : UInt)).reinterpret_as_int()
+        let u = bits & (0x00ff_ffff : UInt32)
+        let raw = if (u & (0x0080_0000 : UInt32)) != (0 : UInt32) {
+          (u | (0xff00_0000 : UInt32)).reinterpret_as_int()
         } else {
           u.reinterpret_as_int()
         }
@@ -298,7 +298,7 @@ pub fn Data::try_as_i24(self : Data) -> Array[I24]? {
 }
 
 ///|
-pub fn Data::try_as_u32(self : Data) -> Array[UInt]? {
+pub fn Data::try_as_u32(self : Data) -> Array[UInt32]? {
   if self.sample_format != U32 {
     return None
   }
@@ -306,7 +306,7 @@ pub fn Data::try_as_u32(self : Data) -> Array[UInt]? {
     return None
   }
   let n = self.bytes.length() / 4
-  let out : Array[UInt] = []
+  let out : Array[UInt32] = []
   let mut i = 0
   while i < n {
     let off = i * 4
@@ -320,7 +320,7 @@ pub fn Data::try_as_u32(self : Data) -> Array[UInt]? {
 }
 
 ///|
-pub fn Data::try_as_i32(self : Data) -> Array[Int]? {
+pub fn Data::try_as_i32(self : Data) -> Array[Int32]? {
   if self.sample_format != I32 {
     return None
   }
@@ -328,7 +328,7 @@ pub fn Data::try_as_i32(self : Data) -> Array[Int]? {
     return None
   }
   let n = self.bytes.length() / 4
-  let out : Array[Int] = []
+  let out : Array[Int32] = []
   let mut i = 0
   while i < n {
     let off = i * 4
@@ -437,7 +437,7 @@ pub fn Data::clear(self : Data) -> Unit {
       // U8 equilibrium is 128 (unsigned).
       let mut i = 0
       while i < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x80)
+        self.bytes[i] = Int32::to_byte(0x80)
         i = i + 1
       }
     }
@@ -445,25 +445,25 @@ pub fn Data::clear(self : Data) -> Unit {
       // U16 equilibrium is 0x8000 (little-endian bytes: 00 80).
       let mut i = 0
       while i + 1 < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
-        self.bytes[i + 1] = Int::to_byte(0x80)
+        self.bytes[i] = Int32::to_byte(0x00)
+        self.bytes[i + 1] = Int32::to_byte(0x80)
         i = i + 2
       }
       if i < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i] = Int32::to_byte(0x00)
       }
     }
     U24 => {
       // U24 equilibrium is 0x800000 (little-endian bytes: 00 00 80).
       let mut i = 0
       while i + 2 < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
-        self.bytes[i + 1] = Int::to_byte(0x00)
-        self.bytes[i + 2] = Int::to_byte(0x80)
+        self.bytes[i] = Int32::to_byte(0x00)
+        self.bytes[i + 1] = Int32::to_byte(0x00)
+        self.bytes[i + 2] = Int32::to_byte(0x80)
         i = i + 3
       }
       while i < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i] = Int32::to_byte(0x00)
         i = i + 1
       }
     }
@@ -471,14 +471,14 @@ pub fn Data::clear(self : Data) -> Unit {
       // U32 equilibrium is 0x80000000 (little-endian bytes: 00 00 00 80).
       let mut i = 0
       while i + 3 < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
-        self.bytes[i + 1] = Int::to_byte(0x00)
-        self.bytes[i + 2] = Int::to_byte(0x00)
-        self.bytes[i + 3] = Int::to_byte(0x80)
+        self.bytes[i] = Int32::to_byte(0x00)
+        self.bytes[i + 1] = Int32::to_byte(0x00)
+        self.bytes[i + 2] = Int32::to_byte(0x00)
+        self.bytes[i + 3] = Int32::to_byte(0x80)
         i = i + 4
       }
       while i < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i] = Int32::to_byte(0x00)
         i = i + 1
       }
     }
@@ -486,18 +486,18 @@ pub fn Data::clear(self : Data) -> Unit {
       // U64 equilibrium is 0x8000_0000_0000_0000.
       let mut i = 0
       while i + 7 < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
-        self.bytes[i + 1] = Int::to_byte(0x00)
-        self.bytes[i + 2] = Int::to_byte(0x00)
-        self.bytes[i + 3] = Int::to_byte(0x00)
-        self.bytes[i + 4] = Int::to_byte(0x00)
-        self.bytes[i + 5] = Int::to_byte(0x00)
-        self.bytes[i + 6] = Int::to_byte(0x00)
-        self.bytes[i + 7] = Int::to_byte(0x80)
+        self.bytes[i] = Int32::to_byte(0x00)
+        self.bytes[i + 1] = Int32::to_byte(0x00)
+        self.bytes[i + 2] = Int32::to_byte(0x00)
+        self.bytes[i + 3] = Int32::to_byte(0x00)
+        self.bytes[i + 4] = Int32::to_byte(0x00)
+        self.bytes[i + 5] = Int32::to_byte(0x00)
+        self.bytes[i + 6] = Int32::to_byte(0x00)
+        self.bytes[i + 7] = Int32::to_byte(0x80)
         i = i + 8
       }
       while i < self.bytes.length() {
-        self.bytes[i] = Int::to_byte(0x00)
+        self.bytes[i] = Int32::to_byte(0x00)
         i = i + 1
       }
     }
@@ -505,7 +505,7 @@ pub fn Data::clear(self : Data) -> Unit {
       // Signed integer and float equilibrium is 0.
       let mut i = 0
       while i < self.bytes.length() {
-        self.bytes[i] = (0 : Int).to_byte()
+        self.bytes[i] = (0 : Int32).to_byte()
         i = i + 1
       }
     }
@@ -514,7 +514,7 @@ pub fn Data::clear(self : Data) -> Unit {
 
 ///|
 /// Best-effort encoder for I8 output buffers.
-pub fn Data::write_i8(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i8(self : Data, samples : Array[Int32]) -> Bool {
   if self.sample_format != I8 {
     return false
   }
@@ -638,14 +638,14 @@ pub fn Data::write_i24(self : Data, samples : Array[I24]) -> Bool {
 
 ///|
 /// Best-effort encoder for U32 (little-endian).
-pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
+pub fn Data::write_u32(self : Data, samples : Array[UInt32]) -> Bool {
   if self.sample_format != U32 {
     return false
   }
   if self.bytes.length() != samples.length() * 4 {
     return false
   }
-  let max_u32 = (0xffff_ffff : UInt)
+  let max_u32 = (0xffff_ffff : UInt32)
   let mut i = 0
   while i < samples.length() {
     let v = samples[i]
@@ -662,7 +662,7 @@ pub fn Data::write_u32(self : Data, samples : Array[UInt]) -> Bool {
 
 ///|
 /// Best-effort encoder for I32 (little-endian).
-pub fn Data::write_i32(self : Data, samples : Array[Int]) -> Bool {
+pub fn Data::write_i32(self : Data, samples : Array[Int32]) -> Bool {
   if self.sample_format != I32 {
     return false
   }

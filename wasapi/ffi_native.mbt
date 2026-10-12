@@ -19,90 +19,90 @@
 extern "C" fn wasapi_devices_utf8() -> Bytes = "moon_cpal_wasapi_devices_utf8"
 
 ///|
-extern "C" fn wasapi_default_device_id_utf8(is_input : Int) -> Bytes = "moon_cpal_wasapi_default_device_id_utf8"
+extern "C" fn wasapi_default_device_id_utf8(is_input : Int32) -> Bytes = "moon_cpal_wasapi_default_device_id_utf8"
 
 ///|
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_name_utf8_len(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-) -> Int = "moon_cpal_wasapi_device_name_utf8_len"
+  device_id_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_device_name_utf8_len"
 
 ///|
 #borrow(out)
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_name_utf8(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
+  device_id_len : Int32,
   out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_wasapi_device_name_utf8"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_device_name_utf8"
 
 ///|
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_form_factor_u32(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-) -> UInt = "moon_cpal_wasapi_device_form_factor_u32"
+  device_id_len : Int32,
+) -> UInt32 = "moon_cpal_wasapi_device_form_factor_u32"
 
 ///|
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_property_utf8_len(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  prop_tag : Int,
-) -> Int = "moon_cpal_wasapi_device_property_utf8_len"
+  device_id_len : Int32,
+  prop_tag : Int32,
+) -> Int32 = "moon_cpal_wasapi_device_property_utf8_len"
 
 ///|
 #borrow(out)
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_property_utf8(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  prop_tag : Int,
+  device_id_len : Int32,
+  prop_tag : Int32,
   out : Bytes,
-  out_len : Int,
-) -> Int = "moon_cpal_wasapi_device_property_utf8"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_device_property_utf8"
 
 ///|
 #borrow(out)
 #owned(device_id_utf8)
 extern "C" fn wasapi_default_config_u32(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  is_input : Int,
-  out : FixedArray[UInt],
-  out_len : Int,
-) -> Int = "moon_cpal_wasapi_default_config_u32"
+  device_id_len : Int32,
+  is_input : Int32,
+  out : FixedArray[UInt32],
+  out_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_default_config_u32"
 
 ///|
 #owned(device_id_utf8)
 extern "C" fn wasapi_device_data_flow_tag(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-) -> Int = "moon_cpal_wasapi_device_data_flow_tag"
+  device_id_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_device_data_flow_tag"
 
 ///|
 #borrow(out)
 #owned(device_id_utf8)
 extern "C" fn wasapi_default_config_ex_u32(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  is_input : Int,
-  out : FixedArray[UInt],
-  out_len : Int,
-) -> Int = "moon_cpal_wasapi_default_config_ex_u32"
+  device_id_len : Int32,
+  is_input : Int32,
+  out : FixedArray[UInt32],
+  out_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_default_config_ex_u32"
 
 ///|
 #borrow(out)
 #owned(device_id_utf8)
 extern "C" fn wasapi_supported_configs_u32(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
-  is_input : Int,
-  out : FixedArray[UInt],
-  out_len : Int,
-) -> Int = "moon_cpal_wasapi_supported_configs_u32"
+  device_id_len : Int32,
+  is_input : Int32,
+  out : FixedArray[UInt32],
+  out_len : Int32,
+) -> Int32 = "moon_cpal_wasapi_supported_configs_u32"
 
 ///|
 pub fn devices_utf8() -> Bytes {
@@ -130,7 +130,7 @@ pub fn device_name_utf8(id : String) -> String? {
   if n <= 0 {
     return None
   }
-  let out = Bytes::make(n, (0 : Int).to_byte())
+  let out = Bytes::make(n, (0 : Int32).to_byte())
   let b2 = @core.string_to_utf8_bytes(id)
   let used = wasapi_device_name_utf8(b2, id_len, out, out.length())
   if used <= 0 {
@@ -141,7 +141,7 @@ pub fn device_name_utf8(id : String) -> String? {
 }
 
 ///|
-pub fn device_form_factor_u32(id : String) -> UInt? {
+pub fn device_form_factor_u32(id : String) -> UInt32? {
   if id.length() == 0 {
     return None
   }
@@ -155,7 +155,7 @@ pub fn device_form_factor_u32(id : String) -> UInt? {
 }
 
 ///|
-pub fn device_property_utf8(id : String, prop_tag : Int) -> String? {
+pub fn device_property_utf8(id : String, prop_tag : Int32) -> String? {
   if id.length() == 0 {
     return None
   }
@@ -165,7 +165,7 @@ pub fn device_property_utf8(id : String, prop_tag : Int) -> String? {
   if n <= 0 {
     return None
   }
-  let out = Bytes::make(n, (0 : Int).to_byte())
+  let out = Bytes::make(n, (0 : Int32).to_byte())
   let b2 = @core.string_to_utf8_bytes(id)
   let used = wasapi_device_property_utf8(
     b2,
@@ -182,9 +182,12 @@ pub fn device_property_utf8(id : String, prop_tag : Int) -> String? {
 }
 
 ///|
-pub fn default_config_u32(id : String, is_input : Bool) -> (UInt, UInt, UInt)? {
+pub fn default_config_u32(
+  id : String,
+  is_input : Bool,
+) -> (UInt32, UInt32, UInt32)? {
   let b = @core.string_to_utf8_bytes(id)
-  let out = FixedArray::make(3, (0 : UInt))
+  let out = FixedArray::make(3, (0 : UInt32))
   let st = wasapi_default_config_u32(
     b,
     b.length(),
@@ -204,7 +207,7 @@ pub fn default_config_u32(id : String, is_input : Bool) -> (UInt, UInt, UInt)? {
 }
 
 ///|
-pub fn data_flow_tag(id : String) -> Int? {
+pub fn data_flow_tag(id : String) -> Int32? {
   let b = @core.string_to_utf8_bytes(id)
   let st = wasapi_device_data_flow_tag(b, b.length())
   if st <= 0 {
@@ -218,9 +221,9 @@ pub fn data_flow_tag(id : String) -> Int? {
 pub fn default_config_ex_u32(
   id : String,
   is_input : Bool,
-) -> (UInt, UInt, UInt, UInt, UInt)? {
+) -> (UInt32, UInt32, UInt32, UInt32, UInt32)? {
   let b = @core.string_to_utf8_bytes(id)
-  let out = FixedArray::make(5, (0 : UInt))
+  let out = FixedArray::make(5, (0 : UInt32))
   let st = wasapi_default_config_ex_u32(
     b,
     b.length(),
@@ -243,9 +246,9 @@ pub fn default_config_ex_u32(
 pub fn supported_configs_u32(
   id : String,
   is_input : Bool,
-) -> (Int, FixedArray[UInt])? {
+) -> (Int32, FixedArray[UInt32])? {
   // 21 sample rates * 2 formats => 42 entries, each uses 5 u32s.
-  let out = FixedArray::make(5 * 64, (0 : UInt))
+  let out = FixedArray::make(5 * 64, (0 : UInt32))
   let b = @core.string_to_utf8_bytes(id)
   let st = wasapi_supported_configs_u32(
     b,

@@ -20,83 +20,87 @@
 #owned(device_id_utf8, data_callback, error_callback)
 extern "C" fn jack_stream_build_output(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
+  device_id_len : Int32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.OutputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.OutputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_jack_stream_build_output"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_jack_stream_build_output"
 
 ///|
 #borrow(out_handles)
 #owned(device_id_utf8, data_callback, error_callback)
 extern "C" fn jack_stream_build_input(
   device_id_utf8 : Bytes,
-  device_id_len : Int,
+  device_id_len : Int32,
   sample_rate : Double,
-  channels : UInt,
-  sample_format_tag : UInt,
-  buffer_frames : UInt,
+  channels : UInt32,
+  sample_format_tag : UInt32,
+  buffer_frames : UInt32,
   call_data_callback : FuncRef[
     (
       (@core.Data, @core.InputCallbackInfo) -> Unit,
-      UInt,
+      UInt32,
       FixedArray[Byte],
       Int64,
-      Int,
+      Int32,
       Int64,
-      Int,
+      Int32,
     ) -> Unit,
   ],
   data_callback : (@core.Data, @core.InputCallbackInfo) -> Unit,
-  call_error_callback : FuncRef[((@core.StreamError) -> Unit, Int, Int) -> Unit],
+  call_error_callback : FuncRef[
+    ((@core.StreamError) -> Unit, Int32, Int32) -> Unit,
+  ],
   error_callback : (@core.StreamError) -> Unit,
   out_handles : FixedArray[UInt64],
-  out_len : Int,
-) -> Int = "moon_cpal_jack_stream_build_input"
+  out_len : Int32,
+) -> Int32 = "moon_cpal_jack_stream_build_input"
 
 ///|
 extern "C" fn jack_stream_owner_new(handle : UInt64) -> StreamOwner = "moon_cpal_jack_stream_owner_new"
 
 ///|
 #borrow(owner)
-extern "C" fn jack_stream_owner_play(owner : StreamOwner) -> Int = "moon_cpal_jack_stream_owner_play"
+extern "C" fn jack_stream_owner_play(owner : StreamOwner) -> Int32 = "moon_cpal_jack_stream_owner_play"
 
 ///|
 #borrow(owner)
-extern "C" fn jack_stream_owner_pause(owner : StreamOwner) -> Int = "moon_cpal_jack_stream_owner_pause"
+extern "C" fn jack_stream_owner_pause(owner : StreamOwner) -> Int32 = "moon_cpal_jack_stream_owner_pause"
 
 ///|
 #borrow(owner)
-extern "C" fn jack_stream_owner_close(owner : StreamOwner) -> Int = "moon_cpal_jack_stream_owner_close"
+extern "C" fn jack_stream_owner_close(owner : StreamOwner) -> Int32 = "moon_cpal_jack_stream_owner_close"
 
 ///|
 fn[A] raise_build_error(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.BuildStreamError {
   raise jack_build_error_from_status(status, op)
 }
 
 ///|
 fn jack_build_error_from_status(
-  status : Int,
+  status : Int32,
   op : String,
 ) -> @core.BuildStreamError {
   // Best-effort errno-like mapping (Linux).
@@ -117,7 +121,7 @@ fn jack_build_error_from_status(
 ///|
 fn[A] raise_play_error(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PlayStreamError {
   raise @core.play_stream_error_backend_specific("\{op}: \{status}")
 }
@@ -125,13 +129,13 @@ fn[A] raise_play_error(
 ///|
 fn[A] raise_pause_error(
   op : String,
-  status : Int,
+  status : Int32,
 ) -> A raise @core.PauseStreamError {
   raise @core.pause_stream_error_backend_specific("\{op}: \{status}")
 }
 
 ///|
-fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt {
+fn buffer_frames_from_config(config : @core.StreamConfig) -> UInt32 {
   match config.buffer_size {
     Default => 0
     Fixed(n) => if n > 0 { n.reinterpret_as_uint() } else { 0 }
@@ -191,7 +195,7 @@ pub fn Device::build_output_stream_raw(
   }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)
-  let fmt_tag = (1 : UInt)
+  let fmt_tag = (1 : UInt32)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = jack_stream_build_output(
@@ -249,7 +253,7 @@ pub fn Device::build_input_stream_raw(
   }
   validate_buffer_size_or_raise(config)
   validate_sample_format_or_raise(sample_format)
-  let fmt_tag = (1 : UInt)
+  let fmt_tag = (1 : UInt32)
   let dev = @core.string_to_utf8_bytes(self.id)
   let out = FixedArray::make(1, (0 : UInt64))
   let st = jack_stream_build_input(

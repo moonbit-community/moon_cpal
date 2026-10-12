@@ -23,56 +23,56 @@
 
 ///|
 pub struct I24 {
-  raw : Int
+  raw : Int32
 } derive(Debug, Eq)
 
 ///|
 pub struct U24 {
-  raw : Int
+  raw : Int32
 } derive(Debug, Eq)
 
 ///|
-let i24_min : Int = -8_388_608
+let i24_min : Int32 = -8_388_608
 
 ///|
-let i24_max : Int = 8_388_607
+let i24_max : Int32 = 8_388_607
 
 ///|
-let u24_min : Int = 0
+let u24_min : Int32 = 0
 
 ///|
-let u24_max : Int = 16_777_215
+let u24_max : Int32 = 16_777_215
 
 ///|
-let u24_mid : Int = 8_388_608
+let u24_mid : Int32 = 8_388_608
 
 ///|
-pub fn I24::new(raw : Int) -> I24 {
+pub fn I24::new(raw : Int32) -> I24 {
   I24(raw)
 }
 
 ///|
-pub fn I24::I24(raw : Int) -> I24 {
-  { raw: Int::clamp(raw, min=i24_min, max=i24_max), }
+pub fn I24::I24(raw : Int32) -> I24 {
+  { raw: Int32::clamp(raw, min=i24_min, max=i24_max), }
 }
 
 ///|
-pub fn I24::to_int(self : I24) -> Int {
+pub fn I24::to_int(self : I24) -> Int32 {
   self.raw
 }
 
 ///|
-pub fn U24::new(raw : Int) -> U24 {
+pub fn U24::new(raw : Int32) -> U24 {
   U24(raw)
 }
 
 ///|
-pub fn U24::U24(raw : Int) -> U24 {
-  { raw: Int::clamp(raw, min=u24_min, max=u24_max), }
+pub fn U24::U24(raw : Int32) -> U24 {
+  { raw: Int32::clamp(raw, min=u24_min, max=u24_max), }
 }
 
 ///|
-pub fn U24::to_int(self : U24) -> Int {
+pub fn U24::to_int(self : U24) -> Int32 {
   self.raw
 }
 
@@ -118,7 +118,7 @@ fn clamp_unit(x : Float) -> Float {
 }
 
 ///|
-fn round_to_int(x : Float) -> Int {
+fn round_to_int(x : Float) -> Int32 {
   x.round().to_int()
 }
 
@@ -191,7 +191,7 @@ pub impl Sample for Int16 with fn to_f32(self : Int16) -> Float {
 pub impl Sample for Int16 with fn from_f32(x : Float) -> Int16 {
   let x = clamp_unit(x)
   let scaled = round_to_int(x * Float::from_int(32_768))
-  let clamped = Int::clamp(scaled, min=-32_768, max=32_767)
+  let clamped = Int32::clamp(scaled, min=-32_768, max=32_767)
   Int16::from_int(clamped)
 }
 
@@ -220,7 +220,7 @@ pub impl Sample for UInt16 with fn to_f32(self : UInt16) -> Float {
 pub impl Sample for UInt16 with fn from_f32(x : Float) -> UInt16 {
   let x = clamp_unit(x)
   let scaled = round_to_int(x * Float::from_int(32_768)) + 32_768
-  let clamped = Int::clamp(scaled, min=0, max=65_535)
+  let clamped = Int32::clamp(scaled, min=0, max=65_535)
   clamped.to_uint16()
 }
 
@@ -249,7 +249,7 @@ pub impl Sample for Byte with fn to_f32(self : Byte) -> Float {
 pub impl Sample for Byte with fn from_f32(x : Float) -> Byte {
   let x = clamp_unit(x)
   let scaled = round_to_int(x * Float::from_int(128)) + 128
-  let clamped = Int::clamp(scaled, min=0, max=255)
+  let clamped = Int32::clamp(scaled, min=0, max=255)
   clamped.to_byte()
 }
 

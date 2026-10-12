@@ -218,13 +218,13 @@ pub struct DeviceDescription {
 ///|
 pub fn DeviceDescription::DeviceDescription(
   name : String,
-  manufacturer? : String? = None,
-  driver? : String? = None,
-  device_type? : DeviceType = Unknown,
-  interface_type? : InterfaceType = Unknown,
-  direction? : DeviceDirection = Unknown,
-  address? : String? = None,
-  extended? : Array[String] = [],
+  manufacturer~ : String? = None,
+  driver~ : String? = None,
+  device_type~ : DeviceType = Unknown,
+  interface_type~ : InterfaceType = Unknown,
+  direction~ : DeviceDirection = Unknown,
+  address~ : String? = None,
+  extended~ : Array[String] = [],
 ) -> DeviceDescription {
   {
     name,
@@ -241,13 +241,13 @@ pub fn DeviceDescription::DeviceDescription(
 ///|
 pub fn DeviceDescription::new(
   name : String,
-  manufacturer? : String? = None,
-  driver? : String? = None,
-  device_type? : DeviceType = Unknown,
-  interface_type? : InterfaceType = Unknown,
-  direction? : DeviceDirection = Unknown,
-  address? : String? = None,
-  extended? : Array[String] = [],
+  manufacturer~ : String? = None,
+  driver~ : String? = None,
+  device_type~ : DeviceType = Unknown,
+  interface_type~ : InterfaceType = Unknown,
+  direction~ : DeviceDirection = Unknown,
+  address~ : String? = None,
+  extended~ : Array[String] = [],
 ) -> DeviceDescription {
   DeviceDescription(
     name,
