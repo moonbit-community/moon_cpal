@@ -7,25 +7,25 @@ import {
 }
 
 // Values
-pub fn data_flow_tag(String) -> Int?
+pub fn data_flow_tag(String) -> Int32?
 
-pub fn default_config_ex_u32(String, Bool) -> (UInt, UInt, UInt, UInt, UInt)?
+pub fn default_config_ex_u32(String, Bool) -> (UInt32, UInt32, UInt32, UInt32, UInt32)?
 
-pub fn default_config_u32(String, Bool) -> (UInt, UInt, UInt)?
+pub fn default_config_u32(String, Bool) -> (UInt32, UInt32, UInt32)?
 
 pub fn default_device_id_utf8(Bool) -> String?
 
 pub fn default_host() -> Host
 
-pub fn device_form_factor_u32(String) -> UInt?
+pub fn device_form_factor_u32(String) -> UInt32?
 
 pub fn device_name_utf8(String) -> String?
 
-pub fn device_property_utf8(String, Int) -> String?
+pub fn device_property_utf8(String, Int32) -> String?
 
 pub fn devices_utf8() -> Bytes
 
-pub fn supported_configs_u32(String, Bool) -> (Int, FixedArray[UInt])?
+pub fn supported_configs_u32(String, Bool) -> (Int32, FixedArray[UInt32])?
 
 // Errors
 

@@ -13,7 +13,7 @@ pub fn all_hosts() -> Array[@core.HostId]
 
 pub fn available_hosts() -> Array[@core.HostId]
 
-pub fn common_sample_rates() -> Array[Int]
+pub fn common_sample_rates() -> Array[Int32]
 
 pub fn default_host() -> @spec.Host
 
@@ -34,7 +34,7 @@ pub using @core {type BufferSize}
 
 pub using @core {type BuildStreamError}
 
-pub type ChannelCount = Int
+pub type ChannelCount = Int32
 
 pub using @spec {type Data}
 
@@ -64,7 +64,7 @@ pub using @builtin {type Iter as DevicesFiltered}
 
 pub using @core {type Duration}
 
-pub type FrameCount = Int
+pub type FrameCount = Int32
 
 pub using @spec {type Host}
 
@@ -94,7 +94,7 @@ pub using @core {type PlayStreamError}
 
 pub using @core {type SampleFormat}
 
-pub type SampleRate = Int
+pub type SampleRate = Int32
 
 pub using @spec {type Stream}
 

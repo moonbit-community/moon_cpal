@@ -18,7 +18,7 @@ pub fn build_stream_error_stream_config_not_supported() -> BuildStreamError
 
 pub fn build_stream_error_stream_id_overflow() -> BuildStreamError
 
-pub fn common_sample_rates() -> Array[Int]
+pub fn common_sample_rates() -> Array[Int32]
 
 pub fn default_stream_config_error_backend_specific(String) -> DefaultStreamConfigError
 
@@ -38,7 +38,7 @@ pub fn devices_error_backend_specific(String) -> DevicesError
 
 pub fn direction_from_caps(Bool, Bool) -> DeviceDirection
 
-pub fn direction_from_counts(Int?, Int?) -> DeviceDirection
+pub fn direction_from_counts(Int32?, Int32?) -> DeviceDirection
 
 pub fn host_unavailable() -> HostUnavailable
 
@@ -54,7 +54,7 @@ pub fn play_stream_error_device_not_available() -> PlayStreamError
 
 pub fn[A : Sample, B : Sample] sample_cast(A) -> B
 
-pub fn sleep_millis(Int) -> Unit
+pub fn sleep_millis(Int32) -> Unit
 
 pub fn stream_error_backend_specific(String) -> StreamError
 
@@ -76,7 +76,7 @@ pub fn supported_stream_configs_error_device_not_available() -> SupportedStreamC
 
 pub fn supported_stream_configs_error_invalid_argument() -> SupportedStreamConfigsError
 
-pub fn utf8_bytes_to_string(Bytes, Int) -> String
+pub fn utf8_bytes_to_string(Bytes, Int32) -> String
 
 // Errors
 pub suberror BuildStreamError {
@@ -212,11 +212,11 @@ pub impl Show for BackendSpecificError
 
 pub enum BufferSize {
   Default
-  Fixed(Int)
+  Fixed(Int32)
 } derive(Eq, @debug.Debug)
 pub fn BufferSize::default() -> Self
 pub fn BufferSize::equal(Self, Self) -> Bool
-pub fn BufferSize::fixed(Int) -> Self
+pub fn BufferSize::fixed(Int32) -> Self
 pub fn BufferSize::not_equal(Self, Self) -> Bool
 pub fn BufferSize::output(Self, &Logger) -> Unit
 pub fn BufferSize::to_repr(Self) -> @debug.Repr
@@ -231,7 +231,7 @@ pub fn Data::Data(SampleFormat, FixedArray[Byte]) -> Self
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::clear(Self) -> Unit
 pub fn Data::equal(Self, Self) -> Bool
-pub fn Data::len(Self) -> Int
+pub fn Data::len(Self) -> Int32
 pub fn Data::new(SampleFormat, FixedArray[Byte]) -> Self
 pub fn Data::not_equal(Self, Self) -> Bool
 pub fn Data::output(Self, &Logger) -> Unit
@@ -242,24 +242,24 @@ pub fn Data::try_as_f32(Self) -> Array[Float]?
 pub fn Data::try_as_f64(Self) -> Array[Double]?
 pub fn Data::try_as_i16(Self) -> Array[Int16]?
 pub fn Data::try_as_i24(Self) -> Array[I24]?
-pub fn Data::try_as_i32(Self) -> Array[Int]?
+pub fn Data::try_as_i32(Self) -> Array[Int32]?
 pub fn Data::try_as_i64(Self) -> Array[Int64]?
-pub fn Data::try_as_i8(Self) -> Array[Int]?
+pub fn Data::try_as_i8(Self) -> Array[Int32]?
 pub fn Data::try_as_u16(Self) -> Array[UInt16]?
 pub fn Data::try_as_u24(Self) -> Array[U24]?
-pub fn Data::try_as_u32(Self) -> Array[UInt]?
+pub fn Data::try_as_u32(Self) -> Array[UInt32]?
 pub fn Data::try_as_u64(Self) -> Array[UInt64]?
 pub fn Data::try_as_u8(Self) -> Array[Byte]?
 pub fn Data::write_f32(Self, Array[Float]) -> Bool
 pub fn Data::write_f64(Self, Array[Double]) -> Bool
 pub fn Data::write_i16(Self, Array[Int16]) -> Bool
 pub fn Data::write_i24(Self, Array[I24]) -> Bool
-pub fn Data::write_i32(Self, Array[Int]) -> Bool
+pub fn Data::write_i32(Self, Array[Int32]) -> Bool
 pub fn Data::write_i64(Self, Array[Int64]) -> Bool
-pub fn Data::write_i8(Self, Array[Int]) -> Bool
+pub fn Data::write_i8(Self, Array[Int32]) -> Bool
 pub fn Data::write_u16(Self, Array[UInt16]) -> Bool
 pub fn Data::write_u24(Self, Array[U24]) -> Bool
-pub fn Data::write_u32(Self, Array[UInt]) -> Bool
+pub fn Data::write_u32(Self, Array[UInt32]) -> Bool
 pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
 pub fn Data::write_u8(Self, Array[Byte]) -> Bool
 pub impl Show for Data
@@ -386,12 +386,12 @@ pub impl Show for DeviceType
 
 pub struct Duration {
   secs : UInt64
-  nanos : Int
+  nanos : Int32
 } derive(Eq, @debug.Debug)
-pub fn Duration::Duration(UInt64, Int) -> Self
+pub fn Duration::Duration(UInt64, Int32) -> Self
 pub fn Duration::equal(Self, Self) -> Bool
 pub fn Duration::from_secs(UInt64) -> Self
-pub fn Duration::new(UInt64, Int) -> Self
+pub fn Duration::new(UInt64, Int32) -> Self
 pub fn Duration::not_equal(Self, Self) -> Bool
 pub fn Duration::output(Self, &Logger) -> Unit
 pub fn Duration::to_repr(Self) -> @debug.Repr
@@ -423,19 +423,19 @@ pub fn HostId::to_string(Self) -> String
 pub impl Show for HostId
 
 pub struct I24 {
-  raw : Int
+  raw : Int32
 } derive(Eq, @debug.Debug)
-pub fn I24::I24(Int) -> Self
+pub fn I24::I24(Int32) -> Self
 pub fn I24::equal(Self, Self) -> Bool
 pub fn I24::equilibrium() -> Self
 pub fn I24::format(Self) -> SampleFormat
 pub fn I24::from_f32(Float) -> Self
 pub fn I24::from_sample(Float) -> Self
-pub fn I24::new(Int) -> Self
+pub fn I24::new(Int32) -> Self
 pub fn I24::not_equal(Self, Self) -> Bool
 pub fn I24::output(Self, &Logger) -> Unit
 pub fn I24::to_f32(Self) -> Float
-pub fn I24::to_int(Self) -> Int
+pub fn I24::to_int(Self) -> Int32
 pub fn I24::to_repr(Self) -> @debug.Repr
 pub fn I24::to_string(Self) -> String
 pub impl FromSample for I24
@@ -566,7 +566,7 @@ pub(all) enum SampleFormat {
   DsdU16
   DsdU32
 } derive(Eq, @debug.Debug)
-pub fn SampleFormat::bits_per_sample(Self) -> Int
+pub fn SampleFormat::bits_per_sample(Self) -> Int32
 pub fn SampleFormat::equal(Self, Self) -> Bool
 pub fn SampleFormat::is_dsd(Self) -> Bool
 pub fn SampleFormat::is_float(Self) -> Bool
@@ -574,20 +574,20 @@ pub fn SampleFormat::is_int(Self) -> Bool
 pub fn SampleFormat::is_uint(Self) -> Bool
 pub fn SampleFormat::not_equal(Self, Self) -> Bool
 pub fn SampleFormat::output(Self, &Logger) -> Unit
-pub fn SampleFormat::sample_size(Self) -> Int
+pub fn SampleFormat::sample_size(Self) -> Int32
 pub fn SampleFormat::to_debug_string(Self) -> String
 pub fn SampleFormat::to_repr(Self) -> @debug.Repr
 pub fn SampleFormat::to_string(Self) -> String
 pub impl Show for SampleFormat
 
 pub struct StreamConfig {
-  channels : Int
-  sample_rate : Int
+  channels : Int32
+  sample_rate : Int32
   buffer_size : BufferSize
 } derive(Eq, @debug.Debug)
-pub fn StreamConfig::StreamConfig(Int, Int, BufferSize) -> Self
+pub fn StreamConfig::StreamConfig(Int32, Int32, BufferSize) -> Self
 pub fn StreamConfig::equal(Self, Self) -> Bool
-pub fn StreamConfig::new(Int, Int, BufferSize) -> Self
+pub fn StreamConfig::new(Int32, Int32, BufferSize) -> Self
 pub fn StreamConfig::not_equal(Self, Self) -> Bool
 pub fn StreamConfig::output(Self, &Logger) -> Unit
 pub fn StreamConfig::to_repr(Self) -> @debug.Repr
@@ -596,13 +596,13 @@ pub impl Show for StreamConfig
 
 pub struct StreamInstant {
   secs : Int64
-  nanos : Int
+  nanos : Int32
 } derive(Eq, @debug.Debug)
-pub fn StreamInstant::StreamInstant(Int64, Int) -> Self
+pub fn StreamInstant::StreamInstant(Int64, Int32) -> Self
 pub fn StreamInstant::add(Self, Duration) -> Self?
 pub fn StreamInstant::duration_since(Self, Self) -> Duration?
 pub fn StreamInstant::equal(Self, Self) -> Bool
-pub fn StreamInstant::new(Int64, Int) -> Self
+pub fn StreamInstant::new(Int64, Int32) -> Self
 pub fn StreamInstant::not_equal(Self, Self) -> Bool
 pub fn StreamInstant::output(Self, &Logger) -> Unit
 pub fn StreamInstant::sub(Self, Duration) -> Self?
@@ -611,10 +611,10 @@ pub fn StreamInstant::to_string(Self) -> String
 pub impl Show for StreamInstant
 
 pub(all) enum SupportedBufferSize {
-  Range(min~ : Int, max~ : Int)
+  Range(min~ : Int32, max~ : Int32)
   Unknown
 } derive(Eq, @debug.Debug)
-pub fn SupportedBufferSize::contains(Self, Int) -> Bool
+pub fn SupportedBufferSize::contains(Self, Int32) -> Bool
 pub fn SupportedBufferSize::equal(Self, Self) -> Bool
 pub fn SupportedBufferSize::not_equal(Self, Self) -> Bool
 pub fn SupportedBufferSize::output(Self, &Logger) -> Unit
@@ -624,63 +624,63 @@ pub impl Show for SupportedBufferSize
 
 pub struct SupportedStreamConfig {
   buffer_size : SupportedBufferSize
-  channels : Int
-  sample_rate : Int
+  channels : Int32
+  sample_rate : Int32
   sample_format : SampleFormat
 } derive(Eq, @debug.Debug)
-pub fn SupportedStreamConfig::SupportedStreamConfig(Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfig::SupportedStreamConfig(Int32, Int32, SupportedBufferSize, SampleFormat) -> Self
 pub fn SupportedStreamConfig::buffer_size(Self) -> SupportedBufferSize
-pub fn SupportedStreamConfig::channels(Self) -> Int
+pub fn SupportedStreamConfig::channels(Self) -> Int32
 pub fn SupportedStreamConfig::config(Self) -> StreamConfig
 pub fn SupportedStreamConfig::equal(Self, Self) -> Bool
-pub fn SupportedStreamConfig::new(Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfig::new(Int32, Int32, SupportedBufferSize, SampleFormat) -> Self
 pub fn SupportedStreamConfig::not_equal(Self, Self) -> Bool
 pub fn SupportedStreamConfig::output(Self, &Logger) -> Unit
 pub fn SupportedStreamConfig::sample_format(Self) -> SampleFormat
-pub fn SupportedStreamConfig::sample_rate(Self) -> Int
+pub fn SupportedStreamConfig::sample_rate(Self) -> Int32
 pub fn SupportedStreamConfig::to_repr(Self) -> @debug.Repr
 pub fn SupportedStreamConfig::to_string(Self) -> String
 pub impl Show for SupportedStreamConfig
 
 pub struct SupportedStreamConfigRange {
   buffer_size : SupportedBufferSize
-  channels : Int
-  min_sample_rate : Int
-  max_sample_rate : Int
+  channels : Int32
+  min_sample_rate : Int32
+  max_sample_rate : Int32
   sample_format : SampleFormat
 } derive(Eq, @debug.Debug)
-pub fn SupportedStreamConfigRange::SupportedStreamConfigRange(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfigRange::SupportedStreamConfigRange(Int32, Int32, Int32, SupportedBufferSize, SampleFormat) -> Self
 pub fn SupportedStreamConfigRange::buffer_size(Self) -> SupportedBufferSize
-pub fn SupportedStreamConfigRange::channels(Self) -> Int
-pub fn SupportedStreamConfigRange::cmp_default_heuristics(Self, Self) -> Int
+pub fn SupportedStreamConfigRange::channels(Self) -> Int32
+pub fn SupportedStreamConfigRange::cmp_default_heuristics(Self, Self) -> Int32
 pub fn SupportedStreamConfigRange::equal(Self, Self) -> Bool
-pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int
-pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int
-pub fn SupportedStreamConfigRange::new(Int, Int, Int, SupportedBufferSize, SampleFormat) -> Self
+pub fn SupportedStreamConfigRange::max_sample_rate(Self) -> Int32
+pub fn SupportedStreamConfigRange::min_sample_rate(Self) -> Int32
+pub fn SupportedStreamConfigRange::new(Int32, Int32, Int32, SupportedBufferSize, SampleFormat) -> Self
 pub fn SupportedStreamConfigRange::not_equal(Self, Self) -> Bool
 pub fn SupportedStreamConfigRange::output(Self, &Logger) -> Unit
 pub fn SupportedStreamConfigRange::sample_format(Self) -> SampleFormat
 pub fn SupportedStreamConfigRange::to_repr(Self) -> @debug.Repr
 pub fn SupportedStreamConfigRange::to_string(Self) -> String
-pub fn SupportedStreamConfigRange::try_with_sample_rate(Self, Int) -> SupportedStreamConfig?
+pub fn SupportedStreamConfigRange::try_with_sample_rate(Self, Int32) -> SupportedStreamConfig?
 pub fn SupportedStreamConfigRange::with_max_sample_rate(Self) -> SupportedStreamConfig
-pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int) -> SupportedStreamConfig
+pub fn SupportedStreamConfigRange::with_sample_rate(Self, Int32) -> SupportedStreamConfig
 pub impl Show for SupportedStreamConfigRange
 
 pub struct U24 {
-  raw : Int
+  raw : Int32
 } derive(Eq, @debug.Debug)
-pub fn U24::U24(Int) -> Self
+pub fn U24::U24(Int32) -> Self
 pub fn U24::equal(Self, Self) -> Bool
 pub fn U24::equilibrium() -> Self
 pub fn U24::format(Self) -> SampleFormat
 pub fn U24::from_f32(Float) -> Self
 pub fn U24::from_sample(Float) -> Self
-pub fn U24::new(Int) -> Self
+pub fn U24::new(Int32) -> Self
 pub fn U24::not_equal(Self, Self) -> Bool
 pub fn U24::output(Self, &Logger) -> Unit
 pub fn U24::to_f32(Self) -> Float
-pub fn U24::to_int(Self) -> Int
+pub fn U24::to_int(Self) -> Int32
 pub fn U24::to_repr(Self) -> @debug.Repr
 pub fn U24::to_string(Self) -> String
 pub impl FromSample for U24
@@ -689,11 +689,11 @@ pub impl SizedSample for U24
 pub impl Show for U24
 
 // Type aliases
-pub type ChannelCount = Int
+pub type ChannelCount = Int32
 
-pub type FrameCount = Int
+pub type FrameCount = Int32
 
-pub type SampleRate = Int
+pub type SampleRate = Int32
 
 // Traits
 pub trait FromSample : Sample {

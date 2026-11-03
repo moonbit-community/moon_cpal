@@ -2,7 +2,7 @@
 package "moonbit-community/downstream_smoke/smoke"
 
 // Values
-pub fn downstream_dependency_compiles() -> Int
+pub fn downstream_dependency_compiles() -> Int32
 
 // Errors
 

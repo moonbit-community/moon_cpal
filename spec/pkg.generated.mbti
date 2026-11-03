@@ -27,7 +27,7 @@ pub struct Data {
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::clear(Self) -> Unit
 pub fn Data::equal(Self, Self) -> Bool
-pub fn Data::len(Self) -> Int
+pub fn Data::len(Self) -> Int32
 pub fn Data::not_equal(Self, Self) -> Bool
 pub fn Data::output(Self, &Logger) -> Unit
 pub fn Data::sample_format(Self) -> @core.SampleFormat
@@ -41,12 +41,12 @@ pub fn Data::write_f32(Self, Array[Float]) -> Bool
 pub fn Data::write_f64(Self, Array[Double]) -> Bool
 pub fn Data::write_i16(Self, Array[Int16]) -> Bool
 pub fn Data::write_i24(Self, Array[@core.I24]) -> Bool
-pub fn Data::write_i32(Self, Array[Int]) -> Bool
+pub fn Data::write_i32(Self, Array[Int32]) -> Bool
 pub fn Data::write_i64(Self, Array[Int64]) -> Bool
-pub fn Data::write_i8(Self, Array[Int]) -> Bool
+pub fn Data::write_i8(Self, Array[Int32]) -> Bool
 pub fn Data::write_u16(Self, Array[UInt16]) -> Bool
 pub fn Data::write_u24(Self, Array[@core.U24]) -> Bool
-pub fn Data::write_u32(Self, Array[UInt]) -> Bool
+pub fn Data::write_u32(Self, Array[UInt32]) -> Bool
 pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
 pub fn Data::write_u8(Self, Array[Byte]) -> Bool
 pub impl Show for Data

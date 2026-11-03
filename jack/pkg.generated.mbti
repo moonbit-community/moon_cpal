@@ -9,7 +9,7 @@ import {
 // Values
 pub fn default_host() -> Host
 
-pub fn default_server_config() -> (Int, Int)?
+pub fn default_server_config() -> (Int32, Int32)?
 
 // Errors
 
