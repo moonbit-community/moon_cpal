@@ -16,10 +16,11 @@
 /// A minimal duration type used by the ported `StreamInstant` arithmetic.
 ///
 /// Upstream uses `std::time::Duration` (non-negative). Here we keep the same invariant.
+#derive(Debug, Eq)
 pub struct Duration {
   secs : UInt64
   nanos : Int32 // 0 <= nanos < 1_000_000_000
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Duration::from_secs(secs : UInt64) -> Duration {
@@ -62,10 +63,11 @@ fn Duration::as_nanos_bigint(self : Duration) -> @bigint.BigInt {
 
 ///|
 /// Monotonic timestamp associated with a stream.
+#derive(Debug, Eq)
 pub struct StreamInstant {
   secs : Int64
   nanos : Int32 // normalized to 0 <= nanos < 1_000_000_000
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StreamInstant::StreamInstant(
@@ -124,7 +126,7 @@ pub fn StreamInstant::duration_since(
   let nanos_b = @bigint.BigInt::sub(diff, @bigint.BigInt::mul(secs_b, b1e9))
 
   // Guard against overflowing Duration's `UInt64` seconds.
-  let max_u64 = @bigint.BigInt::from_string("18446744073709551615")
+  let max_u64 = @bigint.BigInt::from_uint64(0xFFFFFFFFFFFFFFFFUL)
   if @bigint.BigInt::compare(secs_b, max_u64) > 0 {
     return None
   }

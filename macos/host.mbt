@@ -17,14 +17,16 @@
 ///
 /// Includes device enumeration, config queries and native stream I/O (AudioQueue) with
 /// MoonBit callback bridging.
+#derive(Debug, Eq)
 pub struct Host {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   id : DeviceId
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn default_host() -> Host {

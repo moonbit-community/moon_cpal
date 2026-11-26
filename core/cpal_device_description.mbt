@@ -18,6 +18,7 @@
 /// Ported from upstream `cpal/src/device_description.rs`.
 
 ///|
+#derive(Debug, Eq)
 pub enum DeviceType {
   Speaker
   Microphone
@@ -30,7 +31,7 @@ pub enum DeviceType {
   Tuner
   Virtual
   Unknown
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceType::speaker() -> DeviceType {
@@ -88,6 +89,7 @@ pub fn DeviceType::unknown() -> DeviceType {
 }
 
 ///|
+#derive(Debug, Eq)
 pub enum InterfaceType {
   BuiltIn
   Usb
@@ -103,7 +105,7 @@ pub enum InterfaceType {
   DisplayPort
   Aggregate
   Unknown
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn InterfaceType::built_in() -> InterfaceType {
@@ -176,12 +178,13 @@ pub fn InterfaceType::unknown() -> InterfaceType {
 }
 
 ///|
+#derive(Debug, Eq)
 pub enum DeviceDirection {
   Input
   Output
   Duplex
   Unknown
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceDirection::input() -> DeviceDirection {
@@ -204,6 +207,7 @@ pub fn DeviceDirection::unknown() -> DeviceDirection {
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct DeviceDescription {
   name : String
   manufacturer : String?
@@ -213,7 +217,7 @@ pub struct DeviceDescription {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceDescription::DeviceDescription(
@@ -390,6 +394,7 @@ pub fn DeviceDescription::to_string(self : DeviceDescription) -> String {
 ///
 /// This is primarily intended for backend implementations to gradually build up
 /// descriptions with whatever metadata is available.
+#derive(Debug, Eq)
 pub struct DeviceDescriptionBuilder {
   name : String
   manufacturer : String?
@@ -399,7 +404,7 @@ pub struct DeviceDescriptionBuilder {
   direction : DeviceDirection
   address : String?
   extended : Array[String]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceDescriptionBuilder::DeviceDescriptionBuilder(

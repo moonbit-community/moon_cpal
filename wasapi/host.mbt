@@ -19,14 +19,16 @@
 /// real stream I/O via a native C implementation (callback-thread model).
 
 ///|
+#derive(Debug, Eq)
 pub struct Host {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   id : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn default_host() -> Host {

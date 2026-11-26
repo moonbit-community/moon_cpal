@@ -36,10 +36,11 @@ pub type FrameCount = Int32
 ///
 /// The actual callback size depends on the backend/host implementation and may differ from or
 /// vary around the requested size.
+#derive(Debug, Eq)
 pub enum BufferSize {
   Default
   Fixed(FrameCount)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn BufferSize::default() -> BufferSize {
@@ -52,11 +53,12 @@ pub fn BufferSize::fixed(n : FrameCount) -> BufferSize {
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct StreamConfig {
   channels : ChannelCount
   sample_rate : SampleRate
   buffer_size : BufferSize
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StreamConfig::StreamConfig(
@@ -77,10 +79,11 @@ pub fn StreamConfig::new(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum SupportedBufferSize {
   Range(min~ : FrameCount, max~ : FrameCount)
   Unknown
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn SupportedBufferSize::contains(
@@ -97,6 +100,7 @@ pub fn SupportedBufferSize::contains(
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum SampleFormat {
   I8
   I16
@@ -113,18 +117,19 @@ pub(all) enum SampleFormat {
   DsdU8
   DsdU16
   DsdU32
-} derive(Debug, Eq)
+}
 
 ///|
 /// A single supported stream configuration (as opposed to a range).
 ///
 /// Mirrors cpal's `SupportedStreamConfig` shape used by `default_*_config`.
+#derive(Debug, Eq)
 pub struct SupportedStreamConfig {
   buffer_size : SupportedBufferSize
   channels : ChannelCount
   sample_rate : SampleRate
   sample_format : SampleFormat
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn SupportedStreamConfig::SupportedStreamConfig(
@@ -188,13 +193,14 @@ pub fn SupportedStreamConfig::config(
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct SupportedStreamConfigRange {
   buffer_size : SupportedBufferSize
   channels : ChannelCount
   min_sample_rate : SampleRate
   max_sample_rate : SampleRate
   sample_format : SampleFormat
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn SupportedStreamConfigRange::SupportedStreamConfigRange(

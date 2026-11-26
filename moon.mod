@@ -1,6 +1,6 @@
 name = "moonbit-community/moon_cpal"
 
-version = "0.11.8"
+version = "0.11.9"
 
 readme = "README.mbt.md"
 

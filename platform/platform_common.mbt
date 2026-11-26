@@ -24,31 +24,34 @@
 /// - Windows WASAPI
 
 ///|
+#derive(Debug, Eq)
 pub enum Host {
   Null(@null.Host)
   CoreAudio(@macos.Host)
   Alsa(@alsa.Host)
   Jack(@jack.Host)
   Wasapi(@wasapi.Host)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum Device {
   Null(@null.Device)
   CoreAudio(@macos.Device)
   Alsa(@alsa.Device)
   Jack(@jack.Device)
   Wasapi(@wasapi.Device)
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub enum Stream {
   Null(@null.Stream)
   CoreAudio(@macos.Stream)
   Alsa(@alsa.Stream)
   Jack(@jack.Stream)
   Wasapi(@wasapi.Stream)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Host::id(self : Host) -> @core.HostId {

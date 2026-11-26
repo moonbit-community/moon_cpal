@@ -27,10 +27,11 @@
 ///   - (DSD formats are intentionally not decoded at this layer yet)
 
 ///|
+#derive(Debug, Eq)
 pub struct Data {
   sample_format : SampleFormat
   bytes : FixedArray[Byte]
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Data::Data(

@@ -18,9 +18,10 @@
 /// Ported from upstream `cpal/src/error.rs`. Start small and extend as more API is implemented.
 
 ///|
+#derive(Debug, Eq)
 pub struct BackendSpecificError {
   description : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn BackendSpecificError::BackendSpecificError(
@@ -46,12 +47,13 @@ pub fn BackendSpecificError::to_string(self : BackendSpecificError) -> String {
 
 ///|
 /// May occur when attempting to request the default input or output stream config from a device.
+#derive(Debug, Eq)
 pub suberror DefaultStreamConfigError {
   DeviceNotAvailable
   DeviceBusy
   StreamTypeNotSupported
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DefaultStreamConfigError::to_string(
@@ -70,12 +72,13 @@ pub fn DefaultStreamConfigError::to_string(
 
 ///|
 /// Error that can happen when enumerating the list of supported configs.
+#derive(Debug, Eq)
 pub suberror SupportedStreamConfigsError {
   DeviceNotAvailable
   DeviceBusy
   InvalidArgument
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn SupportedStreamConfigsError::to_string(
@@ -94,9 +97,10 @@ pub fn SupportedStreamConfigsError::to_string(
 
 ///|
 /// An error that might occur while attempting to enumerate devices.
+#derive(Debug, Eq)
 pub suberror DevicesError {
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DevicesError::to_string(self : DevicesError) -> String {
@@ -107,9 +111,10 @@ pub fn DevicesError::to_string(self : DevicesError) -> String {
 
 ///|
 /// An error that may occur while attempting to retrieve a device name.
+#derive(Debug, Eq)
 pub suberror DeviceNameError {
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceNameError::to_string(self : DeviceNameError) -> String {
@@ -120,6 +125,7 @@ pub fn DeviceNameError::to_string(self : DeviceNameError) -> String {
 
 ///|
 /// Error that can happen when creating a stream.
+#derive(Debug, Eq)
 pub suberror BuildStreamError {
   DeviceNotAvailable
   DeviceBusy
@@ -127,7 +133,7 @@ pub suberror BuildStreamError {
   InvalidArgument
   StreamIdOverflow
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn BuildStreamError::to_string(self : BuildStreamError) -> String {
@@ -146,10 +152,11 @@ pub fn BuildStreamError::to_string(self : BuildStreamError) -> String {
 }
 
 ///|
+#derive(Debug, Eq)
 pub suberror PlayStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn PlayStreamError::to_string(self : PlayStreamError) -> String {
@@ -161,10 +168,11 @@ pub fn PlayStreamError::to_string(self : PlayStreamError) -> String {
 }
 
 ///|
+#derive(Debug, Eq)
 pub suberror PauseStreamError {
   DeviceNotAvailable
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn PauseStreamError::to_string(self : PauseStreamError) -> String {
@@ -176,12 +184,13 @@ pub fn PauseStreamError::to_string(self : PauseStreamError) -> String {
 }
 
 ///|
+#derive(Debug, Eq)
 pub suberror StreamError {
   DeviceNotAvailable
   StreamInvalidated
   BufferUnderrun
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn StreamError::to_string(self : StreamError) -> String {

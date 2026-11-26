@@ -22,14 +22,16 @@
 /// - basic normalized conversions (`to_f32` / `from_f32`)
 
 ///|
+#derive(Debug, Eq)
 pub struct I24 {
   raw : Int32
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct U24 {
   raw : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 let i24_min : Int32 = -8_388_608

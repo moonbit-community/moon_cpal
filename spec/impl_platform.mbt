@@ -19,24 +19,28 @@
 /// It is implemented as a thin wrapper around the `platform` dynamic dispatch types.
 
 ///|
+#derive(Debug, Eq)
 pub struct Host {
   inner : @platform.Host
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   inner : @platform.Device
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Stream {
   inner : @platform.Stream
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Data {
   inner : @core.Data
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn default_host() -> Host {

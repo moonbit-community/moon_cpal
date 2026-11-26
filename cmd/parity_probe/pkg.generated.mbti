@@ -1,24 +1,35 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "moonbit-community/moon_cpal/cmd/parity_probe"
 
+import {
+  "moonbitlang/core/json",
+}
+
 // Values
 
 // Errors
 
 // Types and methods
-type ProbeBuffer derive(ToJson)
+#derive(@json.ToJson)
+type ProbeBuffer
 
-type ProbeBuild derive(ToJson)
+#derive(@json.ToJson)
+type ProbeBuild
 
-type ProbeConfig derive(ToJson)
+#derive(@json.ToJson)
+type ProbeConfig
 
-type ProbeConfigRange derive(ToJson)
+#derive(@json.ToJson)
+type ProbeConfigRange
 
-type ProbeDevice derive(ToJson)
+#derive(@json.ToJson)
+type ProbeDevice
 
-type ProbeHost derive(ToJson)
+#derive(@json.ToJson)
+type ProbeHost
 
-type ProbeSnapshot derive(ToJson)
+#derive(@json.ToJson)
+type ProbeSnapshot
 
 // Type aliases
 

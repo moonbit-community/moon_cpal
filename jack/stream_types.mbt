@@ -19,10 +19,11 @@
 /// - `stream_native.mbt` (native): real JACK I/O via libjack on Linux, stubs elsewhere.
 
 ///|
+#derive(Debug, Eq)
 pub enum StreamKind {
   Output
   Input
-} derive(Debug, Eq)
+}
 
 ///|
 // An external object that owns native stream resources.

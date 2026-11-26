@@ -20,14 +20,16 @@
 /// unimplemented (represented here as backend-specific errors).
 
 ///|
+#derive(Debug, Eq)
 pub struct Host {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
 let _unused_device_for_lint : Device = { _unit: (), }

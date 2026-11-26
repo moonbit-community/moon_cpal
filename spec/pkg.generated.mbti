@@ -21,9 +21,10 @@ pub fn try_host_from_id(@core.HostId) -> Host?
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub struct Data {
   inner : @core.Data
-} derive(Eq, @debug.Debug)
+}
 pub fn Data::bytes(Self) -> FixedArray[Byte]
 pub fn Data::clear(Self) -> Unit
 pub fn Data::equal(Self, Self) -> Bool
@@ -51,9 +52,10 @@ pub fn Data::write_u64(Self, Array[UInt64]) -> Bool
 pub fn Data::write_u8(Self, Array[Byte]) -> Bool
 pub impl Show for Data
 
+#derive(Eq, @debug.Debug)
 pub struct Device {
   inner : @platform.Device
-} derive(Eq, @debug.Debug)
+}
 pub fn Device::build_input_stream(Self, @core.StreamConfig, (Data, @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_f32(Self, @core.StreamConfig, (Array[Float], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
 pub fn Device::build_input_stream_i16(Self, @core.StreamConfig, (Array[Int16], @core.InputCallbackInfo) -> Unit, (@core.StreamError) -> Unit, @core.Duration?) -> Stream raise @core.BuildStreamError
@@ -82,9 +84,10 @@ pub fn Device::to_repr(Self) -> @debug.Repr
 pub fn Device::to_string(Self) -> String
 pub impl Show for Device
 
+#derive(Eq, @debug.Debug)
 pub struct Host {
   inner : @platform.Host
-} derive(Eq, @debug.Debug)
+}
 pub fn Host::default_input_device(Self) -> Device?
 pub fn Host::default_output_device(Self) -> Device?
 pub fn Host::device_by_id(Self, @core.DeviceId) -> Device?
@@ -99,9 +102,10 @@ pub fn Host::to_repr(Self) -> @debug.Repr
 pub fn Host::to_string(Self) -> String
 pub impl Show for Host
 
+#derive(Eq, @debug.Debug)
 pub struct Stream {
   inner : @platform.Stream
-} derive(Eq, @debug.Debug)
+}
 pub fn Stream::close(Self) -> Unit
 pub fn Stream::equal(Self, Self) -> Bool
 pub fn Stream::not_equal(Self, Self) -> Bool

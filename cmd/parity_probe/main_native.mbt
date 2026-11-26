@@ -13,38 +13,43 @@
 // limitations under the License.
 
 ///|
+#derive(ToJson)
 struct ProbeBuffer {
   kind : String
   min_frames : Int32
   max_frames : Int32
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeConfig {
   channels : Int32
   sample_rate : Int32
   sample_format : String
   buffer : ProbeBuffer
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeConfigRange {
   channels : Int32
   min_sample_rate : Int32
   max_sample_rate : Int32
   sample_format : String
   buffer : ProbeBuffer
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeBuild {
   raw_ok : Bool
   has_typed_probe : Bool
   typed_kind : String
   typed_ok : Bool
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeDevice {
   id_ok : Bool
   id : String
@@ -60,9 +65,10 @@ struct ProbeDevice {
   supported_input_configs : Array[ProbeConfigRange]
   supported_output_configs_ok : Bool
   supported_output_configs : Array[ProbeConfigRange]
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeHost {
   id : String
   devices_ok : Bool
@@ -77,15 +83,16 @@ struct ProbeHost {
   default_output_device_id : String
   has_default_output_build_probe : Bool
   default_output_build : ProbeBuild
-} derive(ToJson)
+}
 
 ///|
+#derive(ToJson)
 struct ProbeSnapshot {
   all_hosts : Array[String]
   available_hosts : Array[String]
   default_host : String
   hosts : Array[ProbeHost]
-} derive(ToJson)
+}
 
 ///|
 fn empty_buffer() -> ProbeBuffer {

@@ -22,15 +22,17 @@
 /// - Mirrors upstream CPAL: expose one input device and one output device (JACK client ports).
 
 ///|
+#derive(Debug, Eq)
 pub struct Host {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   id : String
   direction : @core.DeviceDirection
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn default_host() -> Host {

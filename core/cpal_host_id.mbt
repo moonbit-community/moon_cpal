@@ -19,9 +19,10 @@
 /// cross-platform matching).
 
 ///|
+#derive(Debug, Eq)
 pub suberror HostUnavailable {
   HostUnavailable
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
@@ -31,6 +32,7 @@ pub fn HostUnavailable::to_string(self : HostUnavailable) -> String {
 }
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum HostId {
   AAudio
   Alsa
@@ -43,7 +45,7 @@ pub(all) enum HostId {
   Wasapi
   WebAudio
   AudioWorklet
-} derive(Debug, Eq)
+}
 
 ///|
 /// Upstream `HostId::name()` returns the variant name (before lowercase display).

@@ -20,10 +20,11 @@
 
 ///|
 /// A timestamp associated with a call to an input stream's data callback.
+#derive(Debug, Eq)
 pub struct InputStreamTimestamp {
   callback : StreamInstant
   capture : StreamInstant
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn InputStreamTimestamp::InputStreamTimestamp(
@@ -57,10 +58,11 @@ pub fn InputStreamTimestamp::capture(
 
 ///|
 /// A timestamp associated with a call to an output stream's data callback.
+#derive(Debug, Eq)
 pub struct OutputStreamTimestamp {
   callback : StreamInstant
   playback : StreamInstant
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn OutputStreamTimestamp::OutputStreamTimestamp(
@@ -94,9 +96,10 @@ pub fn OutputStreamTimestamp::playback(
 
 ///|
 /// Information relevant to a single call to the user's input stream data callback.
+#derive(Debug, Eq)
 pub struct InputCallbackInfo {
   timestamp : InputStreamTimestamp
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn InputCallbackInfo::InputCallbackInfo(
@@ -121,9 +124,10 @@ pub fn InputCallbackInfo::timestamp(
 
 ///|
 /// Information relevant to a single call to the user's output stream data callback.
+#derive(Debug, Eq)
 pub struct OutputCallbackInfo {
   timestamp : OutputStreamTimestamp
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn OutputCallbackInfo::OutputCallbackInfo(

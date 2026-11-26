@@ -18,10 +18,11 @@
 /// Ported from upstream `cpal::DeviceId` and its parsing/display behavior.
 
 ///|
+#derive(Debug, Eq)
 pub suberror DeviceIdError {
   UnsupportedPlatform
   BackendSpecific(BackendSpecificError)
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn device_id_error_unsupported_platform() -> DeviceIdError {
@@ -42,10 +43,11 @@ pub fn DeviceIdError::to_string(self : DeviceIdError) -> String {
 }
 
 ///|
+#derive(Debug, Eq)
 pub struct DeviceId {
   host_id : HostId
   device_id : String
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn DeviceId::DeviceId(host_id : HostId, device_id : String) -> DeviceId {

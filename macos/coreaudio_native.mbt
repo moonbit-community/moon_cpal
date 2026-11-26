@@ -406,7 +406,7 @@ pub fn device_name(device_id : DeviceId) -> String raise CoreAudioError {
   if need < 0 {
     raise_osstatus("ca_device_name_utf8_len", need)
   }
-  let mut out = Bytes::new(need)
+  let mut out = Bytes::make(need, b'\x00')
   let mut wrote = ca_device_name_utf8(device_id, out, need)
   if wrote < 0 {
     raise_osstatus("ca_device_name_utf8", wrote)
@@ -414,7 +414,7 @@ pub fn device_name(device_id : DeviceId) -> String raise CoreAudioError {
   // Some CoreAudio strings may change between the length probe and the copy.
   // If the buffer was too small, the C stub returns the required length.
   if wrote > out.length() {
-    out = Bytes::new(wrote)
+    out = Bytes::make(wrote, b'\x00')
     wrote = ca_device_name_utf8(device_id, out, wrote)
     if wrote < 0 {
       raise_osstatus("ca_device_name_utf8 (retry)", wrote)
@@ -432,13 +432,13 @@ pub fn device_uid(device_id : DeviceId) -> String? {
   if need <= 0 {
     return None
   }
-  let mut out = Bytes::new(need)
+  let mut out = Bytes::make(need, b'\x00')
   let mut wrote = ca_device_uid_utf8(device_id, out, need)
   if wrote <= 0 {
     return None
   }
   if wrote > out.length() {
-    out = Bytes::new(wrote)
+    out = Bytes::make(wrote, b'\x00')
     wrote = ca_device_uid_utf8(device_id, out, wrote)
     if wrote <= 0 || wrote > out.length() {
       return None
@@ -453,13 +453,13 @@ pub fn device_manufacturer(device_id : DeviceId) -> String? {
   if need <= 0 {
     return None
   }
-  let mut out = Bytes::new(need)
+  let mut out = Bytes::make(need, b'\x00')
   let mut wrote = ca_device_manufacturer_utf8(device_id, out, need)
   if wrote <= 0 {
     return None
   }
   if wrote > out.length() {
-    out = Bytes::new(wrote)
+    out = Bytes::make(wrote, b'\x00')
     wrote = ca_device_manufacturer_utf8(device_id, out, wrote)
     if wrote <= 0 || wrote > out.length() {
       return None

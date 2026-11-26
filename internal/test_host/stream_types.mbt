@@ -16,10 +16,11 @@
 /// Stream types for the internal test backend.
 
 ///|
+#derive(Debug, Eq)
 pub enum StreamKind {
   Input
   Output
-} derive(Debug, Eq)
+}
 
 ///|
 type StreamOwner

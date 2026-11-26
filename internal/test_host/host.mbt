@@ -19,14 +19,16 @@
 /// without requiring real audio devices.
 
 ///|
+#derive(Debug, Eq)
 pub struct Host {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
+#derive(Debug, Eq)
 pub struct Device {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
 pub fn Device::Device() -> Device {

@@ -20,10 +20,11 @@
 /// - `stream_stub.mbt`   (non-native): raises backend-specific errors.
 
 ///|
+#derive(Debug, Eq)
 pub enum StreamKind {
   Output
   Input
-} derive(Debug, Eq)
+}
 
 ///|
 // An external object that owns native stream resources.

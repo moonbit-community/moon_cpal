@@ -18,9 +18,10 @@
 /// This mirrors upstream `cpal::host::null::Stream`, which cannot be played/paused.
 
 ///|
+#derive(Debug, Eq)
 pub struct Stream {
   _unit : Unit
-} derive(Debug, Eq)
+}
 
 ///|
 let _unused_stream_for_lint : Stream = { _unit: (), }

@@ -19,12 +19,13 @@
 /// so we expose a tiny native helper implemented in C.
 
 ///|
+#derive(Debug, Eq)
 pub(all) enum NativeOs {
   Unknown
   Macos
   Windows
   Linux
-} derive(Debug, Eq)
+}
 
 ///|
 extern "C" fn native_os_tag() -> Int32 = "moon_cpal_os_tag"

@@ -20,10 +20,11 @@
 /// - `stream.mbt`        (non-native): stubs.
 
 ///|
+#derive(Debug, Eq)
 pub enum StreamKind {
   Output
   Input
-} derive(Debug, Eq)
+}
 
 ///|
 // An external object that owns native stream resources.
